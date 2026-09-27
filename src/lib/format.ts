@@ -44,3 +44,17 @@ export function formatDateTime(
 export function formatCurrency(value: number): string {
   return currencyFmt.format(value);
 }
+
+/** Calcula la edad en años desde una fecha ISO de nacimiento (o null). */
+export function edadEnAnios(
+  fechaNacimiento: string | null | undefined,
+): number | null {
+  if (!fechaNacimiento) return null;
+  const nac = new Date(fechaNacimiento);
+  if (Number.isNaN(nac.getTime())) return null;
+  const hoy = new Date();
+  let edad = hoy.getFullYear() - nac.getFullYear();
+  const m = hoy.getMonth() - nac.getMonth();
+  if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) edad--;
+  return edad >= 0 ? edad : null;
+}

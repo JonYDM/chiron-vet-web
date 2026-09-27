@@ -62,22 +62,25 @@ Definidos con CVA (variantes tipadas):
 
 ---
 
-## Movimiento (Framer Motion + View Transitions)
+## Movimiento (anime.js + View Transitions)
 
-- **Framer Motion** para entradas y microinteracciones. Helpers en `lib/motion.ts`
-  (`fadeInUp`, `listaStagger`/`itemStagger` para cascadas en listas y grids).
+- **anime.js** (~ligero) para entradas y microinteracciones. Helpers en:
+  - `src/lib/anim.tsx` → componente `<Reveal>` (fade+subida; `stagger` para cascadas).
+  - `src/lib/useContador.ts` → hook `useContador` (efecto "count up" de números, tipo Nubank).
 - **View Transitions API** para transiciones entre rutas: `lib/useNavegarConTransicion.ts`
-  usa `document.startViewTransition` si existe, con **fallback** a navegación normal.
-- Todo se degrada con `prefers-reduced-motion: reduce` (definido en `styles/index.css`).
+  (con fallback a navegación normal).
+- Todo respeta `prefers-reduced-motion: reduce`.
 
-### Ejemplo de lista con stagger
-```tsx
-<motion.div variants={listaStagger} initial="hidden" animate="visible">
-  {items.map((x) => (
-    <motion.div key={x.id} variants={itemStagger}>...</motion.div>
-  ))}
-</motion.div>
-```
+> Nota: se migró de Framer Motion a **anime.js** para reducir peso (~36KB → ~1KB de helpers +
+> anime.js). El `<Reveal>` reemplaza a `motion.div`.
+
+## Estética "Chiron × Nubank"
+
+- **Bloques de color generosos:** gradientes de marca (`bg-brand`, `bg-brand-mesh`,
+  `bg-accent-grad`) en heros y zonas clave, no solo botones.
+- **Ilustraciones propias (SVG, sin equipo gráfico):** en `components/ilustraciones`
+  (`Blob`, `Huella`, `MascotaVacio`). `EmptyState` las usa para estados vacíos con carácter.
+- **Radios grandes** (rounded-3xl), sombras suaves, mucho aire, tipografía grande y amigable.
 
 ---
 
@@ -91,7 +94,9 @@ Estas dos sirven de referencia para pulir el resto de pantallas con el mismo len
 ---
 
 ## Pendientes / evolución
-- Aplicar el sistema a las pantallas restantes (clientes, POS, citas, portal, superadmin).
-- Evaluar **anime.js** como alternativa más ligera a Framer Motion (~9KB vs ~36KB) si el peso importa.
+- Aplicar `EmptyState` ilustrado + `Reveal` al resto de pantallas (citas, POS, expediente,
+  historial de ventas, recordatorios, staff, veterinarias) — mismo patrón ya aplicado en
+  clientes y mis-mascotas.
+- Refactor de Input/Select/Card/Modal a variantes CVA con el look Nubank.
 - Tooltips y toasts con transiciones de entrada/salida.
 - Modo oscuro (los tokens ya están listos para extenderse).

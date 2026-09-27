@@ -124,6 +124,9 @@ export interface Mascota {
   raza: string | null;
   sexo: SexoMascota;
   fechaNacimiento: string | null;
+  pesoKg: number | null;
+  padecimientos: string | null;
+  esterilizado: boolean | null;
 }
 
 export interface RegistroMedico {
@@ -134,6 +137,11 @@ export interface RegistroMedico {
   fecha: string;
   descripcion: string;
   fechaProximaAplicacion: string | null;
+  diagnostico: string | null;
+  tratamiento: string | null;
+  pesoKg: number | null;
+  temperaturaC: number | null;
+  notas: string | null;
 }
 
 export interface Cita {
@@ -152,6 +160,25 @@ export interface Producto {
   categoria: CategoriaProducto;
   precio: number;
   stock: number;
+  activo: boolean;
+}
+
+/** Línea de una venta del historial. */
+export interface LineaVentaHistorial {
+  productoId: string;
+  nombreProducto: string;
+  cantidad: number;
+  precioUnitario: number;
+  subtotal: number;
+}
+
+/** Venta del historial (con sus líneas). */
+export interface VentaHistorial {
+  id: string;
+  clienteId: string | null;
+  fechaHora: string;
+  total: number;
+  lineas: LineaVentaHistorial[];
 }
 
 export interface RecordatorioDetectado {
@@ -215,6 +242,11 @@ export interface AgregarRegistroMedicoRequest {
   fecha: string;
   descripcion: string;
   fechaProximaAplicacion?: string | null;
+  diagnostico?: string | null;
+  tratamiento?: string | null;
+  pesoKg?: number | null;
+  temperaturaC?: number | null;
+  notas?: string | null;
 }
 
 export interface AgendarCitaRequest {

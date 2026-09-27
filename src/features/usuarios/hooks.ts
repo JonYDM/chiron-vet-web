@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  cambiarMiPin,
   crearStaff,
+  gestionarUsuario,
   listarAdministradores,
   listarStaff,
   obtenerUsuarioDeCliente,
@@ -53,5 +55,30 @@ export function useCrearStaff() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["usuarios", "staff"] });
     },
+  });
+}
+
+/** Cambia el PIN del usuario autenticado. */
+export function useCambiarMiPin() {
+  return useMutation({
+    mutationFn: ({ pinActual, nuevoPin }: { pinActual: string; nuevoPin: string }) =>
+      cambiarMiPin(pinActual, nuevoPin),
+  });
+}
+
+/** Edita nombre y/o activa-desactiva un usuario e invalida las listas. */
+export function useGestionarUsuario() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      usuarioId,
+      nuevoNombre,
+      accion,
+    }: {
+      usuarioId: string;
+      nuevoNombre?: string | null;
+      accion?: 1 | 2 | null;
+    }) => gestionarUsuario(usuarioId, { nuevoNombre, accion }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["usuarios"] }),
   });
 }

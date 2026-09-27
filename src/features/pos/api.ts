@@ -4,7 +4,33 @@ import type {
   Producto,
   RegistrarVentaRequest,
   VentaResponse,
+  VentaHistorial,
 } from "@/types/api";
+
+/** Historial de ventas de la veterinaria (Admin), rango de fechas opcional. */
+export function listarVentas(
+  veterinariaId: string,
+  desde?: string,
+  hasta?: string,
+  signal?: AbortSignal,
+): Promise<VentaHistorial[]> {
+  const params = new URLSearchParams();
+  if (desde) params.set("desde", desde);
+  if (hasta) params.set("hasta", hasta);
+  const qs = params.toString() ? `?${params.toString()}` : "";
+  return http.get<VentaHistorial[]>(
+    `/api/veterinarias/${veterinariaId}/ventas${qs}`,
+    signal,
+  );
+}
+
+/** Historial de compras de un cliente. */
+export function listarVentasDeCliente(
+  clienteId: string,
+  signal?: AbortSignal,
+): Promise<VentaHistorial[]> {
+  return http.get<VentaHistorial[]>(`/api/clientes/${clienteId}/ventas`, signal);
+}
 
 /** Catálogo de productos de la veterinaria. */
 export function listarCatalogo(
@@ -27,4 +53,22 @@ export function registrarVenta(
   body: RegistrarVentaRequest,
 ): Promise<VentaResponse> {
   return http.post<VentaResponse>("/api/ventas", body);
+}
+
+/** Edita un producto (Admin). */
+export function editarProducto(
+  productoId: string,
+  body: { nombre: string; categoria: number; precio: number },
+): Promise<unknown> {
+  return http.put(`/api/productos/${productoId}`, body);
+}
+
+/** Reabastece stock de un producto (Admin). */
+export function reabastecerStock(productoId: string, cantidad: number): Promise<unknown> {
+  return http.post(`/api/productos/${productoId}/reabastecer`, { cantidad });
+}
+
+/** Desactiva (baja lógica) un producto (Admin). */
+export function desactivarProducto(productoId: string): Promise<unknown> {
+  return http.post(`/api/productos/${productoId}/desactivar`);
 }

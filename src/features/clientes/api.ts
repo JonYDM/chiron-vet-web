@@ -41,3 +41,48 @@ export function crearAccesoDueno(body: {
 }): Promise<unknown> {
   return http.post("/api/usuarios/dueno", body);
 }
+
+/** Crea SOLO un cliente (sin mascota). */
+export function crearCliente(body: {
+  nombre: string;
+  telefono: string;
+  origen: number;
+}): Promise<string> {
+  return http.post<string>("/api/clientes", body);
+}
+
+/** Edita un cliente. */
+export function editarCliente(
+  clienteId: string,
+  body: { nombre: string; telefono: string; origen: number },
+): Promise<unknown> {
+  return http.put(`/api/clientes/${clienteId}`, body);
+}
+
+/** Datos para crear/editar una mascota. */
+export interface DatosMascota {
+  nombre: string;
+  especie: number;
+  sexo: number;
+  raza?: string | null;
+  fechaNacimiento?: string | null;
+  pesoKg?: number | null;
+  padecimientos?: string | null;
+  esterilizado?: boolean | null;
+}
+
+/** Agrega una mascota a un cliente existente. */
+export function agregarMascota(
+  clienteId: string,
+  datos: DatosMascota,
+): Promise<string> {
+  return http.post<string>("/api/mascotas", { clienteId, ...datos });
+}
+
+/** Edita una mascota. */
+export function editarMascota(
+  mascotaId: string,
+  datos: DatosMascota,
+): Promise<unknown> {
+  return http.put(`/api/mascotas/${mascotaId}`, datos);
+}

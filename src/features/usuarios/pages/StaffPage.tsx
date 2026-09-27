@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { KeyRound, Plus, UserCog, Users } from "lucide-react";
+import { KeyRound, Plus, Settings2, UserCog, Users } from "lucide-react";
 import { PageHeader } from "@/components/molecules/PageHeader";
 import { Badge, Button, Card, CardContent, Spinner } from "@/components/ui";
 import { rolLabel } from "@/lib/enums";
@@ -7,12 +7,14 @@ import { RolUsuario, type UsuarioDto } from "@/types/api";
 import { useStaff } from "../hooks";
 import { CrearStaffModal } from "../components/CrearStaffModal";
 import { ResetearPinModal } from "../components/ResetearPinModal";
+import { GestionarUsuarioModal } from "../components/GestionarUsuarioModal";
 
 /** Pantalla de gestión de staff del Administrador (listar, crear, resetear PIN). */
 export function StaffPage() {
   const { data: usuarios, isLoading, isError } = useStaff();
   const [crearAbierto, setCrearAbierto] = useState(false);
   const [resetUsuario, setResetUsuario] = useState<UsuarioDto | null>(null);
+  const [gestionUsuario, setGestionUsuario] = useState<UsuarioDto | null>(null);
 
   // Mostrar solo staff operativo (Veterinario/Recepcionista). Los dueños se
   // gestionan desde la ficha del cliente.
@@ -56,7 +58,7 @@ export function StaffPage() {
                   <p className="text-sm text-ink-soft">@{u.nombreUsuario}</p>
                 </div>
                 <Badge tone={u.activo ? "primary" : "neutral"}>
-                  {rolLabel[u.rol]}
+                  {u.activo ? rolLabel[u.rol] : "Inactivo"}
                 </Badge>
                 <Button
                   size="sm"
@@ -65,6 +67,14 @@ export function StaffPage() {
                 >
                   <KeyRound className="h-4 w-4" aria-hidden />
                   PIN
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setGestionUsuario(u)}
+                  aria-label={`Gestionar ${u.nombre}`}
+                >
+                  <Settings2 className="h-4 w-4" aria-hidden />
                 </Button>
               </CardContent>
             </Card>
@@ -91,6 +101,13 @@ export function StaffPage() {
           onClose={() => setResetUsuario(null)}
           usuarioId={resetUsuario.id}
           nombre={resetUsuario.nombre}
+        />
+      )}
+      {gestionUsuario && (
+        <GestionarUsuarioModal
+          open={!!gestionUsuario}
+          onClose={() => setGestionUsuario(null)}
+          usuario={gestionUsuario}
         />
       )}
     </div>

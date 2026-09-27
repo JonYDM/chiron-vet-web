@@ -17,7 +17,7 @@ import { usePermisos } from "@/lib/usePermisos";
 import { ResetearPinModal } from "@/features/usuarios";
 import { useMascotas, useCambiarEstadoCliente } from "../hooks";
 import { useConfirm } from "@/components/feedback/ConfirmProvider";
-import { useToast } from "@/components/feedback/ToastProvider";
+import { useToast } from "@/components/feedback/useToast";
 import { DarAccesoModal } from "./DarAccesoModal";
 import { EditarClienteModal } from "./EditarClienteModal";
 import { MascotaModal } from "./MascotaModal";

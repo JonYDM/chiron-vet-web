@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "@/lib/http";
-import { useToast } from "./ToastProvider";
+import toast from "react-hot-toast";
 
 /**
  * Muestra un toast cuando una MUTACIÓN (acción del usuario: crear, editar, cobrar…)
@@ -10,7 +10,6 @@ import { useToast } from "./ToastProvider";
  * oculta lo que el rol no puede ver). Así evitamos ruido de errores no accionados.
  */
 export function HttpFeedbackBridge() {
-  const toast = useToast();
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -32,7 +31,7 @@ export function HttpFeedbackBridge() {
       }
     });
     return unsub;
-  }, [queryClient, toast]);
+  }, [queryClient]);
 
   return null;
 }

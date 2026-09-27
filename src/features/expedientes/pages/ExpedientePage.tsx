@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { CalendarClock, FileText, Plus, Syringe } from "lucide-react";
 import { PageHeader } from "@/components/molecules/PageHeader";
-import { Badge, Button, Card, CardContent, Spinner } from "@/components/ui";
+import { EmptyState } from "@/components/molecules/EmptyState";
+import { Badge, Button, Card, CardContent, SkeletonFila } from "@/components/ui";
+import { Reveal } from "@/lib/anim";
 import { usePermisos } from "@/lib/usePermisos";
 import { tipoRegistroLabel } from "@/lib/enums";
 import { formatDate } from "@/lib/format";
@@ -36,8 +38,10 @@ export function ExpedientePage() {
       />
 
       {isLoading ? (
-        <div className="grid place-items-center py-12">
-          <Spinner label="Cargando expediente…" />
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <SkeletonFila key={i} />
+          ))}
         </div>
       ) : isError ? (
         <Card>
@@ -46,13 +50,13 @@ export function ExpedientePage() {
           </CardContent>
         </Card>
       ) : registros && registros.length > 0 ? (
-        <ul className="space-y-3">
+        <Reveal stagger className="space-y-3">
           {registros.map((r) => {
             const esVacuna =
               r.tipo === TipoRegistroMedico.Vacuna ||
               r.tipo === TipoRegistroMedico.Desparasitacion;
             return (
-              <li key={r.id}>
+              <div key={r.id}>
                 <Card>
                   <CardContent className="flex gap-3 p-4">
                     <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-50 text-primary">
@@ -100,22 +104,15 @@ export function ExpedientePage() {
                     </div>
                   </CardContent>
                 </Card>
-              </li>
+              </div>
             );
           })}
-        </ul>
+        </Reveal>
       ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <div className="grid h-14 w-14 place-items-center rounded-2xl bg-hairline text-ink-soft">
-              <FileText className="h-7 w-7" aria-hidden />
-            </div>
-            <p className="font-semibold text-ink">Expediente vacío</p>
-            <p className="max-w-xs text-sm text-ink-soft">
-              Aún no hay registros médicos para esta mascota.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          titulo="Expediente vacío"
+          descripcion="Aún no hay registros médicos para esta mascota."
+        />
       )}
 
       {puedeAgregar && (

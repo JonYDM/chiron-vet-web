@@ -11,15 +11,13 @@ interface ModalProps {
 }
 
 /**
- * Diálogo modal accesible. Cierra con Escape o clic en el overlay.
- * Bloquea el scroll del fondo mientras está abierto.
+ * Diálogo modal estilo shadcn: overlay con blur, panel centrado con animación de
+ * entrada, cierre con Escape/overlay y bloqueo de scroll. Accesible (role=dialog).
  */
 export function Modal({ open, onClose, title, children, className }: ModalProps) {
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => {
@@ -32,7 +30,7 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 p-0 sm:items-center sm:p-6"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur-sm p-0 sm:items-center sm:p-6"
       onClick={onClose}
       role="presentation"
     >
@@ -42,16 +40,16 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
         aria-label={title}
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          "w-full max-w-md animate-fade-in-up rounded-t-2xl bg-surface shadow-lift sm:rounded-2xl",
+          "w-full max-w-md animate-fade-in-up rounded-t-2xl border border-border bg-card shadow-float sm:rounded-2xl",
           className,
         )}
       >
-        <div className="flex items-center justify-between border-b border-hairline p-5">
-          <h2 className="text-lg font-bold text-ink">{title}</h2>
+        <div className="flex items-center justify-between border-b border-border p-5">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">{title}</h2>
           <button
             onClick={onClose}
             aria-label="Cerrar"
-            className="grid h-9 w-9 place-items-center rounded-lg text-ink-soft hover:bg-hairline/50"
+            className="grid h-9 w-9 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <X className="h-5 w-5" aria-hidden />
           </button>

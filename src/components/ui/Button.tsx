@@ -4,30 +4,26 @@ import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 /**
- * Variantes del botón definidas con CVA (class-variance-authority): tipadas y
- * centralizadas. Ejes: variant (color/estilo) y size (tamaño). El estado
- * (loading/disabled) se maneja por props. Microinteracción: escala al presionar
- * y transición suave (estética Nubank/Apple).
+ * Botón con anatomía y variantes estilo shadcn/ui, con tokens semánticos.
+ * Estados: hover, active (escala sutil), focus-visible (ring), disabled, loading.
  */
 const buttonVariants = cva(
   [
-    "inline-flex items-center justify-center gap-2 rounded-xl font-semibold",
-    "transition-all duration-200 ease-out-expo select-none",
-    "focus-visible:outline-none focus-visible:shadow-focus",
-    "disabled:pointer-events-none disabled:opacity-50",
-    "active:scale-[0.97]",
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium",
+    "transition-all duration-150 ease-out-expo select-none",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+    "disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
+    "[&_svg]:shrink-0",
   ],
   {
     variants: {
       variant: {
-        primary:
-          "bg-primary text-white shadow-soft hover:bg-primary-600 hover:shadow-primary-glow",
-        secondary: "bg-primary-50 text-primary hover:bg-primary-100",
-        soft: "bg-hairline/60 text-ink hover:bg-hairline",
-        ghost: "bg-transparent text-ink hover:bg-hairline/60",
-        danger: "bg-danger text-white shadow-soft hover:brightness-95",
-        outline:
-          "border border-hairline bg-surface text-ink hover:border-primary hover:text-primary",
+        primary: "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 hover:shadow-primary-glow",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        soft: "bg-muted text-foreground hover:bg-muted/70",
+        ghost: "text-foreground hover:bg-muted",
+        danger: "bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90",
+        outline: "border border-input bg-card text-foreground hover:bg-muted hover:text-foreground",
       },
       size: {
         sm: "h-9 px-3 text-sm",
@@ -35,14 +31,9 @@ const buttonVariants = cva(
         lg: "h-12 px-6 text-base",
         icon: "h-10 w-10",
       },
-      fullWidth: {
-        true: "w-full",
-      },
+      fullWidth: { true: "w-full" },
     },
-    defaultVariants: {
-      variant: "primary",
-      size: "md",
-    },
+    defaultVariants: { variant: "primary", size: "md" },
   },
 );
 
@@ -53,22 +44,17 @@ export interface ButtonProps
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    { className, variant, size, fullWidth, loading = false, disabled, children, ...props },
-    ref,
-  ) => {
-    return (
-      <button
-        ref={ref}
-        className={cn(buttonVariants({ variant, size, fullWidth }), className)}
-        disabled={disabled || loading}
-        aria-busy={loading}
-        {...props}
-      >
-        {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
-        {children}
-      </button>
-    );
-  },
+  ({ className, variant, size, fullWidth, loading = false, disabled, children, ...props }, ref) => (
+    <button
+      ref={ref}
+      className={cn(buttonVariants({ variant, size, fullWidth }), className)}
+      disabled={disabled || loading}
+      aria-busy={loading}
+      {...props}
+    >
+      {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
+      {children}
+    </button>
+  ),
 );
 Button.displayName = "Button";

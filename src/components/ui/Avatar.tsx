@@ -11,9 +11,9 @@ const avatarVariants = cva(
         lg: "h-14 w-14 text-lg",
       },
       tone: {
-        primary: "bg-primary-100 text-primary-700",
-        accent: "bg-accent-100 text-accent-700",
-        neutral: "bg-hairline text-ink-soft",
+        primary: "bg-secondary text-secondary-foreground",
+        accent: "bg-accent/20 text-accent-foreground",
+        neutral: "bg-muted text-muted-foreground",
       },
     },
     defaultVariants: { size: "md", tone: "primary" },
@@ -21,14 +21,12 @@ const avatarVariants = cva(
 );
 
 interface AvatarProps extends VariantProps<typeof avatarVariants> {
-  /** Nombre del que se derivan las iniciales. */
   nombre: string;
   className?: string;
 }
 
 function iniciales(nombre: string): string {
-  const partes = nombre.trim().split(/\s+/).slice(0, 2);
-  return partes.map((p) => p[0] ?? "").join("");
+  return nombre.trim().split(/\s+/).slice(0, 2).map((p) => p[0] ?? "").join("");
 }
 
 /** Avatar con iniciales derivadas del nombre. */

@@ -8,25 +8,25 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 /**
- * Campo de entrada base. Incluye label asociada, texto de ayuda y estado de error,
- * todo enlazado con aria para accesibilidad.
+ * Campo de texto con anatomía y estados estilo shadcn/ui: borde e input tokenizados,
+ * anillo de foco con el color de marca, estado de error y texto de ayuda accesibles.
  */
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, label, error, hint, id, ...props }, ref) => {
     const autoId = useId();
     const inputId = id ?? autoId;
-    const describedById = error
+    const describedBy = error
       ? `${inputId}-error`
       : hint
         ? `${inputId}-hint`
         : undefined;
 
     return (
-      <div className="w-full">
+      <div className="w-full space-y-1.5">
         {label && (
           <label
             htmlFor={inputId}
-            className="mb-1.5 block text-sm font-medium text-ink"
+            className="text-sm font-medium leading-none text-foreground"
           >
             {label}
           </label>
@@ -35,22 +35,24 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           id={inputId}
           aria-invalid={!!error}
-          aria-describedby={describedById}
+          aria-describedby={describedBy}
           className={cn(
-            "h-11 w-full rounded-xl border bg-surface px-4 text-sm text-ink " +
-              "placeholder:text-ink-soft/60 transition-colors duration-150 " +
-              "focus:outline-none focus:ring-2 focus:ring-primary/40",
-            error ? "border-danger" : "border-hairline focus:border-primary",
+            "flex h-11 w-full rounded-md border bg-card px-3.5 py-2 text-sm text-foreground shadow-xs",
+            "transition-[color,box-shadow,border-color] duration-150",
+            "placeholder:text-muted-foreground/70",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:border-ring",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+            error ? "border-destructive focus-visible:ring-destructive/40" : "border-input",
             className,
           )}
           {...props}
         />
         {error ? (
-          <p id={`${inputId}-error`} className="mt-1.5 text-sm text-danger">
+          <p id={`${inputId}-error`} className="text-xs font-medium text-destructive">
             {error}
           </p>
         ) : hint ? (
-          <p id={`${inputId}-hint`} className="mt-1.5 text-sm text-ink-soft">
+          <p id={`${inputId}-hint`} className="text-xs text-muted-foreground">
             {hint}
           </p>
         ) : null}

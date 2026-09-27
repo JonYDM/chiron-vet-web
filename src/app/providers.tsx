@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/features/auth/AuthContext";
 import { ToastProvider } from "@/components/feedback/ToastProvider";
 import { ConfirmProvider } from "@/components/feedback/ConfirmProvider";
+import { HttpFeedbackBridge } from "@/components/feedback/HttpFeedbackBridge";
 
 /**
  * Providers globales de la app: TanStack Query (estado de servidor) + Auth +
@@ -26,6 +27,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
+        <HttpFeedbackBridge />
         <ConfirmProvider>
           <AuthProvider>{children}</AuthProvider>
         </ConfirmProvider>

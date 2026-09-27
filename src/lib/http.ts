@@ -30,11 +30,18 @@ export function setTokenAccessor(accessor: () => string | null): void {
   tokenAccessor = accessor;
 }
 
-// Handler opcional para 401 (sesión inválida/expirada): lo usa auth para logout.
+// Handler opcional para 401 (sesión inválida/expenrada): lo usa auth para logout.
 let onUnauthorized: (() => void) | null = null;
 
 export function setUnauthorizedHandler(handler: () => void): void {
   onUnauthorized = handler;
+}
+
+// Handler opcional para 403 (sin permiso): lo usa la app para mostrar un toast.
+let onForbidden: ((mensaje: string) => void) | null = null;
+
+export function setForbiddenHandler(handler: (mensaje: string) => void): void {
+  onForbidden = handler;
 }
 
 interface RequestOptions {
@@ -62,6 +69,13 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   if (response.status === 401) {
     onUnauthorized?.();
     throw new ApiError(401, "Sesión expirada. Inicia sesión de nuevo.");
+  }
+
+  // 403: autenticado pero sin permiso para esta acción.
+  if (response.status === 403) {
+    const msg = "No tienes permiso para esta acción.";
+    onForbidden?.(msg);
+    throw new ApiError(403, msg);
   }
 
   // Sin contenido.

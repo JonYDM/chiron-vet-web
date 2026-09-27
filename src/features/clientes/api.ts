@@ -33,3 +33,11 @@ export function registroRapido(
 ): Promise<RegistroRapidoResponse> {
   return http.post<RegistroRapidoResponse>("/api/registro-rapido", body);
 }
+
+/** Crea el acceso al portal de un cliente (usuario dueño con PIN). */
+export function crearAccesoDueno(body: {
+  clienteId: string;
+  pin: string;
+}): Promise<unknown> {
+  return http.post("/api/usuarios/dueno", body);
+}

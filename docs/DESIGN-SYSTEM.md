@@ -12,8 +12,9 @@
 1. **Consistencia por variantes.** Los componentes se definen con **CVA**
    (class-variance-authority): ejes tipados de `variant` (color/estilo), `size` (tamaño)
    y estado. Nada de clases sueltas duplicadas → se elimina el look "genérico".
-2. **Ligereza.** Tokens sin runtime (Tailwind), componentes propios. La única dependencia
-   "de peso" es Framer Motion (~36KB gzip, en chunk lazy) para el movimiento.
+2. **Ligereza.** Tokens sin runtime (Tailwind), componentes propios estilo **shadcn/ui**
+   (CVA + tokens semánticos vía CSS variables). El motor de animación es **anime.js**
+   (~ligero), no Framer Motion.
 3. **Movimiento con propósito.** Microanimaciones que confirman acciones y guían la vista,
    nunca decorativas de más. Siempre respetando `prefers-reduced-motion`.
 4. **Accesibilidad.** Focus visible (halo de marca), contraste, touch targets ≥ 44px,
@@ -21,27 +22,45 @@
 
 ---
 
-## Tokens (en `tailwind.config.js`)
+## Tokens semánticos (shadcn) — `src/styles/index.css` + `tailwind.config.js`
 
-### Color — "Visión Canina" (azules + amarillos que las mascotas perciben)
-- **primary** (índigo `#4C6FFF`) con escala 50–900.
-- **accent** (ámbar `#FFB020`) con escala 50–700.
-- **Neutros:** `canvas` (fondo), `surface` (tarjetas), `hairline` (bordes), `ink`/`ink-soft`/`ink-muted` (texto).
-- **Semánticos:** `success`, `warning`, `danger`, `info`.
+El sistema sigue el patrón de **shadcn/ui**: los colores se declaran como **CSS variables
+en HSL** dentro de `:root` (en `src/styles/index.css`) y Tailwind los mapea a nombres
+semánticos. Esto permite temizar (p. ej. modo oscuro) sin tocar componentes.
+
+### Variables base (`:root`)
+`--background` · `--foreground` · `--card` · `--card-foreground` · `--primary` ·
+`--primary-foreground` · `--secondary` · `--accent` · `--muted` · `--muted-foreground` ·
+`--destructive` · `--success` · `--border` · `--input` · `--ring` · `--radius`.
+
+Identidad **"Visión Canina"** (colores que perros y gatos perciben):
+- `--primary: 227 100% 65%` → índigo **#4C6FFF**
+- `--accent: 39 100% 56%` → ámbar **#FFB020**
+
+### Nombres semánticos en Tailwind
+`bg-background`, `text-foreground`, `bg-card`, `bg-primary/text-primary-foreground`,
+`bg-secondary`, `bg-accent`, `bg-muted/text-muted-foreground`, `bg-destructive`,
+`border-border`, `ring-ring`, etc.
+
+### Alias de compatibilidad
+Para no romper clases previas hay alias mapeados a los tokens semánticos:
+`canvas`→background, `surface`→card, `hairline`→border, `ink`/`ink-soft`/`ink-muted`→
+foreground/muted-foreground, `danger`→destructive, `primary-50/100`→secondary.
 
 ### Tipografía
 - Fuente **Inter** (400–800).
-- Escala con jerarquía: `text-display`, `text-h1`, `text-h2`, `text-h3` (con line-height y tracking cuidados).
+- Escala con jerarquía: `text-display`, `text-h1`, `text-h2`, `text-h3`.
 
 ### Forma y elevación
-- Radios: `lg`, `xl`, `2xl`, `3xl` (generosos).
+- Radios basados en `var(--radius)`: `lg`, `xl`, `2xl`, `3xl` (generosos).
 - Sombras multicapa: `xs`, `soft`, `lift`, `float`, `focus` (halo), `primary-glow`.
+- Gradientes de marca: `bg-brand`, `bg-brand-mesh`, `bg-accent-grad`.
 
 ### Movimiento
 - Easings: `out-expo`, `out-back`, `in-out-soft`.
 - Duraciones: `fast` (120ms), default (180ms), `slow` (280ms).
 - Animaciones CSS: `fade-in`, `fade-in-up`, `scale-in`. Shimmer para skeletons.
-- Variantes Framer Motion en `src/lib/motion.ts`: `fadeInUp`, `fadeIn`, `listaStagger` + `itemStagger`.
+- Entradas y microinteracciones con **anime.js** (ver sección Movimiento).
 
 ---
 
@@ -93,10 +112,26 @@ Estas dos sirven de referencia para pulir el resto de pantallas con el mismo len
 
 ---
 
+## Feedback (toasts y confirmaciones)
+
+- **Toasts:** se usa **`react-hot-toast`** estilizado con nuestros tokens (tarjeta, borde,
+  sombra) y montado en `ToastProvider` (`<Toaster position="top-center">`). La app consume
+  siempre la fachada `useToast()` (`src/components/feedback/useToast.ts`) que expone
+  `exito` / `error` / `info`, de modo que la librería se puede cambiar sin tocar consumidores.
+- **Errores HTTP:** `HttpFeedbackBridge` observa el cache de **mutaciones** de TanStack Query
+  y muestra un toast ante 403 (sin permiso) u otros errores de negocio. Las **queries** de
+  fondo no generan toast (ruido evitado).
+- **Confirmaciones:** `ConfirmProvider` con API imperativa (`useConfirm`) para acciones
+  destructivas.
+
+---
+
 ## Pendientes / evolución
-- Aplicar `EmptyState` ilustrado + `Reveal` al resto de pantallas (citas, POS, expediente,
-  historial de ventas, recordatorios, staff, veterinarias) — mismo patrón ya aplicado en
-  clientes y mis-mascotas.
-- Refactor de Input/Select/Card/Modal a variantes CVA con el look Nubank.
-- Tooltips y toasts con transiciones de entrada/salida.
-- Modo oscuro (los tokens ya están listos para extenderse).
+- ~~Aplicar `EmptyState` + `Reveal` al resto de pantallas~~ ✅ hecho en toda la app
+  (clientes, mis-mascotas, citas, POS, expediente, historial de ventas, recordatorios,
+  mi-expediente, equipo y veterinarias).
+- ~~Refactor de componentes base a variantes CVA con tokens semánticos~~ ✅ hecho
+  (Button/Input/Select/Card/Modal/Badge/Avatar/Skeleton).
+- ~~Toasts con librería madura~~ ✅ migrado a `react-hot-toast`.
+- Tooltips accesibles reutilizables.
+- Modo oscuro (los tokens semánticos ya están listos: basta un bloque `.dark` en `:root`).

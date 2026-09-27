@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Minus, Plus, Receipt, Settings2, ShoppingCart, Trash2, Package } from "lucide-react";
+import { Minus, Plus, Receipt, Settings2, ShoppingCart, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/molecules/PageHeader";
+import { EmptyState } from "@/components/molecules/EmptyState";
 import {
   Badge,
   Button,
@@ -10,8 +11,9 @@ import {
   Input,
   Modal,
   Select,
-  Spinner,
+  Skeleton,
 } from "@/components/ui";
+import { Reveal } from "@/lib/anim";
 import { useAuth } from "@/features/auth";
 import { useVeterinariaId } from "@/features/auth/useVeterinariaId";
 import { useClientes } from "@/features/clientes/hooks";
@@ -139,8 +141,10 @@ export function PosPage() {
         {/* Catálogo */}
         <section>
           {isLoading ? (
-            <div className="grid place-items-center py-12">
-              <Spinner label="Cargando catálogo…" />
+            <div className="grid gap-3 sm:grid-cols-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-32 rounded-2xl" />
+              ))}
             </div>
           ) : isError ? (
             <Card>
@@ -149,7 +153,7 @@ export function PosPage() {
               </CardContent>
             </Card>
           ) : productos && productos.length > 0 ? (
-            <div className="grid gap-3 sm:grid-cols-2">
+            <Reveal stagger className="grid gap-3 sm:grid-cols-2">
               {productos.map((p) => {
                 const agotado = p.stock <= 0;
                 return (
@@ -193,21 +197,16 @@ export function PosPage() {
                   </Card>
                 );
               })}
-            </div>
+            </Reveal>
           ) : (
-            <Card>
-              <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-                <div className="grid h-14 w-14 place-items-center rounded-2xl bg-hairline text-ink-soft">
-                  <Package className="h-7 w-7" aria-hidden />
-                </div>
-                <p className="font-semibold text-ink">Catálogo vacío</p>
-                <p className="max-w-xs text-sm text-ink-soft">
-                  {esAdmin
-                    ? "Agrega tu primer producto."
-                    : "Aún no hay productos en el catálogo."}
-                </p>
-              </CardContent>
-            </Card>
+            <EmptyState
+              titulo="Catálogo vacío"
+              descripcion={
+                esAdmin
+                  ? "Agrega tu primer producto para empezar a vender."
+                  : "Aún no hay productos en el catálogo."
+              }
+            />
           )}
         </section>
 

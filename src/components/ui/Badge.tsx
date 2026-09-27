@@ -3,15 +3,15 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/cn";
 
 const badgeVariants = cva(
-  "inline-flex items-center gap-1 rounded-full font-semibold",
+  "inline-flex items-center gap-1 rounded-full border font-medium",
   {
     variants: {
       tone: {
-        neutral: "bg-hairline text-ink-soft",
-        primary: "bg-primary-50 text-primary",
-        success: "bg-success/10 text-success",
-        warning: "bg-accent-50 text-accent-700",
-        danger: "bg-danger/10 text-danger",
+        neutral: "border-transparent bg-muted text-muted-foreground",
+        primary: "border-transparent bg-secondary text-secondary-foreground",
+        success: "border-transparent bg-success/10 text-success",
+        warning: "border-transparent bg-accent/15 text-accent-foreground",
+        danger: "border-transparent bg-destructive/10 text-destructive",
       },
       size: {
         sm: "px-2 py-0.5 text-[11px]",
@@ -26,7 +26,6 @@ export interface BadgeProps
   extends HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof badgeVariants> {}
 
-/** Etiqueta de estado con variantes tipadas (tono + tamaño). */
 export function Badge({ className, tone, size, ...props }: BadgeProps) {
   return <span className={cn(badgeVariants({ tone, size }), className)} {...props} />;
 }

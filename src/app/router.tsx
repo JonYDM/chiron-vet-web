@@ -48,6 +48,11 @@ const MiExpedientePage = lazy(() =>
 const MisRecordatoriosPage = lazy(() =>
   import("@/features/portal").then((m) => ({ default: m.MisRecordatoriosPage })),
 );
+const VeterinariasPage = lazy(() =>
+  import("@/features/veterinarias").then((m) => ({
+    default: m.VeterinariasPage,
+  })),
+);
 
 const STAFF_ROLES = [
   RolUsuario.Administrador,
@@ -122,7 +127,7 @@ const router = createBrowserRouter([
     element: <Protegida roles={[RolUsuario.SuperAdmin]}><AdminLayout /></Protegida>,
     children: [
       { index: true, element: <Navigate to="/admin/veterinarias" replace /> },
-      { path: "veterinarias", element: <EnConstruccion titulo="Veterinarias" /> },
+      { path: "veterinarias", element: <VeterinariasPage /> },
     ],
   },
 

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   activarVeterinaria,
+  configurarAdminOperativo,
   crearAdmin,
   crearVeterinaria,
   desactivarVeterinaria,
@@ -41,5 +42,15 @@ export function useCambiarEstadoVeterinaria() {
 export function useCrearAdmin() {
   return useMutation({
     mutationFn: (body: CrearAdminRequest) => crearAdmin(body),
+  });
+}
+
+/** Configura el modo operativo del admin de una veterinaria e invalida la lista. */
+export function useConfigurarAdminOperativo() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, operativo }: { id: string; operativo: boolean }) =>
+      configurarAdminOperativo(id, operativo),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   });
 }

@@ -31,3 +31,8 @@ export function desactivarVeterinaria(id: string): Promise<unknown> {
 export function crearAdmin(body: CrearAdminRequest): Promise<unknown> {
   return http.post("/api/admin/usuarios-admin", body);
 }
+
+/** Configura si el Administrador de una veterinaria puede operar (true) o solo supervisar (false). */
+export function configurarAdminOperativo(id: string, operativo: boolean): Promise<unknown> {
+  return http.post(`/api/admin/veterinarias/${id}/admin-operativo`, { operativo });
+}

@@ -27,6 +27,9 @@ const StaffDashboard = lazy(() =>
     default: m.StaffDashboard,
   })),
 );
+const ClientesPage = lazy(() =>
+  import("@/features/clientes").then((m) => ({ default: m.ClientesPage })),
+);
 
 const STAFF_ROLES = [
   RolUsuario.Administrador,
@@ -76,7 +79,7 @@ const router = createBrowserRouter([
     element: <Protegida roles={STAFF_ROLES}><StaffLayout /></Protegida>,
     children: [
       { index: true, element: <StaffDashboard /> },
-      { path: "clientes", element: <EnConstruccion titulo="Clientes y mascotas" /> },
+      { path: "clientes", element: <ClientesPage /> },
       { path: "citas", element: <EnConstruccion titulo="Citas" /> },
       { path: "pos", element: <EnConstruccion titulo="Ventas" /> },
       { path: "recordatorios", element: <EnConstruccion titulo="Recordatorios" /> },

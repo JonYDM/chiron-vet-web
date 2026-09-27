@@ -1,4 +1,5 @@
 export { AuthProvider, useAuth } from "./AuthContext";
+export { useVeterinariaId } from "./useVeterinariaId";
 export { ProtectedRoute } from "./ProtectedRoute";
 export { rutaInicialPorRol } from "./roles";
 export { LoginPage } from "./pages/LoginPage";

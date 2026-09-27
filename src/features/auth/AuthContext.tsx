@@ -38,6 +38,7 @@ function construirSesion(resp: LoginResponse): Sesion {
     expiraEn: resp.expiraEn,
     veterinariaId: getVeterinariaId(claims),
     clienteId: getClienteId(claims),
+    adminOperativo: resp.adminOperativo,
   };
 }
 

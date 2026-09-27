@@ -3,24 +3,22 @@ import { useParams } from "react-router-dom";
 import { CalendarClock, FileText, Plus, Syringe } from "lucide-react";
 import { PageHeader } from "@/components/molecules/PageHeader";
 import { Badge, Button, Card, CardContent, Spinner } from "@/components/ui";
-import { useAuth } from "@/features/auth";
+import { usePermisos } from "@/lib/usePermisos";
 import { tipoRegistroLabel } from "@/lib/enums";
 import { formatDate } from "@/lib/format";
-import { RolUsuario, TipoRegistroMedico } from "@/types/api";
+import { TipoRegistroMedico } from "@/types/api";
 import { useExpediente } from "../hooks";
 import { AgregarRegistroModal } from "../components/AgregarRegistroModal";
 
 /** Página del expediente médico de una mascota (F3.3). */
 export function ExpedientePage() {
   const { mascotaId = "" } = useParams();
-  const { sesion } = useAuth();
   const [modalAbierto, setModalAbierto] = useState(false);
   const { data: registros, isLoading, isError } = useExpediente(mascotaId);
+  const p = usePermisos();
 
-  // Solo Admin y Veterinario pueden agregar al expediente (regla del backend).
-  const puedeAgregar =
-    sesion?.rol === RolUsuario.Administrador ||
-    sesion?.rol === RolUsuario.Veterinario;
+  // Solo quien puede editar el expediente ve el botón de agregar.
+  const puedeAgregar = p("editar_expediente");
 
   return (
     <div>

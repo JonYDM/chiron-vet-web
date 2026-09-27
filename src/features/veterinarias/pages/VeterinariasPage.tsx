@@ -1,10 +1,14 @@
 import { useState } from "react";
-import { Building2, Plus, Power, UserCog } from "lucide-react";
+import { Building2, Plus, Power, Shield, UserCog } from "lucide-react";
 import { PageHeader } from "@/components/molecules/PageHeader";
 import { Badge, Button, Card, CardContent, Spinner } from "@/components/ui";
 import { formatDate } from "@/lib/format";
 import type { Veterinaria } from "@/types/api";
-import { useCambiarEstadoVeterinaria, useVeterinarias } from "../hooks";
+import {
+  useCambiarEstadoVeterinaria,
+  useConfigurarAdminOperativo,
+  useVeterinarias,
+} from "../hooks";
 import { CrearVeterinariaModal } from "../components/CrearVeterinariaModal";
 import { CrearAdminModal } from "../components/CrearAdminModal";
 import { AdministradoresSection } from "../components/AdministradoresSection";
@@ -13,6 +17,7 @@ import { AdministradoresSection } from "../components/AdministradoresSection";
 export function VeterinariasPage() {
   const { data: veterinarias, isLoading, isError } = useVeterinarias();
   const cambiarEstado = useCambiarEstadoVeterinaria();
+  const adminOperativo = useConfigurarAdminOperativo();
   const [modalCrear, setModalCrear] = useState(false);
   const [adminDe, setAdminDe] = useState<Veterinaria | null>(null);
 
@@ -48,17 +53,34 @@ export function VeterinariasPage() {
                   <Building2 className="h-5 w-5" aria-hidden />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <p className="truncate font-semibold text-ink">{v.nombre}</p>
                     <Badge tone={v.activa ? "success" : "danger"}>
                       {v.activa ? "Activa" : "Inactiva"}
+                    </Badge>
+                    <Badge tone={v.adminOperativo ? "primary" : "neutral"}>
+                      {v.adminOperativo ? "Admin operativo" : "Admin supervisor"}
                     </Badge>
                   </div>
                   <p className="text-sm text-ink-soft">
                     {v.telefono} · alta {formatDate(v.fechaAlta)}
                   </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() =>
+                      adminOperativo.mutate({ id: v.id, operativo: !v.adminOperativo })
+                    }
+                    loading={
+                      adminOperativo.isPending &&
+                      adminOperativo.variables?.id === v.id
+                    }
+                  >
+                    <Shield className="h-4 w-4" aria-hidden />
+                    {v.adminOperativo ? "Hacer supervisor" : "Hacer operativo"}
+                  </Button>
                   <Button
                     size="sm"
                     variant="ghost"

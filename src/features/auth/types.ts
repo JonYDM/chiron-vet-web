@@ -10,6 +10,8 @@ export interface Sesion {
   veterinariaId?: string;
   /** Del JWT (solo dueños de mascota). */
   clienteId?: string;
+  /** Si el Admin de la veterinaria puede operar (no solo supervisar). */
+  adminOperativo: boolean;
 }
 
 export interface AuthState {

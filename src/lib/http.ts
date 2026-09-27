@@ -37,13 +37,6 @@ export function setUnauthorizedHandler(handler: () => void): void {
   onUnauthorized = handler;
 }
 
-// Handler opcional para 403 (sin permiso): lo usa la app para mostrar un toast.
-let onForbidden: ((mensaje: string) => void) | null = null;
-
-export function setForbiddenHandler(handler: (mensaje: string) => void): void {
-  onForbidden = handler;
-}
-
 interface RequestOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE";
   body?: unknown;
@@ -72,10 +65,10 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   }
 
   // 403: autenticado pero sin permiso para esta acción.
+  // No hay handler global: el error se propaga como ApiError y las mutaciones
+  // (acciones del usuario) muestran el toast; las queries de fondo lo manejan en silencio.
   if (response.status === 403) {
-    const msg = "No tienes permiso para esta acción.";
-    onForbidden?.(msg);
-    throw new ApiError(403, msg);
+    throw new ApiError(403, "No tienes permiso para esta acción.");
   }
 
   // Sin contenido.

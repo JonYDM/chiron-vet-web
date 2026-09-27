@@ -1,16 +1,38 @@
 import { useEffect } from "react";
-import { setForbiddenHandler } from "@/lib/http";
+import { useQueryClient } from "@tanstack/react-query";
+import { ApiError } from "@/lib/http";
 import { useToast } from "./ToastProvider";
 
 /**
- * Conecta el handler global de 403 del cliente HTTP con el sistema de toasts.
- * Se monta una vez dentro de los providers. Así cualquier 403 muestra un toast
- * consistente sin que cada pantalla lo maneje.
+ * Muestra un toast cuando una MUTACIÓN (acción del usuario: crear, editar, cobrar…)
+ * falla por permiso (403) u otro error de negocio. Las QUERIES de fondo NO generan
+ * toast: si una consulta de estado devuelve 403 se maneja en silencio (la UI ya
+ * oculta lo que el rol no puede ver). Así evitamos ruido de errores no accionados.
  */
 export function HttpFeedbackBridge() {
   const toast = useToast();
+  const queryClient = useQueryClient();
+
   useEffect(() => {
-    setForbiddenHandler((mensaje) => toast.error(mensaje));
-  }, [toast]);
+    const cache = queryClient.getMutationCache();
+    const unsub = cache.subscribe((event) => {
+      // Solo reaccionar cuando una mutación termina en error.
+      if (event?.type !== "updated") return;
+      const mutation = event.mutation;
+      if (mutation?.state.status !== "error") return;
+
+      const error = mutation.state.error;
+      if (error instanceof ApiError) {
+        if (error.status === 403) {
+          toast.error("No tienes permiso para esta acción.");
+        } else if (error.status !== 401) {
+          // 401 lo maneja auth (logout). El resto muestra el mensaje del backend.
+          toast.error(error.message);
+        }
+      }
+    });
+    return unsub;
+  }, [queryClient, toast]);
+
   return null;
 }

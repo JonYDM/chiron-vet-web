@@ -13,6 +13,7 @@ import { cn } from "@/lib/cn";
 import { Badge, Button, Card, Spinner } from "@/components/ui";
 import { especieLabel } from "@/lib/enums";
 import { useUsuarioDeCliente } from "@/features/usuarios/hooks";
+import { usePermisos } from "@/lib/usePermisos";
 import { ResetearPinModal } from "@/features/usuarios";
 import { useMascotas, useCambiarEstadoCliente } from "../hooks";
 import { useConfirm } from "@/components/feedback/ConfirmProvider";
@@ -36,6 +37,7 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
   const cambiarEstado = useCambiarEstadoCliente();
   const confirmar = useConfirm();
   const toast = useToast();
+  const p = usePermisos();
 
   async function alternarEstado() {
     const desactivar = cliente.activo;
@@ -55,8 +57,10 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
       toast.error("No se pudo cambiar el estado del cliente.");
     }
   }
+  const puedeAcceso = p("gestionar_acceso_portal");
   const { data: usuario, isLoading: cargandoUsuario } = useUsuarioDeCliente(
     abierto ? cliente.id : null,
+    puedeAcceso,
   );
 
   return (
@@ -147,32 +151,33 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
           </Button>
 
           {/* Acceso al portal */}
-          {cargandoUsuario ? (
-            <Spinner label="Verificando acceso…" />
-          ) : usuario ? (
-            <div className="flex items-center gap-2">
-              <Badge tone="success">Con acceso al portal</Badge>
+          {puedeAcceso &&
+            (cargandoUsuario ? (
+              <Spinner label="Verificando acceso…" />
+            ) : usuario ? (
+              <div className="flex items-center gap-2">
+                <Badge tone="success">Con acceso al portal</Badge>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="ml-auto"
+                  onClick={() => setResetAbierto(true)}
+                >
+                  <KeyRound className="h-4 w-4" aria-hidden />
+                  Resetear PIN
+                </Button>
+              </div>
+            ) : (
               <Button
-                variant="ghost"
+                variant="secondary"
                 size="sm"
-                className="ml-auto"
-                onClick={() => setResetAbierto(true)}
+                fullWidth
+                onClick={() => setAccesoAbierto(true)}
               >
                 <KeyRound className="h-4 w-4" aria-hidden />
-                Resetear PIN
+                Dar acceso al portal
               </Button>
-            </div>
-          ) : (
-            <Button
-              variant="secondary"
-              size="sm"
-              fullWidth
-              onClick={() => setAccesoAbierto(true)}
-            >
-              <KeyRound className="h-4 w-4" aria-hidden />
-              Dar acceso al portal
-            </Button>
-          )}
+            ))}
         </div>
       )}
 

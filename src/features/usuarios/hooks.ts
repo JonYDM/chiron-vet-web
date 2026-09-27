@@ -27,11 +27,11 @@ export function useAdministradores() {
 }
 
 /** Usuario (acceso al portal) de un cliente; null si no tiene acceso. */
-export function useUsuarioDeCliente(clienteId: string | null) {
+export function useUsuarioDeCliente(clienteId: string | null, habilitado = true) {
   return useQuery({
     queryKey: ["usuarios", "cliente", clienteId],
     queryFn: ({ signal }) => obtenerUsuarioDeCliente(clienteId as string, signal),
-    enabled: !!clienteId,
+    enabled: !!clienteId && habilitado,
   });
 }
 

@@ -35,8 +35,15 @@ export function useRegistroRapido() {
 
 /** Crea el acceso al portal (usuario dueño + PIN) para un cliente. */
 export function useCrearAccesoDueno() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: { clienteId: string; pin: string }) =>
       crearAccesoDueno(body),
+    onSuccess: (_data, variables) => {
+      // Refresca el estado de acceso del cliente en la tarjeta.
+      queryClient.invalidateQueries({
+        queryKey: ["usuarios", "cliente", variables.clienteId],
+      });
+    },
   });
 }

@@ -87,24 +87,25 @@ Campos existentes: `VeterinariaId`, `MascotaId`, `Tipo` (Consulta/Vacuna/Despara
 
 ---
 
-## 3. Resetear PIN (recuperación de acceso) — YA detectado
+## 3. Resetear PIN (recuperación de acceso) — ✅ IMPLEMENTADO
+
+> Estado: **implementado** en backend (rama `feature/reset-pin`, pendiente de `dotnet build`
+> por el usuario) y frontend (mergeado). Incluye además gestión de usuarios (secciones nuevas).
 
 **Necesidad:** un dueño o un admin olvida su PIN y necesita recuperar el acceso.
 
-### Estado actual
-- La entidad `Usuario` **ya tiene** el método `CambiarHashPin(nuevoHash)`.
-- **NO existe endpoint** que lo exponga (no hay reset de PIN en `Program.cs`).
-
-### Cambios en backend
-- `POST /api/usuarios/{id}/resetear-pin` con body `{ nuevoPin }`:
-  - **Administrador** puede resetear el PIN de su staff (Veterinario/Recepcionista) y de los
-    dueños de su veterinaria.
-  - **SuperAdmin** puede resetear el PIN de los Administradores.
-  - Validar el PIN (6 dígitos) y el aislamiento multi-tenant (no resetear usuarios de otra vet).
-- Reutiliza `Usuario.CambiarHashPin` + `IHasheadorContrasena.Hashear`.
-
-> **Frontend (cuando exista el endpoint):** botón "Resetear PIN" en la gestión de usuarios/staff
-> y en la tarjeta de cliente con acceso; para admins, en el panel SuperAdmin.
+### Implementado
+- Backend: `POST /api/usuarios/{id}/resetear-pin` con body `{ nuevoPin }`.
+  - **Administrador** resetea el PIN de su staff (Veterinario/Recepcionista) y de los dueños
+    de su veterinaria.
+  - **SuperAdmin** resetea el PIN de los Administradores.
+  - Reutiliza `Usuario.CambiarHashPin` + `IHasheadorContrasena.Hashear` y desbloquea al usuario.
+- Backend: `GET /api/usuarios/staff` (Admin lista su equipo), `GET /api/admin/administradores`
+  (SuperAdmin lista admins), `GET /api/clientes/{clienteId}/usuario` (saber si un cliente tiene
+  acceso y obtener su usuarioId). DTO seguro `UsuarioDto` (sin HashPin).
+- Frontend: pantalla "Equipo" del Admin (`/app/equipo`) con crear staff y resetear PIN;
+  sección de Administradores en el panel SuperAdmin con resetear PIN; en la ficha de cliente,
+  botón "Resetear PIN" (si tiene acceso) o "Dar acceso al portal" (si no).
 
 ---
 
@@ -236,27 +237,11 @@ cliente es fricción innecesaria.
 
 ---
 
-## 8. Saber si un cliente ya tiene acceso al portal (validación)
+## 8. Saber si un cliente ya tiene acceso al portal — ✅ IMPLEMENTADO
 
-**Necesidad:** al ofrecer "Dar acceso al portal" a un cliente, saber si **ya tiene** un usuario
-creado, para no intentar crearlo dos veces y mostrar el estado correcto en la UI.
-
-### Estado actual
-- El endpoint `POST /api/usuarios/dueno` crea el acceso, pero si ya existe probablemente
-  devuelve error (usuario duplicado).
-- La entidad `Cliente` **no expone** si tiene un usuario/acceso asociado. El frontend no puede
-  saber de antemano si mostrar "Dar acceso" o "Ya tiene acceso".
-
-### Cambios en backend (opciones)
-- (Simple) Incluir un flag `tieneAcceso: bool` en el DTO de cliente que devuelven
-  `buscar/listar clientes`.
-- (Alternativa) `GET /api/clientes/{id}/tiene-acceso` → `{ tieneAcceso: bool }`.
-- Asegurar que `POST /api/usuarios/dueno` devuelva un error claro y manejable si ya existe
-  (ej: 409/mensaje específico) para que el frontend lo muestre bien.
-
-### Frontend (cuando exista)
-- Mostrar en la tarjeta del cliente un badge "Con acceso" y ocultar/deshabilitar el botón
-  "Dar acceso" si `tieneAcceso` es true; en su lugar ofrecer "Resetear PIN" (ver sección 3).
+> Estado: **implementado** vía `GET /api/clientes/{clienteId}/usuario` (204 si no tiene acceso,
+> o el `UsuarioDto` si lo tiene). El frontend muestra badge "Con acceso al portal" y alterna
+> entre "Dar acceso" y "Resetear PIN" en la ficha del cliente.
 
 ---
 

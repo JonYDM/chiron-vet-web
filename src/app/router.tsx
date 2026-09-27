@@ -53,6 +53,9 @@ const VeterinariasPage = lazy(() =>
     default: m.VeterinariasPage,
   })),
 );
+const EquipoPage = lazy(() =>
+  import("@/features/usuarios").then((m) => ({ default: m.StaffPage })),
+);
 
 const STAFF_ROLES = [
   RolUsuario.Administrador,
@@ -107,6 +110,14 @@ const router = createBrowserRouter([
       { path: "citas", element: <CitasPage /> },
       { path: "pos", element: <PosPage /> },
       { path: "recordatorios", element: <EnConstruccion titulo="Recordatorios" /> },
+      {
+        path: "equipo",
+        element: (
+          <ProtectedRoute roles={[RolUsuario.Administrador]}>
+            <EquipoPage />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 

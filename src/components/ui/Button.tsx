@@ -1,64 +1,66 @@
 import { forwardRef, type ButtonHTMLAttributes } from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/cn";
 
-type Variant = "primary" | "secondary" | "ghost" | "danger";
-type Size = "sm" | "md" | "lg";
+/**
+ * Variantes del botón definidas con CVA (class-variance-authority): tipadas y
+ * centralizadas. Ejes: variant (color/estilo) y size (tamaño). El estado
+ * (loading/disabled) se maneja por props. Microinteracción: escala al presionar
+ * y transición suave (estética Nubank/Apple).
+ */
+const buttonVariants = cva(
+  [
+    "inline-flex items-center justify-center gap-2 rounded-xl font-semibold",
+    "transition-all duration-200 ease-out-expo select-none",
+    "focus-visible:outline-none focus-visible:shadow-focus",
+    "disabled:pointer-events-none disabled:opacity-50",
+    "active:scale-[0.97]",
+  ],
+  {
+    variants: {
+      variant: {
+        primary:
+          "bg-primary text-white shadow-soft hover:bg-primary-600 hover:shadow-primary-glow",
+        secondary: "bg-primary-50 text-primary hover:bg-primary-100",
+        soft: "bg-hairline/60 text-ink hover:bg-hairline",
+        ghost: "bg-transparent text-ink hover:bg-hairline/60",
+        danger: "bg-danger text-white shadow-soft hover:brightness-95",
+        outline:
+          "border border-hairline bg-surface text-ink hover:border-primary hover:text-primary",
+      },
+      size: {
+        sm: "h-9 px-3 text-sm",
+        md: "h-11 px-5 text-sm",
+        lg: "h-12 px-6 text-base",
+        icon: "h-10 w-10",
+      },
+      fullWidth: {
+        true: "w-full",
+      },
+    },
+    defaultVariants: {
+      variant: "primary",
+      size: "md",
+    },
+  },
+);
 
-const base =
-  "inline-flex items-center justify-center gap-2 rounded-xl font-semibold " +
-  "transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 " +
-  "focus-visible:ring-primary/40 disabled:pointer-events-none disabled:opacity-50 " +
-  "active:scale-[0.98] select-none";
-
-const variants: Record<Variant, string> = {
-  primary: "bg-primary text-white shadow-soft hover:bg-primary-dark",
-  secondary: "bg-primary-50 text-primary hover:bg-primary-100",
-  ghost: "bg-transparent text-ink hover:bg-hairline/60",
-  danger: "bg-danger text-white hover:brightness-95",
-};
-
-const sizes: Record<Size, string> = {
-  sm: "h-9 px-3 text-sm",
-  md: "h-11 px-5 text-sm",
-  lg: "h-12 px-6 text-base",
-};
-
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: Variant;
-  size?: Size;
+export interface ButtonProps
+  extends ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
   loading?: boolean;
-  fullWidth?: boolean;
 }
 
-/**
- * Botón base del design system. Variantes con tokens "Visión Canina",
- * estado de carga accesible y microinteracción (active:scale) estilo Nubank.
- */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    {
-      className,
-      variant = "primary",
-      size = "md",
-      loading = false,
-      fullWidth = false,
-      disabled,
-      children,
-      ...props
-    },
+    { className, variant, size, fullWidth, loading = false, disabled, children, ...props },
     ref,
   ) => {
     return (
       <button
         ref={ref}
-        className={cn(
-          base,
-          variants[variant],
-          sizes[size],
-          fullWidth && "w-full",
-          className,
-        )}
+        className={cn(buttonVariants({ variant, size, fullWidth }), className)}
         disabled={disabled || loading}
         aria-busy={loading}
         {...props}

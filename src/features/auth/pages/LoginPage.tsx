@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, PawPrint } from "lucide-react";
 import { Button, Card, CardContent, Input } from "@/components/ui";
 import { PinInput } from "@/components/molecules/PinInput";
+import { Blob, Huella } from "@/components/ilustraciones";
+import { Reveal } from "@/lib/anim";
 import { ApiError } from "@/lib/http";
-import { fadeInUp, transicionSuave } from "@/lib/motion";
 import { useAuth } from "../AuthContext";
 import { rutaInicialPorRol } from "../roles";
 
@@ -62,60 +62,39 @@ export function LoginPage() {
   }
 
   return (
-    <main className="relative grid min-h-full place-items-center overflow-hidden bg-canvas p-6">
-      {/* Fondo decorativo con el color de marca (blur suave). */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-32 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 translate-x-1/3 translate-y-1/3 rounded-full bg-accent/20 blur-3xl"
-      />
+    <main className="relative min-h-full overflow-hidden bg-brand">
+      {/* Fondo mesh + blobs (bloques de color generosos estilo Nubank). */}
+      <div className="pointer-events-none absolute inset-0 bg-brand-mesh opacity-60" aria-hidden />
+      <Blob className="pointer-events-none absolute -left-20 -top-16 h-80 w-80 text-white/10" />
+      <Huella className="pointer-events-none absolute right-8 top-16 h-16 w-16 rotate-12 text-white/15" />
+      <Huella className="pointer-events-none absolute bottom-24 left-10 h-10 w-10 -rotate-12 text-white/10" />
 
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={fadeInUp}
-        className="relative w-full max-w-sm"
-      >
-        <div className="mb-8 flex flex-col items-center text-center">
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ ...transicionSuave, delay: 0.05 }}
-            className="mb-4 grid h-16 w-16 place-items-center rounded-3xl bg-primary text-white shadow-primary-glow"
-          >
-            <PawPrint className="h-8 w-8" aria-hidden />
-          </motion.div>
-          <h1 className="text-h1 text-ink">Bienvenido a Chiron</h1>
-          <p className="mt-1 text-sm text-ink-soft">
-            {paso === "identificador"
-              ? "Ingresa tu usuario o teléfono"
-              : "Ahora tu PIN de acceso"}
-          </p>
-        </div>
+      <div className="relative grid min-h-full place-items-center p-6">
+        <Reveal className="w-full max-w-sm">
+          {/* Marca */}
+          <div className="mb-8 flex flex-col items-center text-center">
+            <div className="mb-4 grid h-16 w-16 place-items-center rounded-3xl bg-white/15 backdrop-blur-sm ring-1 ring-white/25">
+              <PawPrint className="h-8 w-8 text-white" aria-hidden />
+            </div>
+            <h1 className="text-h1 text-white">Chiron</h1>
+            <p className="mt-1 text-sm text-white/80">
+              {paso === "identificador"
+                ? "Ingresa tu usuario o teléfono"
+                : "Ahora tu PIN de acceso"}
+            </p>
+          </div>
 
-        {/* Indicador de pasos */}
-        <div className="mb-4 flex items-center justify-center gap-2">
-          <span
-            className={`h-1.5 rounded-full transition-all duration-slow ${paso === "identificador" ? "w-8 bg-primary" : "w-4 bg-hairline"}`}
-          />
-          <span
-            className={`h-1.5 rounded-full transition-all duration-slow ${paso === "pin" ? "w-8 bg-primary" : "w-4 bg-hairline"}`}
-          />
-        </div>
+          {/* Card flotante */}
+          <Card className="rounded-3xl border-0 shadow-float">
+            <CardContent className="space-y-6 p-6">
+              {/* Indicador de pasos */}
+              <div className="flex items-center justify-center gap-2">
+                <span className={`h-1.5 rounded-full transition-all duration-slow ${paso === "identificador" ? "w-8 bg-primary" : "w-4 bg-hairline"}`} />
+                <span className={`h-1.5 rounded-full transition-all duration-slow ${paso === "pin" ? "w-8 bg-primary" : "w-4 bg-hairline"}`} />
+              </div>
 
-        <Card className="shadow-lift">
-          <CardContent className="space-y-6">
-            <AnimatePresence mode="wait">
               {paso === "identificador" ? (
-                <motion.form
-                  key="paso-id"
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -12 }}
-                  transition={transicionSuave}
+                <form
                   onSubmit={(e) => {
                     e.preventDefault();
                     siguiente();
@@ -139,16 +118,9 @@ export function LoginPage() {
                     Continuar
                     <ArrowRight className="h-4 w-4" aria-hidden />
                   </Button>
-                </motion.form>
+                </form>
               ) : (
-                <motion.div
-                  key="paso-pin"
-                  initial={{ opacity: 0, x: 12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 12 }}
-                  transition={transicionSuave}
-                  className="space-y-5"
-                >
+                <div className="space-y-5">
                   <button
                     onClick={volver}
                     className="flex items-center gap-1.5 text-sm font-medium text-ink-soft transition-colors hover:text-ink"
@@ -170,14 +142,12 @@ export function LoginPage() {
                   />
 
                   {error && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
+                    <p
                       role="alert"
                       className="rounded-xl bg-danger/10 px-4 py-3 text-center text-sm text-danger"
                     >
                       {error}
-                    </motion.p>
+                    </p>
                   )}
 
                   <Button
@@ -189,12 +159,16 @@ export function LoginPage() {
                   >
                     Entrar
                   </Button>
-                </motion.div>
+                </div>
               )}
-            </AnimatePresence>
-          </CardContent>
-        </Card>
-      </motion.div>
+            </CardContent>
+          </Card>
+
+          <p className="mt-6 text-center text-xs text-white/60">
+            Chiron · Gestión veterinaria 🐾
+          </p>
+        </Reveal>
+      </div>
     </main>
   );
 }

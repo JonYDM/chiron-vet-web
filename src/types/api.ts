@@ -102,6 +102,7 @@ export interface LoginResponse {
   expiraEn: string; // ISO 8601
   nombre: string;
   rol: RolUsuario;
+  adminOperativo: boolean;
 }
 
 /** Claims contenidos en el JWT (se extraen con lib/jwt). */
@@ -126,6 +127,7 @@ export interface Veterinaria {
   telefono: string;
   activa: boolean;
   fechaAlta: string;
+  adminOperativo: boolean;
 }
 
 export interface Cliente {

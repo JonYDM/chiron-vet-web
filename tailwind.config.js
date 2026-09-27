@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: "class",
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
@@ -21,6 +22,7 @@ export default {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          strong: "hsl(var(--accent-strong))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -31,6 +33,8 @@ export default {
           foreground: "hsl(var(--destructive-foreground))",
         },
         success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
+        info: "hsl(var(--info))",
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
@@ -54,13 +58,14 @@ export default {
         "primary-100": "hsl(var(--secondary))",
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
+        sans: ["Plus Jakarta Sans", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
       },
       fontSize: {
-        display: ["2.5rem", { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "800" }],
-        h1: ["1.875rem", { lineHeight: "1.2", letterSpacing: "-0.015em", fontWeight: "700" }],
-        h2: ["1.5rem", { lineHeight: "1.25", letterSpacing: "-0.01em", fontWeight: "700" }],
-        h3: ["1.25rem", { lineHeight: "1.3", fontWeight: "600" }],
+        display: ["2.25rem", { lineHeight: "2.75rem", letterSpacing: "-0.02em", fontWeight: "700" }],
+        h1: ["1.75rem", { lineHeight: "2.25rem", letterSpacing: "-0.01em", fontWeight: "700" }],
+        h2: ["1.375rem", { lineHeight: "1.75rem", fontWeight: "600" }],
+        h3: ["1.125rem", { lineHeight: "1.5rem", fontWeight: "600" }],
+        metric: ["2rem", { lineHeight: "2.375rem", letterSpacing: "-0.03em", fontWeight: "700" }],
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -71,17 +76,17 @@ export default {
         "3xl": "calc(var(--radius) + 16px)",
       },
       boxShadow: {
-        xs: "0 1px 2px rgba(26,29,46,0.05)",
-        soft: "0 1px 2px rgba(26,29,46,0.04), 0 4px 16px rgba(26,29,46,0.06)",
-        lift: "0 4px 12px rgba(26,29,46,0.08), 0 12px 32px rgba(26,29,46,0.10)",
-        float: "0 8px 24px rgba(26,29,46,0.10), 0 24px 48px rgba(26,29,46,0.12)",
-        "primary-glow": "0 6px 20px hsl(var(--primary) / 0.35)",
+        xs: "0 1px 2px rgba(15,23,42,0.05)",
+        soft: "0 2px 8px -2px rgba(13,110,110,0.06), 0 1px 4px -1px rgba(15,23,42,0.04)",
+        lift: "0 10px 24px -4px rgba(8,76,76,0.10), 0 4px 10px -2px rgba(15,23,42,0.04)",
+        float: "0 20px 40px -8px rgba(15,23,42,0.22)",
+        "primary-glow": "0 6px 20px hsl(var(--primary) / 0.28)",
       },
       backgroundImage: {
-        brand: "linear-gradient(135deg, #4C6FFF 0%, #2A3EB1 100%)",
+        brand: "linear-gradient(135deg, #0D6E6E 0%, #084C4C 100%)",
         "brand-mesh":
-          "radial-gradient(at 20% 20%, rgba(124,147,255,0.5) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(76,111,255,0.6) 0px, transparent 50%), radial-gradient(at 90% 90%, rgba(42,62,177,0.5) 0px, transparent 50%)",
-        "accent-grad": "linear-gradient(135deg, #FFC94D 0%, #FFB020 100%)",
+          "radial-gradient(at 20% 20%, rgba(13,110,110,0.35) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(8,76,76,0.45) 0px, transparent 50%), radial-gradient(at 90% 90%, rgba(20,83,83,0.35) 0px, transparent 50%)",
+        "accent-grad": "linear-gradient(135deg, #F0954E 0%, #D97736 100%)",
       },
       transitionTimingFunction: {
         "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",

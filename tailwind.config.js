@@ -80,6 +80,14 @@ export default {
         focus: "0 0 0 3px rgba(76,111,255,0.28)",
         "primary-glow": "0 6px 20px rgba(76,111,255,0.35)",
       },
+      backgroundImage: {
+        // Gradientes de marca estilo Nubank (bloques de color generosos).
+        "brand": "linear-gradient(135deg, #4C6FFF 0%, #2A3EB1 100%)",
+        "brand-soft": "linear-gradient(135deg, #5B7BFF 0%, #3B57E0 100%)",
+        "accent-grad": "linear-gradient(135deg, #FFC94D 0%, #FFB020 100%)",
+        "brand-mesh":
+          "radial-gradient(at 20% 20%, rgba(124,147,255,0.5) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(76,111,255,0.6) 0px, transparent 50%), radial-gradient(at 90% 90%, rgba(42,62,177,0.5) 0px, transparent 50%)",
+      },
       transitionTimingFunction: {
         // Easings expresivos (tokens de movimiento).
         "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",

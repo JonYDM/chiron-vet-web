@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { CalendarDays, Check, Plus, X, UserX } from "lucide-react";
 import { PageHeader } from "@/components/molecules/PageHeader";
-import { Badge, Button, Card, CardContent, Spinner } from "@/components/ui";
+import { EmptyState } from "@/components/molecules/EmptyState";
+import { Badge, Button, Card, CardContent, SkeletonFila } from "@/components/ui";
+import { Reveal } from "@/lib/anim";
 import { estadoCitaLabel, estadoCitaTone } from "@/lib/enums";
 import { formatDateTime } from "@/lib/format";
 import { EstadoCita } from "@/types/api";
@@ -28,8 +30,10 @@ export function CitasPage() {
       />
 
       {isLoading ? (
-        <div className="grid place-items-center py-12">
-          <Spinner label="Cargando citas…" />
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonFila key={i} />
+          ))}
         </div>
       ) : isError ? (
         <Card>
@@ -38,9 +42,9 @@ export function CitasPage() {
           </CardContent>
         </Card>
       ) : citas && citas.length > 0 ? (
-        <ul className="space-y-3">
+        <Reveal stagger className="space-y-3">
           {citas.map((c) => (
-            <li key={c.id}>
+            <div key={c.id}>
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
@@ -89,21 +93,14 @@ export function CitasPage() {
                   )}
                 </CardContent>
               </Card>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <div className="grid h-14 w-14 place-items-center rounded-2xl bg-hairline text-ink-soft">
-              <CalendarDays className="h-7 w-7" aria-hidden />
             </div>
-            <p className="font-semibold text-ink">Sin citas próximas</p>
-            <p className="max-w-xs text-sm text-ink-soft">
-              Agenda la primera cita con el botón de arriba.
-            </p>
-          </CardContent>
-        </Card>
+          ))}
+        </Reveal>
+      ) : (
+        <EmptyState
+          titulo="Sin citas próximas"
+          descripcion="Agenda la primera cita con el botón de arriba 🐾"
+        />
       )}
 
       <AgendarCitaModal open={modalAbierto} onClose={() => setModalAbierto(false)} />

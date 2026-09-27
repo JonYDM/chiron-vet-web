@@ -19,7 +19,7 @@ import { ApiError } from "@/lib/http";
 import { categoriaProductoLabel } from "@/lib/enums";
 import { formatCurrency } from "@/lib/format";
 import { RolUsuario, MetodoPago, type Producto } from "@/types/api";
-import { useToast } from "@/components/feedback/ToastProvider";
+import { useToast } from "@/components/feedback/useToast";
 import { useCatalogo, useRegistrarVenta } from "../hooks";
 import { AgregarProductoModal } from "../components/AgregarProductoModal";
 import { EditarProductoModal } from "../components/EditarProductoModal";

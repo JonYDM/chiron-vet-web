@@ -39,6 +39,15 @@ const CitasPage = lazy(() =>
 const PosPage = lazy(() =>
   import("@/features/pos").then((m) => ({ default: m.PosPage })),
 );
+const MisMascotasPage = lazy(() =>
+  import("@/features/portal").then((m) => ({ default: m.MisMascotasPage })),
+);
+const MiExpedientePage = lazy(() =>
+  import("@/features/portal").then((m) => ({ default: m.MiExpedientePage })),
+);
+const MisRecordatoriosPage = lazy(() =>
+  import("@/features/portal").then((m) => ({ default: m.MisRecordatoriosPage })),
+);
 
 const STAFF_ROLES = [
   RolUsuario.Administrador,
@@ -101,8 +110,9 @@ const router = createBrowserRouter([
     path: "/portal",
     element: <Protegida roles={[RolUsuario.DuenoMascota]}><PortalLayout /></Protegida>,
     children: [
-      { index: true, element: <EnConstruccion titulo="Mis mascotas" /> },
-      { path: "recordatorios", element: <EnConstruccion titulo="Mis recordatorios" /> },
+      { index: true, element: <MisMascotasPage /> },
+      { path: "mascotas/:mascotaId", element: <MiExpedientePage /> },
+      { path: "recordatorios", element: <MisRecordatoriosPage /> },
     ],
   },
 

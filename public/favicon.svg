@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="112" fill="#4C6FFF"/>
+  <g fill="#FFFFFF">
+    <!-- Almohadilla central -->
+    <path d="M256 300c-46 0-84 30-84 70 0 26 22 42 52 42 14 0 22-6 32-6s18 6 32 6c30 0 52-16 52-42 0-40-38-70-84-70z"/>
+    <!-- Dedos -->
+    <ellipse cx="168" cy="250" rx="28" ry="36"/>
+    <ellipse cx="222" cy="212" rx="26" ry="34"/>
+    <ellipse cx="290" cy="212" rx="26" ry="34"/>
+    <ellipse cx="344" cy="250" rx="28" ry="36"/>
+  </g>
+</svg>

@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import {
   createBrowserRouter,
   Navigate,
@@ -7,34 +7,55 @@ import {
 import { RolUsuario } from "@/types/api";
 import { ProtectedRoute, useAuth, rutaInicialPorRol } from "@/features/auth";
 import { Spinner } from "@/components/ui";
-import { HomePlaceholder } from "./HomePlaceholder";
+import { EnConstruccion } from "@/components/organisms/EnConstruccion";
 
-// Login con lazy loading (no se descarga hasta que se necesita).
+// Lazy loading por área (code-splitting por rol).
 const LoginPage = lazy(() =>
-  import("@/features/auth/pages/LoginPage").then((m) => ({
-    default: m.LoginPage,
+  import("@/features/auth/pages/LoginPage").then((m) => ({ default: m.LoginPage })),
+);
+const StaffLayout = lazy(() =>
+  import("@/app/layouts/StaffLayout").then((m) => ({ default: m.StaffLayout })),
+);
+const PortalLayout = lazy(() =>
+  import("@/app/layouts/PortalLayout").then((m) => ({ default: m.PortalLayout })),
+);
+const AdminLayout = lazy(() =>
+  import("@/app/layouts/AdminLayout").then((m) => ({ default: m.AdminLayout })),
+);
+const StaffDashboard = lazy(() =>
+  import("@/features/dashboard/StaffDashboard").then((m) => ({
+    default: m.StaffDashboard,
   })),
 );
+
+const STAFF_ROLES = [
+  RolUsuario.Administrador,
+  RolUsuario.Veterinario,
+  RolUsuario.Recepcionista,
+];
 
 /** Redirige la raíz "/" al home del rol actual (o al login si no hay sesión). */
 function RootRedirect() {
   const { sesion, cargando } = useAuth();
-  if (cargando) {
-    return (
-      <div className="grid min-h-full place-items-center">
-        <Spinner label="Cargando…" />
-      </div>
-    );
-  }
+  if (cargando) return <FullSpinner label="Cargando…" />;
   if (!sesion) return <Navigate to="/login" replace />;
   return <Navigate to={rutaInicialPorRol(sesion.rol)} replace />;
 }
 
-function Fallback() {
+function FullSpinner({ label }: { label?: string }) {
   return (
     <div className="grid min-h-full place-items-center">
-      <Spinner />
+      <Spinner label={label} />
     </div>
+  );
+}
+
+/** Envuelve un elemento en Suspense + guarda de roles. */
+function Protegida({ roles, children }: { roles?: RolUsuario[]; children: ReactNode }) {
+  return (
+    <ProtectedRoute roles={roles}>
+      <Suspense fallback={<FullSpinner />}>{children}</Suspense>
+    </ProtectedRoute>
   );
 }
 
@@ -43,41 +64,45 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: (
-      <Suspense fallback={<Fallback />}>
+      <Suspense fallback={<FullSpinner />}>
         <LoginPage />
       </Suspense>
     ),
   },
+
+  // ── Área de staff ──
   {
     path: "/app",
-    element: (
-      <ProtectedRoute
-        roles={[
-          RolUsuario.Administrador,
-          RolUsuario.Veterinario,
-          RolUsuario.Recepcionista,
-        ]}
-      >
-        <HomePlaceholder area="Staff" />
-      </ProtectedRoute>
-    ),
+    element: <Protegida roles={STAFF_ROLES}><StaffLayout /></Protegida>,
+    children: [
+      { index: true, element: <StaffDashboard /> },
+      { path: "clientes", element: <EnConstruccion titulo="Clientes y mascotas" /> },
+      { path: "citas", element: <EnConstruccion titulo="Citas" /> },
+      { path: "pos", element: <EnConstruccion titulo="Ventas" /> },
+      { path: "recordatorios", element: <EnConstruccion titulo="Recordatorios" /> },
+    ],
   },
-  {
-    path: "/admin/veterinarias",
-    element: (
-      <ProtectedRoute roles={[RolUsuario.SuperAdmin]}>
-        <HomePlaceholder area="SuperAdmin" />
-      </ProtectedRoute>
-    ),
-  },
+
+  // ── Portal del dueño ──
   {
     path: "/portal",
-    element: (
-      <ProtectedRoute roles={[RolUsuario.DuenoMascota]}>
-        <HomePlaceholder area="Portal del dueño" />
-      </ProtectedRoute>
-    ),
+    element: <Protegida roles={[RolUsuario.DuenoMascota]}><PortalLayout /></Protegida>,
+    children: [
+      { index: true, element: <EnConstruccion titulo="Mis mascotas" /> },
+      { path: "recordatorios", element: <EnConstruccion titulo="Mis recordatorios" /> },
+    ],
   },
+
+  // ── Panel SuperAdmin ──
+  {
+    path: "/admin",
+    element: <Protegida roles={[RolUsuario.SuperAdmin]}><AdminLayout /></Protegida>,
+    children: [
+      { index: true, element: <Navigate to="/admin/veterinarias" replace /> },
+      { path: "veterinarias", element: <EnConstruccion titulo="Veterinarias" /> },
+    ],
+  },
+
   { path: "*", element: <Navigate to="/" replace /> },
 ]);
 

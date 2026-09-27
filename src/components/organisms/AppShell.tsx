@@ -6,6 +6,7 @@ import { useAuth } from "@/features/auth";
 import { rolLabel } from "@/lib/enums";
 import { type NavItem } from "@/app/navigation";
 import { usePermisos } from "@/lib/usePermisos";
+import { Avatar } from "@/components/ui";
 import { CambiarMiPinModal } from "@/features/usuarios";
 
 interface AppShellProps {
@@ -33,7 +34,7 @@ export function AppShell({ nav, titulo, children }: AppShellProps) {
       {/* Sidebar (escritorio) */}
       <aside className="hidden border-r border-hairline bg-surface md:flex md:flex-col">
         <div className="flex items-center gap-3 p-5">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-white">
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-brand text-white shadow-primary-glow">
             <PawPrint className="h-5 w-5" aria-hidden />
           </div>
           <div>
@@ -50,10 +51,10 @@ export function AppShell({ nav, titulo, children }: AppShellProps) {
               end={item.to.split("/").length <= 2}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                  "flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all duration-200 ease-out-expo",
                   isActive
-                    ? "bg-primary-50 text-primary"
-                    : "text-ink-soft hover:bg-hairline/50 hover:text-ink",
+                    ? "bg-brand text-white shadow-primary-glow"
+                    : "text-ink-soft hover:bg-primary-50 hover:text-primary",
                 )
               }
             >
@@ -65,11 +66,14 @@ export function AppShell({ nav, titulo, children }: AppShellProps) {
 
         {sesion && (
           <div className="border-t border-hairline p-3">
-            <div className="px-2 py-1.5">
-              <p className="truncate text-sm font-semibold text-ink">
-                {sesion.nombre}
-              </p>
-              <p className="text-xs text-ink-soft">{rolLabel[sesion.rol]}</p>
+            <div className="flex items-center gap-3 px-2 py-1.5">
+              <Avatar nombre={sesion.nombre} size="sm" />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-ink">
+                  {sesion.nombre}
+                </p>
+                <p className="text-xs text-ink-soft">{rolLabel[sesion.rol]}</p>
+              </div>
             </div>
             <button
               onClick={() => setPinAbierto(true)}

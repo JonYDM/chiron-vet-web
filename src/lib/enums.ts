@@ -2,6 +2,7 @@ import {
   CategoriaProducto,
   EspecieMascota,
   EstadoCita,
+  MetodoPago,
   OrigenCliente,
   RolUsuario,
   SexoMascota,
@@ -69,6 +70,12 @@ export const categoriaProductoLabel: Record<CategoriaProducto, string> = {
 export const tipoRecordatorioLabel: Record<TipoRecordatorio, string> = {
   [TipoRecordatorio.ProximaAplicacion]: "Próxima aplicación",
   [TipoRecordatorio.Cita]: "Cita",
+};
+
+export const metodoPagoLabel: Record<MetodoPago, string> = {
+  [MetodoPago.Efectivo]: "Efectivo",
+  [MetodoPago.Tarjeta]: "Tarjeta",
+  [MetodoPago.Transferencia]: "Transferencia",
 };
 
 /** Mapea el estado de la cita a un tono de Badge para feedback visual. */

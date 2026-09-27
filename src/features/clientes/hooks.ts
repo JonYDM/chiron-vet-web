@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useVeterinariaId } from "@/features/auth/useVeterinariaId";
-import { buscarClientes, listarMascotas, registroRapido } from "./api";
+import { buscarClientes, crearAccesoDueno, listarMascotas, registroRapido } from "./api";
 import type { RegistroRapidoRequest } from "@/types/api";
 
 /** Lista/busca clientes de la veterinaria actual. */
@@ -30,5 +30,13 @@ export function useRegistroRapido() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clientes", veterinariaId] });
     },
+  });
+}
+
+/** Crea el acceso al portal (usuario dueño + PIN) para un cliente. */
+export function useCrearAccesoDueno() {
+  return useMutation({
+    mutationFn: (body: { clienteId: string; pin: string }) =>
+      crearAccesoDueno(body),
   });
 }

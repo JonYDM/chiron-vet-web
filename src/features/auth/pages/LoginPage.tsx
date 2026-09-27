@@ -1,39 +1,49 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { PawPrint } from "lucide-react";
+import { ArrowLeft, ArrowRight, PawPrint } from "lucide-react";
 import { Button, Card, CardContent, Input } from "@/components/ui";
-import { PinPad } from "@/components/molecules/PinPad";
+import { PinInput } from "@/components/molecules/PinInput";
 import { ApiError } from "@/lib/http";
 import { useAuth } from "../AuthContext";
 import { rutaInicialPorRol } from "../roles";
 
 const PIN_LENGTH = 6;
 
-/** Estado de la ubicación previa (para volver tras login). */
 interface LocationState {
   from?: { pathname: string };
 }
+
+type Paso = "identificador" | "pin";
 
 export function LoginPage() {
   const { iniciarSesion } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [paso, setPaso] = useState<Paso>("identificador");
   const [identificador, setIdentificador] = useState("");
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
 
-  const puedeEnviar =
-    identificador.trim().length > 0 && pin.length === PIN_LENGTH && !cargando;
+  function siguiente() {
+    if (identificador.trim().length === 0) return;
+    setError(null);
+    setPaso("pin");
+  }
+
+  function volver() {
+    setError(null);
+    setPin("");
+    setPaso("identificador");
+  }
 
   async function enviar() {
-    if (!puedeEnviar) return;
+    if (pin.length !== PIN_LENGTH || cargando) return;
     setError(null);
     setCargando(true);
     try {
       const sesion = await iniciarSesion(identificador.trim(), pin);
-      // Redirige al destino previo (si venía redirigido) o a su home por rol.
       const state = location.state as LocationState | null;
       const destino = state?.from?.pathname ?? rutaInicialPorRol(sesion.rol);
       navigate(destino, { replace: true });
@@ -58,56 +68,92 @@ export function LoginPage() {
           </div>
           <h1 className="text-2xl font-bold text-ink">Bienvenido a Chiron</h1>
           <p className="mt-1 text-sm text-ink-soft">
-            Ingresa con tu usuario o teléfono y tu PIN
+            {paso === "identificador"
+              ? "Ingresa tu usuario o teléfono"
+              : "Ahora tu PIN de acceso"}
           </p>
+        </div>
+
+        {/* Indicador de pasos */}
+        <div className="mb-4 flex items-center justify-center gap-2">
+          <span
+            className={`h-1.5 w-8 rounded-full ${paso === "identificador" ? "bg-primary" : "bg-hairline"}`}
+          />
+          <span
+            className={`h-1.5 w-8 rounded-full ${paso === "pin" ? "bg-primary" : "bg-hairline"}`}
+          />
         </div>
 
         <Card className="animate-fade-in-up">
           <CardContent className="space-y-6">
-            <Input
-              label="Usuario o teléfono"
-              inputMode="text"
-              autoComplete="username"
-              placeholder="ej: admindemo"
-              value={identificador}
-              onChange={(e) => setIdentificador(e.target.value)}
-              disabled={cargando}
-            />
-
-            <div>
-              <p className="mb-3 text-center text-sm font-medium text-ink">
-                Tu PIN de {PIN_LENGTH} dígitos
-              </p>
-              <PinPad
-                value={pin}
-                onChange={(next) => {
-                  setPin(next);
-                  if (error) setError(null);
+            {paso === "identificador" ? (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  siguiente();
                 }}
-                length={PIN_LENGTH}
-                onComplete={enviar}
-                disabled={cargando}
-              />
-            </div>
-
-            {error && (
-              <p
-                role="alert"
-                className="rounded-xl bg-danger/10 px-4 py-3 text-center text-sm text-danger"
+                className="space-y-5"
               >
-                {error}
-              </p>
-            )}
+                <Input
+                  label="Usuario o teléfono"
+                  autoComplete="username"
+                  placeholder="ej: 7771523546"
+                  value={identificador}
+                  onChange={(e) => setIdentificador(e.target.value)}
+                  autoFocus
+                />
+                <Button
+                  type="submit"
+                  fullWidth
+                  size="lg"
+                  disabled={identificador.trim().length === 0}
+                >
+                  Continuar
+                  <ArrowRight className="h-4 w-4" aria-hidden />
+                </Button>
+              </form>
+            ) : (
+              <div className="space-y-5">
+                <button
+                  onClick={volver}
+                  className="flex items-center gap-1.5 text-sm font-medium text-ink-soft hover:text-ink"
+                >
+                  <ArrowLeft className="h-4 w-4" aria-hidden />
+                  {identificador}
+                </button>
 
-            <Button
-              fullWidth
-              size="lg"
-              onClick={enviar}
-              loading={cargando}
-              disabled={!puedeEnviar}
-            >
-              Entrar
-            </Button>
+                <PinInput
+                  value={pin}
+                  onChange={(next) => {
+                    setPin(next);
+                    if (error) setError(null);
+                  }}
+                  length={PIN_LENGTH}
+                  onComplete={enviar}
+                  disabled={cargando}
+                  autoFocus
+                />
+
+                {error && (
+                  <p
+                    role="alert"
+                    className="rounded-xl bg-danger/10 px-4 py-3 text-center text-sm text-danger"
+                  >
+                    {error}
+                  </p>
+                )}
+
+                <Button
+                  fullWidth
+                  size="lg"
+                  onClick={enviar}
+                  loading={cargando}
+                  disabled={pin.length !== PIN_LENGTH}
+                >
+                  Entrar
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

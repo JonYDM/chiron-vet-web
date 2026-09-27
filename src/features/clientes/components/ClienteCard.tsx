@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, PawPrint, Phone } from "lucide-react";
+import { ChevronDown, KeyRound, PawPrint, Phone } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { Badge, Card, Spinner } from "@/components/ui";
+import { Badge, Button, Card, Spinner } from "@/components/ui";
 import { especieLabel } from "@/lib/enums";
 import { useMascotas } from "../hooks";
+import { DarAccesoModal } from "./DarAccesoModal";
 import type { Cliente } from "@/types/api";
 
 /** Tarjeta de cliente: al expandir, carga y muestra sus mascotas (lazy). */
 export function ClienteCard({ cliente }: { cliente: Cliente }) {
   const [abierto, setAbierto] = useState(false);
+  const [accesoAbierto, setAccesoAbierto] = useState(false);
   const { data: mascotas, isLoading } = useMascotas(abierto ? cliente.id : null);
 
   return (
@@ -36,7 +38,7 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
       </button>
 
       {abierto && (
-        <div className="border-t border-hairline p-4">
+        <div className="space-y-3 border-t border-hairline p-4">
           {isLoading ? (
             <Spinner label="Cargando mascotas…" />
           ) : mascotas && mascotas.length > 0 ? (
@@ -61,8 +63,26 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
               Este cliente no tiene mascotas registradas.
             </p>
           )}
+
+          <Button
+            variant="secondary"
+            size="sm"
+            fullWidth
+            onClick={() => setAccesoAbierto(true)}
+          >
+            <KeyRound className="h-4 w-4" aria-hidden />
+            Dar acceso al portal
+          </Button>
         </div>
       )}
+
+      <DarAccesoModal
+        open={accesoAbierto}
+        onClose={() => setAccesoAbierto(false)}
+        clienteId={cliente.id}
+        clienteNombre={cliente.nombre}
+        clienteTelefono={cliente.telefono}
+      />
     </Card>
   );
 }

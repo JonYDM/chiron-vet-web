@@ -1,33 +1,32 @@
 import { type HTMLAttributes } from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/cn";
 
-type Tone = "neutral" | "primary" | "success" | "warning" | "danger";
+const badgeVariants = cva(
+  "inline-flex items-center gap-1 rounded-full font-semibold",
+  {
+    variants: {
+      tone: {
+        neutral: "bg-hairline text-ink-soft",
+        primary: "bg-primary-50 text-primary",
+        success: "bg-success/10 text-success",
+        warning: "bg-accent-50 text-accent-700",
+        danger: "bg-danger/10 text-danger",
+      },
+      size: {
+        sm: "px-2 py-0.5 text-[11px]",
+        md: "px-2.5 py-0.5 text-xs",
+      },
+    },
+    defaultVariants: { tone: "neutral", size: "md" },
+  },
+);
 
-const tones: Record<Tone, string> = {
-  neutral: "bg-hairline text-ink-soft",
-  primary: "bg-primary-50 text-primary",
-  success: "bg-success/10 text-success",
-  warning: "bg-accent/15 text-[#9A6A00]",
-  danger: "bg-danger/10 text-danger",
-};
+export interface BadgeProps
+  extends HTMLAttributes<HTMLSpanElement>,
+    VariantProps<typeof badgeVariants> {}
 
-export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
-  tone?: Tone;
-}
-
-/**
- * Etiqueta de estado. Usa los colores semánticos para comunicar el estado
- * de una acción/entidad (estilo de feedback claro tipo Nubank).
- */
-export function Badge({ className, tone = "neutral", ...props }: BadgeProps) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold",
-        tones[tone],
-        className,
-      )}
-      {...props}
-    />
-  );
+/** Etiqueta de estado con variantes tipadas (tono + tamaño). */
+export function Badge({ className, tone, size, ...props }: BadgeProps) {
+  return <span className={cn(badgeVariants({ tone, size }), className)} {...props} />;
 }

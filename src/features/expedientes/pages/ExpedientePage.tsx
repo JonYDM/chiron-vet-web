@@ -96,7 +96,7 @@ export function ExpedientePage() {
                         <p className="mt-1 text-sm italic text-ink-soft">{r.notas}</p>
                       )}
                       {r.fechaProximaAplicacion && (
-                        <p className="mt-1.5 flex items-center gap-1.5 text-sm text-[#9A6A00]">
+                        <p className="mt-1.5 flex items-center gap-1.5 text-sm text-accent-strong">
                           <CalendarClock className="h-4 w-4" aria-hidden />
                           Próxima: {formatDate(r.fechaProximaAplicacion)}
                         </p>

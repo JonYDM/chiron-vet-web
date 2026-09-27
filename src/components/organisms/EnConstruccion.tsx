@@ -9,7 +9,7 @@ export function EnConstruccion({ titulo }: { titulo: string }) {
       <PageHeader titulo={titulo} />
       <Card>
         <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-          <div className="grid h-14 w-14 place-items-center rounded-2xl bg-accent/15 text-[#9A6A00]">
+          <div className="grid h-14 w-14 place-items-center rounded-2xl bg-accent/15 text-accent-strong">
             <Hammer className="h-7 w-7" aria-hidden />
           </div>
           <p className="font-semibold text-ink">Próximamente</p>

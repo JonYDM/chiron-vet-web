@@ -377,8 +377,8 @@ export function PosPage() {
             </div>
             {recibo.cambio != null && recibo.cambio > 0 && (
               <div className="rounded-xl bg-accent/15 px-4 py-3">
-                <p className="text-sm text-[#9A6A00]">Cambio a entregar</p>
-                <p className="text-xl font-bold text-[#9A6A00]">
+                <p className="text-sm text-accent-strong">Cambio a entregar</p>
+                <p className="text-xl font-bold text-accent-strong">
                   {formatCurrency(recibo.cambio)}
                 </p>
               </div>

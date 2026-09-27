@@ -12,7 +12,7 @@ const avatarVariants = cva(
       },
       tone: {
         primary: "bg-secondary text-secondary-foreground",
-        accent: "bg-accent/20 text-accent-foreground",
+        accent: "bg-accent/20 text-accent-strong",
         neutral: "bg-muted text-muted-foreground",
       },
     },

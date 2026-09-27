@@ -13,7 +13,7 @@ interface QuickCardProps {
 
 const toneClasses: Record<NonNullable<QuickCardProps["tone"]>, string> = {
   primary: "bg-primary-50 text-primary",
-  accent: "bg-accent/15 text-[#9A6A00]",
+  accent: "bg-accent/15 text-accent-strong",
   success: "bg-success/10 text-success",
 };
 

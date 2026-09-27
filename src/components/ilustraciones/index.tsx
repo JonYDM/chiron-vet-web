@@ -35,12 +35,12 @@ export function Huella({ className }: { className?: string }) {
 export function MascotaVacio({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 160 160" className={cn("h-40 w-40", className)} aria-hidden>
-      <circle cx="80" cy="80" r="76" fill="#EEF2FF" />
+      <circle cx="80" cy="80" r="76" fill="#E5EEEE" />
       {/* Cuerpo/cara */}
-      <ellipse cx="80" cy="92" rx="42" ry="38" fill="#4C6FFF" />
+      <ellipse cx="80" cy="92" rx="42" ry="38" fill="#0D6E6E" />
       {/* Orejas */}
-      <ellipse cx="46" cy="60" rx="13" ry="22" fill="#2A3EB1" transform="rotate(-20 46 60)" />
-      <ellipse cx="114" cy="60" rx="13" ry="22" fill="#2A3EB1" transform="rotate(20 114 60)" />
+      <ellipse cx="46" cy="60" rx="13" ry="22" fill="#084C4C" transform="rotate(-20 46 60)" />
+      <ellipse cx="114" cy="60" rx="13" ry="22" fill="#084C4C" transform="rotate(20 114 60)" />
       {/* Hocico */}
       <ellipse cx="80" cy="104" rx="20" ry="16" fill="#FFF" />
       <circle cx="80" cy="98" r="5" fill="#1A1D2E" />
@@ -49,9 +49,9 @@ export function MascotaVacio({ className }: { className?: string }) {
       <circle cx="94" cy="82" r="5" fill="#FFF" />
       <circle cx="66" cy="82" r="2.5" fill="#1A1D2E" />
       <circle cx="94" cy="82" r="2.5" fill="#1A1D2E" />
-      {/* Mejillas ámbar */}
-      <circle cx="54" cy="96" r="5" fill="#FFC94D" opacity="0.7" />
-      <circle cx="106" cy="96" r="5" fill="#FFC94D" opacity="0.7" />
+      {/* Mejillas terracota */}
+      <circle cx="54" cy="96" r="5" fill="#F0954E" opacity="0.75" />
+      <circle cx="106" cy="96" r="5" fill="#F0954E" opacity="0.75" />
     </svg>
   );
 }

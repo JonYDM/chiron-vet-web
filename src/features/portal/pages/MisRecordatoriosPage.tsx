@@ -39,7 +39,7 @@ export function MisRecordatoriosPage() {
               <div key={`${r.clienteId}-${i}`}>
                 <Card>
                   <CardContent className="flex items-center gap-3 p-4">
-                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-accent/15 text-[#9A6A00]">
+                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent-strong">
                       {esVacuna ? (
                         <Syringe className="h-5 w-5" aria-hidden />
                       ) : (

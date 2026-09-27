@@ -1,0 +1,268 @@
+import { useMemo, useState } from "react";
+import { Minus, Plus, ShoppingCart, Trash2, Package } from "lucide-react";
+import { PageHeader } from "@/components/molecules/PageHeader";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  Spinner,
+} from "@/components/ui";
+import { useAuth } from "@/features/auth";
+import { useVeterinariaId } from "@/features/auth/useVeterinariaId";
+import { ApiError } from "@/lib/http";
+import { categoriaProductoLabel } from "@/lib/enums";
+import { formatCurrency } from "@/lib/format";
+import { RolUsuario, type Producto } from "@/types/api";
+import { useCatalogo, useRegistrarVenta } from "../hooks";
+import { AgregarProductoModal } from "../components/AgregarProductoModal";
+
+interface LineaCarrito {
+  producto: Producto;
+  cantidad: number;
+}
+
+/** Página del punto de venta (F3.5): catálogo + carrito de venta. */
+export function PosPage() {
+  const { sesion } = useAuth();
+  const veterinariaId = useVeterinariaId();
+  const { data: productos, isLoading, isError } = useCatalogo();
+  const registrarVenta = useRegistrarVenta();
+
+  const [carrito, setCarrito] = useState<Record<string, LineaCarrito>>({});
+  const [modalProducto, setModalProducto] = useState(false);
+  const [mensaje, setMensaje] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const esAdmin = sesion?.rol === RolUsuario.Administrador;
+
+  const lineas = Object.values(carrito);
+  const total = useMemo(
+    () => lineas.reduce((s, l) => s + l.producto.precio * l.cantidad, 0),
+    [lineas],
+  );
+
+  function agregar(p: Producto) {
+    setCarrito((prev) => {
+      const actual = prev[p.id]?.cantidad ?? 0;
+      if (actual >= p.stock) return prev;
+      return { ...prev, [p.id]: { producto: p, cantidad: actual + 1 } };
+    });
+  }
+
+  function quitar(id: string) {
+    setCarrito((prev) => {
+      const actual = prev[id]?.cantidad ?? 0;
+      if (actual <= 1) {
+        const copia = { ...prev };
+        delete copia[id];
+        return copia;
+      }
+      return { ...prev, [id]: { ...prev[id], cantidad: actual - 1 } };
+    });
+  }
+
+  async function cobrar() {
+    setError(null);
+    setMensaje(null);
+    try {
+      const resp = await registrarVenta.mutateAsync({
+        veterinariaId,
+        items: lineas.map((l) => ({
+          productoId: l.producto.id,
+          cantidad: l.cantidad,
+        })),
+      });
+      setMensaje(`Venta registrada por ${formatCurrency(resp.total)} 🎉`);
+      setCarrito({});
+    } catch (err) {
+      setError(
+        err instanceof ApiError ? err.message : "No se pudo registrar la venta.",
+      );
+    }
+  }
+
+  return (
+    <div>
+      <PageHeader
+        titulo="Punto de venta"
+        descripcion="Selecciona productos y registra la venta"
+        accion={
+          esAdmin ? (
+            <Button variant="secondary" onClick={() => setModalProducto(true)}>
+              <Plus className="h-4 w-4" aria-hidden />
+              Producto
+            </Button>
+          ) : undefined
+        }
+      />
+
+      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+        {/* Catálogo */}
+        <section>
+          {isLoading ? (
+            <div className="grid place-items-center py-12">
+              <Spinner label="Cargando catálogo…" />
+            </div>
+          ) : isError ? (
+            <Card>
+              <CardContent className="py-8 text-center text-sm text-danger">
+                No se pudo cargar el catálogo.
+              </CardContent>
+            </Card>
+          ) : productos && productos.length > 0 ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {productos.map((p) => {
+                const agotado = p.stock <= 0;
+                return (
+                  <Card key={p.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="font-semibold text-ink">{p.nombre}</p>
+                        <Badge tone={agotado ? "danger" : "neutral"}>
+                          {agotado ? "Agotado" : `Stock ${p.stock}`}
+                        </Badge>
+                      </div>
+                      <p className="mt-0.5 text-xs text-ink-soft">
+                        {categoriaProductoLabel[p.categoria]}
+                      </p>
+                      <div className="mt-3 flex items-center justify-between">
+                        <span className="font-bold text-ink">
+                          {formatCurrency(p.precio)}
+                        </span>
+                        <Button
+                          size="sm"
+                          onClick={() => agregar(p)}
+                          disabled={agotado}
+                        >
+                          <Plus className="h-4 w-4" aria-hidden />
+                          Agregar
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
+                <div className="grid h-14 w-14 place-items-center rounded-2xl bg-hairline text-ink-soft">
+                  <Package className="h-7 w-7" aria-hidden />
+                </div>
+                <p className="font-semibold text-ink">Catálogo vacío</p>
+                <p className="max-w-xs text-sm text-ink-soft">
+                  {esAdmin
+                    ? "Agrega tu primer producto."
+                    : "Aún no hay productos en el catálogo."}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </section>
+
+        {/* Carrito */}
+        <aside>
+          <Card className="lg:sticky lg:top-6">
+            <CardContent className="p-4">
+              <h2 className="mb-3 flex items-center gap-2 font-bold text-ink">
+                <ShoppingCart className="h-5 w-5 text-primary" aria-hidden />
+                Venta actual
+              </h2>
+
+              {lineas.length === 0 ? (
+                <p className="py-6 text-center text-sm text-ink-soft">
+                  Agrega productos del catálogo.
+                </p>
+              ) : (
+                <ul className="space-y-2">
+                  {lineas.map((l) => (
+                    <li
+                      key={l.producto.id}
+                      className="flex items-center justify-between gap-2 rounded-xl bg-canvas p-2.5"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-ink">
+                          {l.producto.nombre}
+                        </p>
+                        <p className="text-xs text-ink-soft">
+                          {formatCurrency(l.producto.precio)} c/u
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => quitar(l.producto.id)}
+                          aria-label="Quitar uno"
+                          className="grid h-7 w-7 place-items-center rounded-lg bg-surface text-ink-soft hover:text-ink"
+                        >
+                          {l.cantidad <= 1 ? (
+                            <Trash2 className="h-4 w-4" aria-hidden />
+                          ) : (
+                            <Minus className="h-4 w-4" aria-hidden />
+                          )}
+                        </button>
+                        <span className="w-5 text-center text-sm font-semibold">
+                          {l.cantidad}
+                        </span>
+                        <button
+                          onClick={() => agregar(l.producto)}
+                          aria-label="Agregar uno"
+                          disabled={l.cantidad >= l.producto.stock}
+                          className="grid h-7 w-7 place-items-center rounded-lg bg-surface text-ink-soft hover:text-ink disabled:opacity-40"
+                        >
+                          <Plus className="h-4 w-4" aria-hidden />
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="mt-4 flex items-center justify-between border-t border-hairline pt-3">
+                <span className="text-ink-soft">Total</span>
+                <span className="text-xl font-bold text-ink">
+                  {formatCurrency(total)}
+                </span>
+              </div>
+
+              {mensaje && (
+                <p
+                  role="status"
+                  className="mt-3 rounded-xl bg-success/10 px-4 py-2.5 text-center text-sm text-success"
+                >
+                  {mensaje}
+                </p>
+              )}
+              {error && (
+                <p
+                  role="alert"
+                  className="mt-3 rounded-xl bg-danger/10 px-4 py-2.5 text-center text-sm text-danger"
+                >
+                  {error}
+                </p>
+              )}
+
+              <Button
+                fullWidth
+                size="lg"
+                className="mt-3"
+                onClick={cobrar}
+                loading={registrarVenta.isPending}
+                disabled={lineas.length === 0}
+              >
+                Cobrar
+              </Button>
+            </CardContent>
+          </Card>
+        </aside>
+      </div>
+
+      {esAdmin && (
+        <AgregarProductoModal
+          open={modalProducto}
+          onClose={() => setModalProducto(false)}
+        />
+      )}
+    </div>
+  );
+}

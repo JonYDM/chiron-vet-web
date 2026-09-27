@@ -27,6 +27,18 @@ const StaffDashboard = lazy(() =>
     default: m.StaffDashboard,
   })),
 );
+const ClientesPage = lazy(() =>
+  import("@/features/clientes").then((m) => ({ default: m.ClientesPage })),
+);
+const ExpedientePage = lazy(() =>
+  import("@/features/expedientes").then((m) => ({ default: m.ExpedientePage })),
+);
+const CitasPage = lazy(() =>
+  import("@/features/citas").then((m) => ({ default: m.CitasPage })),
+);
+const PosPage = lazy(() =>
+  import("@/features/pos").then((m) => ({ default: m.PosPage })),
+);
 
 const STAFF_ROLES = [
   RolUsuario.Administrador,
@@ -76,9 +88,10 @@ const router = createBrowserRouter([
     element: <Protegida roles={STAFF_ROLES}><StaffLayout /></Protegida>,
     children: [
       { index: true, element: <StaffDashboard /> },
-      { path: "clientes", element: <EnConstruccion titulo="Clientes y mascotas" /> },
-      { path: "citas", element: <EnConstruccion titulo="Citas" /> },
-      { path: "pos", element: <EnConstruccion titulo="Ventas" /> },
+      { path: "clientes", element: <ClientesPage /> },
+      { path: "mascotas/:mascotaId", element: <ExpedientePage /> },
+      { path: "citas", element: <CitasPage /> },
+      { path: "pos", element: <PosPage /> },
       { path: "recordatorios", element: <EnConstruccion titulo="Recordatorios" /> },
     ],
   },

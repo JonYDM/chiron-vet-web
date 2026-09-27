@@ -4,15 +4,13 @@ import { PageHeader } from "@/components/molecules/PageHeader";
 import { QuickCard } from "@/components/molecules/QuickCard";
 import { Card, CardContent, Spinner } from "@/components/ui";
 import { formatCurrency } from "@/lib/format";
-import { RolUsuario } from "@/types/api";
+import { usePermisos } from "@/lib/usePermisos";
 import { useMetricas } from "./hooks";
 
-/** Dashboard inicial del staff: métricas (Admin) + accesos rápidos según rol. */
+/** Dashboard inicial del staff: métricas + accesos rápidos según permisos. */
 export function StaffDashboard() {
   const { sesion } = useAuth();
-  const rol = sesion?.rol;
-  const esAdmin = rol === RolUsuario.Administrador;
-  const esRecepcion = rol === RolUsuario.Recepcionista;
+  const p = usePermisos();
   const nombreCorto = sesion?.nombre?.split(" ")[0] ?? "";
 
   return (
@@ -22,24 +20,27 @@ export function StaffDashboard() {
         descripcion="¿Qué quieres hacer hoy?"
       />
 
-      {/* Métricas (solo Admin, que ve el dinero) */}
-      {esAdmin && <Metricas />}
+      {p("ver_metricas") && <Metricas />}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <QuickCard
-          titulo="Clientes y mascotas"
-          descripcion="Registra y busca dueños y pacientes"
-          icon={Users}
-          to="/app/clientes"
-        />
-        <QuickCard
-          titulo="Citas"
-          descripcion="Agenda y consulta las próximas citas"
-          icon={Calendar}
-          to="/app/citas"
-          tone="accent"
-        />
-        {(esAdmin || esRecepcion) && (
+        {p("operar_clientes") && (
+          <QuickCard
+            titulo="Clientes y mascotas"
+            descripcion="Registra y busca dueños y pacientes"
+            icon={Users}
+            to="/app/clientes"
+          />
+        )}
+        {p("gestionar_citas") && (
+          <QuickCard
+            titulo="Citas"
+            descripcion="Agenda y consulta las próximas citas"
+            icon={Calendar}
+            to="/app/citas"
+            tone="accent"
+          />
+        )}
+        {p("usar_pos") && (
           <QuickCard
             titulo="Ventas"
             descripcion="Punto de venta y catálogo"
@@ -48,7 +49,7 @@ export function StaffDashboard() {
             tone="success"
           />
         )}
-        {esAdmin && (
+        {p("gestionar_equipo") && (
           <QuickCard
             titulo="Equipo"
             descripcion="Gestiona a tu personal"

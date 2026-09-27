@@ -5,11 +5,10 @@ import {
   PawPrint,
   ShoppingCart,
   Users,
-  Bell,
   Building2,
   UserCog,
 } from "lucide-react";
-import { RolUsuario } from "@/types/api";
+import type { Accion } from "@/lib/permisos";
 
 export interface NavItem {
   /** Ruta absoluta. */
@@ -17,59 +16,29 @@ export interface NavItem {
   /** Etiqueta corta para el menú. */
   label: string;
   icon: LucideIcon;
-  /** Roles que ven este ítem. */
-  roles: RolUsuario[];
+  /**
+   * Acción/permiso requerido para ver el ítem. Si es null, lo ven todos los
+   * usuarios del área (ej: Inicio). El AppShell filtra con `puede`.
+   */
+  permiso: Accion | null;
 }
 
-const STAFF = [
-  RolUsuario.Administrador,
-  RolUsuario.Veterinario,
-  RolUsuario.Recepcionista,
-];
-
 /**
- * Navegación de la app de staff (/app/*). Cada ítem declara qué roles lo ven,
- * de modo que el mismo shell sirve a Admin/Veterinario/Recepcionista mostrando
- * solo lo permitido.
+ * Navegación de la app de staff (/app/*). Cada ítem declara el permiso que requiere;
+ * el shell lo filtra según la sesión (rol + AdminOperativo). Una sola fuente de verdad.
  */
 export const navStaff: NavItem[] = [
-  { to: "/app", label: "Inicio", icon: Home, roles: STAFF },
-  { to: "/app/clientes", label: "Clientes", icon: Users, roles: STAFF },
-  {
-    to: "/app/citas",
-    label: "Citas",
-    icon: Calendar,
-    roles: STAFF,
-  },
-  {
-    to: "/app/pos",
-    label: "Ventas",
-    icon: ShoppingCart,
-    roles: [RolUsuario.Administrador, RolUsuario.Recepcionista],
-  },
-  {
-    to: "/app/recordatorios",
-    label: "Recordatorios",
-    icon: Bell,
-    roles: [RolUsuario.Administrador],
-  },
-  {
-    to: "/app/equipo",
-    label: "Equipo",
-    icon: UserCog,
-    roles: [RolUsuario.Administrador],
-  },
+  { to: "/app", label: "Inicio", icon: Home, permiso: null },
+  { to: "/app/clientes", label: "Clientes", icon: Users, permiso: "operar_clientes" },
+  { to: "/app/citas", label: "Citas", icon: Calendar, permiso: "gestionar_citas" },
+  { to: "/app/pos", label: "Ventas", icon: ShoppingCart, permiso: "usar_pos" },
+  { to: "/app/equipo", label: "Equipo", icon: UserCog, permiso: "gestionar_equipo" },
 ];
 
 /** Navegación del portal del dueño (/portal/*). */
 export const navPortal: NavItem[] = [
-  { to: "/portal", label: "Mis mascotas", icon: PawPrint, roles: [RolUsuario.DuenoMascota] },
-  {
-    to: "/portal/recordatorios",
-    label: "Recordatorios",
-    icon: Bell,
-    roles: [RolUsuario.DuenoMascota],
-  },
+  { to: "/portal", label: "Mis mascotas", icon: PawPrint, permiso: null },
+  { to: "/portal/recordatorios", label: "Recordatorios", icon: Home, permiso: null },
 ];
 
 /** Navegación del panel SuperAdmin (/admin/*). */
@@ -78,11 +47,6 @@ export const navAdmin: NavItem[] = [
     to: "/admin/veterinarias",
     label: "Veterinarias",
     icon: Building2,
-    roles: [RolUsuario.SuperAdmin],
+    permiso: "gestionar_veterinarias",
   },
 ];
-
-/** Devuelve los ítems visibles para un rol dado a partir de una lista. */
-export function itemsVisibles(items: NavItem[], rol: RolUsuario): NavItem[] {
-  return items.filter((i) => i.roles.includes(rol));
-}

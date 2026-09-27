@@ -4,7 +4,8 @@ import { KeyRound, LogOut, PawPrint } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useAuth } from "@/features/auth";
 import { rolLabel } from "@/lib/enums";
-import { itemsVisibles, type NavItem } from "@/app/navigation";
+import { type NavItem } from "@/app/navigation";
+import { usePermisos } from "@/lib/usePermisos";
 import { CambiarMiPinModal } from "@/features/usuarios";
 
 interface AppShellProps {
@@ -23,8 +24,8 @@ interface AppShellProps {
  */
 export function AppShell({ nav, titulo, children }: AppShellProps) {
   const { sesion, cerrarSesion } = useAuth();
-  const rol = sesion?.rol;
-  const items = rol ? itemsVisibles(nav, rol) : [];
+  const p = usePermisos();
+  const items = nav.filter((i) => i.permiso === null || p(i.permiso));
   const [pinAbierto, setPinAbierto] = useState(false);
 
   return (

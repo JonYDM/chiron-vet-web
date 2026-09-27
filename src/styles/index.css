@@ -4,9 +4,48 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Tokens semánticos estilo shadcn/ui (CSS variables en HSL). La identidad
+ * "Visión Canina" (azul índigo + ámbar) se expresa como --primary/--accent.
+ * Estas variables permiten consistencia total y habilitan modo oscuro.
+ */
 @layer base {
   :root {
-    color-scheme: light;
+    --background: 228 40% 98%;      /* canvas */
+    --foreground: 230 28% 14%;      /* ink */
+
+    --card: 0 0% 100%;
+    --card-foreground: 230 28% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 230 28% 14%;
+
+    --primary: 227 100% 65%;        /* #4C6FFF índigo Visión Canina */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 226 100% 96%;      /* primary-50 */
+    --secondary-foreground: 227 62% 43%;
+
+    --accent: 39 100% 56%;          /* #FFB020 ámbar */
+    --accent-foreground: 34 100% 24%;
+
+    --muted: 228 24% 95%;
+    --muted-foreground: 230 12% 47%;
+
+    --destructive: 350 84% 63%;     /* coral */
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 160 76% 37%;
+
+    --border: 230 24% 92%;
+    --input: 230 24% 90%;
+    --ring: 227 100% 65%;
+
+    --radius: 0.875rem;
+  }
+
+  * {
+    border-color: hsl(var(--border));
   }
 
   html,
@@ -16,32 +55,25 @@
   }
 
   body {
-    @apply bg-canvas text-ink font-sans antialiased;
+    @apply bg-background text-foreground font-sans antialiased;
     text-rendering: optimizeLegibility;
   }
 
-  /* Selección con el color de marca. */
   ::selection {
-    background: rgba(76, 111, 255, 0.18);
+    background: hsl(var(--primary) / 0.18);
   }
 
-  /* Scrollbar sutil (WebKit). */
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
   }
   ::-webkit-scrollbar-thumb {
-    background: #d7dae6;
+    background: hsl(var(--border));
     border-radius: 9999px;
     border: 2px solid transparent;
     background-clip: content-box;
   }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #c2c6d6;
-    background-clip: content-box;
-  }
 
-  /* Respeta la preferencia de menos movimiento (accesibilidad). */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -55,7 +87,6 @@
 }
 
 @layer utilities {
-  /* Efecto shimmer para skeletons de carga. */
   .shimmer {
     position: relative;
     overflow: hidden;
@@ -65,17 +96,11 @@
     position: absolute;
     inset: 0;
     transform: translateX(-100%);
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.6),
-      transparent
-    );
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
     animation: shimmer 1.6s infinite;
   }
 }
 
-/* Transiciones de vista entre rutas (navegadores compatibles). Fallback: sin animación. */
 @media (prefers-reduced-motion: no-preference) {
   ::view-transition-old(root),
   ::view-transition-new(root) {

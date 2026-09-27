@@ -1,25 +1,64 @@
+import { useState } from "react";
 import { PawPrint } from "lucide-react";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+} from "@/components/ui";
+import { PinPad } from "@/components/molecules/PinPad";
 
 /**
- * App raíz. Por ahora es una pantalla de arranque que valida el scaffolding
- * (Tailwind, tokens de la paleta, fuente e iconos). En Sprint 1 se reemplaza
- * por el Router + providers.
+ * Showcase temporal del design system (F0.2). Valida tokens, átomos y la
+ * molécula PinPad. Se reemplaza por el Router + login en Sprint 1.
  */
 export default function App() {
+  const [pin, setPin] = useState("");
+
   return (
-    <main className="grid min-h-full place-items-center p-6">
-      <div className="animate-fade-in-up rounded-2xl bg-surface p-8 text-center shadow-soft">
-        <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-primary text-surface">
-          <PawPrint className="h-8 w-8" aria-hidden />
+    <main className="mx-auto grid min-h-full max-w-md gap-5 p-6">
+      <header className="flex items-center gap-3">
+        <div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary text-white">
+          <PawPrint className="h-6 w-6" aria-hidden />
         </div>
-        <h1 className="text-2xl font-bold text-ink">Chiron</h1>
-        <p className="mt-1 text-ink-soft">
-          Gestión simple para veterinarias 🐾
-        </p>
-        <p className="mt-6 text-sm text-ink-soft">
-          Scaffolding listo — Sprint 0 · F0.1
-        </p>
-      </div>
+        <div>
+          <h1 className="text-xl font-bold text-ink">Chiron</h1>
+          <p className="text-sm text-ink-soft">Design system · F0.2</p>
+        </div>
+      </header>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Componentes base</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            <Button>Primario</Button>
+            <Button variant="secondary">Secundario</Button>
+            <Button variant="ghost">Ghost</Button>
+            <Button variant="danger">Peligro</Button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Badge tone="primary">Programada</Badge>
+            <Badge tone="success">Atendida</Badge>
+            <Badge tone="warning">Vacuna próxima</Badge>
+            <Badge tone="danger">Cancelada</Badge>
+          </div>
+          <Input label="Usuario o teléfono" placeholder="ej: admindemo" />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>PIN de acceso</CardTitle>
+        </CardHeader>
+        <CardContent className="grid place-items-center">
+          <PinPad value={pin} onChange={setPin} onComplete={() => undefined} />
+        </CardContent>
+      </Card>
     </main>
   );
 }

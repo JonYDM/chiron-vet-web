@@ -1,30 +1,53 @@
 import { http } from "@/lib/http";
 import type {
   Cliente,
+  FiltroEstado,
   Mascota,
   RegistroRapidoRequest,
   RegistroRapidoResponse,
+  ResultadoPaginado,
 } from "@/types/api";
 
-/** Busca/lista clientes de una veterinaria (texto opcional). */
+/** Busca/lista clientes (paginado + filtro de estado, todo server-side). */
 export function buscarClientes(
   veterinariaId: string,
-  texto?: string,
+  opciones: {
+    texto?: string;
+    estado?: FiltroEstado;
+    pagina?: number;
+    tamano?: number;
+  } = {},
   signal?: AbortSignal,
-): Promise<Cliente[]> {
-  const query = texto ? `?texto=${encodeURIComponent(texto)}` : "";
-  return http.get<Cliente[]>(
-    `/api/veterinarias/${veterinariaId}/clientes${query}`,
+): Promise<ResultadoPaginado<Cliente>> {
+  const params = new URLSearchParams();
+  if (opciones.texto) params.set("texto", opciones.texto);
+  if (opciones.estado != null) params.set("estado", String(opciones.estado));
+  params.set("pagina", String(opciones.pagina ?? 1));
+  params.set("tamano", String(opciones.tamano ?? 20));
+  return http.get<ResultadoPaginado<Cliente>>(
+    `/api/veterinarias/${veterinariaId}/clientes?${params.toString()}`,
     signal,
   );
 }
 
-/** Lista las mascotas de un cliente. */
+/** Lista las mascotas de un cliente (con filtro de estado). */
 export function listarMascotas(
   clienteId: string,
+  estado?: FiltroEstado,
   signal?: AbortSignal,
 ): Promise<Mascota[]> {
-  return http.get<Mascota[]>(`/api/clientes/${clienteId}/mascotas`, signal);
+  const qs = estado != null ? `?estado=${estado}` : "";
+  return http.get<Mascota[]>(`/api/clientes/${clienteId}/mascotas${qs}`, signal);
+}
+
+/** Activa o desactiva un cliente (baja lógica). */
+export function cambiarEstadoCliente(clienteId: string, activar: boolean): Promise<unknown> {
+  return http.post(`/api/clientes/${clienteId}/estado`, { activar });
+}
+
+/** Activa o desactiva una mascota (baja lógica). */
+export function cambiarEstadoMascota(mascotaId: string, activar: boolean): Promise<unknown> {
+  return http.post(`/api/mascotas/${mascotaId}/estado`, { activar });
 }
 
 /** Registro rápido: crea cliente + su primera mascota en una sola operación. */

@@ -5,18 +5,20 @@ import { ApiError } from "@/lib/http";
 import type { AgendarCitaRequest } from "@/types/api";
 import { useAgendarCita } from "../hooks";
 import { SelectorMascota } from "./SelectorMascota";
+import { SelectorVeterinario } from "./SelectorVeterinario";
 
 interface Props {
   open: boolean;
   onClose: () => void;
 }
 
-/** Modal para agendar una cita: selecciona mascota, fecha/hora y motivo. */
+/** Modal para agendar una cita: mascota, responsable, fecha/hora y motivo. */
 export function AgendarCitaModal({ open, onClose }: Props) {
   const veterinariaId = useVeterinariaId();
   const agendar = useAgendarCita();
 
   const [mascotaId, setMascotaId] = useState<string | null>(null);
+  const [veterinarioId, setVeterinarioId] = useState("");
   const [fechaHora, setFechaHora] = useState("");
   const [motivo, setMotivo] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -31,13 +33,14 @@ export function AgendarCitaModal({ open, onClose }: Props) {
     const body: AgendarCitaRequest = {
       veterinariaId,
       mascotaId,
-      // El input datetime-local da hora local; el backend espera ISO.
       fechaHora: new Date(fechaHora).toISOString(),
       motivo: motivo.trim(),
+      veterinarioId: veterinarioId || null,
     };
     try {
       await agendar.mutateAsync(body);
       setMascotaId(null);
+      setVeterinarioId("");
       setFechaHora("");
       setMotivo("");
       onClose();
@@ -52,6 +55,7 @@ export function AgendarCitaModal({ open, onClose }: Props) {
     <Modal open={open} onClose={onClose} title="Agendar cita">
       <form onSubmit={enviar} className="space-y-4">
         <SelectorMascota onSelect={setMascotaId} />
+        <SelectorVeterinario value={veterinarioId} onChange={setVeterinarioId} />
         <Input
           label="Fecha y hora"
           type="datetime-local"

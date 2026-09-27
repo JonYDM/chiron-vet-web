@@ -72,6 +72,27 @@ export function ExpedientePage() {
                         </span>
                       </div>
                       <p className="mt-1.5 text-ink">{r.descripcion}</p>
+                      {r.diagnostico && (
+                        <p className="mt-1 text-sm text-ink-soft">
+                          <span className="font-medium text-ink">Diagnóstico:</span>{" "}
+                          {r.diagnostico}
+                        </p>
+                      )}
+                      {r.tratamiento && (
+                        <p className="mt-1 text-sm text-ink-soft">
+                          <span className="font-medium text-ink">Tratamiento:</span>{" "}
+                          {r.tratamiento}
+                        </p>
+                      )}
+                      {(r.pesoKg != null || r.temperaturaC != null) && (
+                        <p className="mt-1 text-sm text-ink-soft">
+                          {r.pesoKg != null && <>Peso: {r.pesoKg} kg&nbsp;&nbsp;</>}
+                          {r.temperaturaC != null && <>Temp: {r.temperaturaC} °C</>}
+                        </p>
+                      )}
+                      {r.notas && (
+                        <p className="mt-1 text-sm italic text-ink-soft">{r.notas}</p>
+                      )}
                       {r.fechaProximaAplicacion && (
                         <p className="mt-1.5 flex items-center gap-1.5 text-sm text-[#9A6A00]">
                           <CalendarClock className="h-4 w-4" aria-hidden />

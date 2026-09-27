@@ -15,7 +15,7 @@ interface Props {
 
 const hoyISO = () => new Date().toISOString().slice(0, 10);
 
-/** Modal para agregar una entrada al expediente médico. */
+/** Modal para agregar una entrada al expediente médico, con detalle clínico opcional. */
 export function AgregarRegistroModal({ open, onClose, mascotaId }: Props) {
   const veterinariaId = useVeterinariaId();
   const agregar = useAgregarRegistro(mascotaId);
@@ -24,12 +24,26 @@ export function AgregarRegistroModal({ open, onClose, mascotaId }: Props) {
   const [fecha, setFecha] = useState(hoyISO());
   const [descripcion, setDescripcion] = useState("");
   const [proxima, setProxima] = useState("");
+  const [diagnostico, setDiagnostico] = useState("");
+  const [tratamiento, setTratamiento] = useState("");
+  const [peso, setPeso] = useState("");
+  const [temperatura, setTemperatura] = useState("");
+  const [notas, setNotas] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  // La próxima aplicación solo aplica a vacunas/desparasitaciones.
   const requiereProxima =
     tipo === TipoRegistroMedico.Vacuna ||
     tipo === TipoRegistroMedico.Desparasitacion;
+
+  function limpiar() {
+    setDescripcion("");
+    setProxima("");
+    setDiagnostico("");
+    setTratamiento("");
+    setPeso("");
+    setTemperatura("");
+    setNotas("");
+  }
 
   async function enviar(e: FormEvent) {
     e.preventDefault();
@@ -41,11 +55,15 @@ export function AgregarRegistroModal({ open, onClose, mascotaId }: Props) {
       fecha,
       descripcion: descripcion.trim(),
       fechaProximaAplicacion: requiereProxima && proxima ? proxima : null,
+      diagnostico: diagnostico.trim() || null,
+      tratamiento: tratamiento.trim() || null,
+      pesoKg: peso ? Number(peso) : null,
+      temperaturaC: temperatura ? Number(temperatura) : null,
+      notas: notas.trim() || null,
     };
     try {
       await agregar.mutateAsync(body);
-      setDescripcion("");
-      setProxima("");
+      limpiar();
       onClose();
     } catch (err) {
       setError(
@@ -74,9 +92,10 @@ export function AgregarRegistroModal({ open, onClose, mascotaId }: Props) {
           label="Descripción"
           value={descripcion}
           onChange={(e) => setDescripcion(e.target.value)}
-          placeholder="ej: Vacuna antirrábica"
+          placeholder="ej: Vacuna antirrábica / Consulta general"
           required
         />
+
         {requiereProxima && (
           <Input
             label="Próxima aplicación (opcional)"
@@ -86,6 +105,48 @@ export function AgregarRegistroModal({ open, onClose, mascotaId }: Props) {
             hint="Genera un recordatorio automático"
           />
         )}
+
+        {/* Detalle clínico (opcional) */}
+        <div className="rounded-xl bg-canvas p-3">
+          <p className="mb-3 text-sm font-semibold text-ink-soft">
+            Detalle clínico (opcional)
+          </p>
+          <div className="space-y-3">
+            <Input
+              label="Diagnóstico"
+              value={diagnostico}
+              onChange={(e) => setDiagnostico(e.target.value)}
+            />
+            <Input
+              label="Tratamiento administrado"
+              value={tratamiento}
+              onChange={(e) => setTratamiento(e.target.value)}
+              placeholder="Medicamento, dosis, indicaciones"
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                label="Peso (kg)"
+                type="number"
+                step="0.01"
+                min="0"
+                value={peso}
+                onChange={(e) => setPeso(e.target.value)}
+              />
+              <Input
+                label="Temperatura (°C)"
+                type="number"
+                step="0.1"
+                value={temperatura}
+                onChange={(e) => setTemperatura(e.target.value)}
+              />
+            </div>
+            <Input
+              label="Notas"
+              value={notas}
+              onChange={(e) => setNotas(e.target.value)}
+            />
+          </div>
+        </div>
 
         {error && (
           <p role="alert" className="rounded-xl bg-danger/10 px-4 py-3 text-sm text-danger">

@@ -1,10 +1,11 @@
-import { type ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { LogOut, PawPrint } from "lucide-react";
+import { KeyRound, LogOut, PawPrint } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useAuth } from "@/features/auth";
 import { rolLabel } from "@/lib/enums";
 import { itemsVisibles, type NavItem } from "@/app/navigation";
+import { CambiarMiPinModal } from "@/features/usuarios";
 
 interface AppShellProps {
   /** Ítems de navegación del área (staff, portal o admin). */
@@ -24,6 +25,7 @@ export function AppShell({ nav, titulo, children }: AppShellProps) {
   const { sesion, cerrarSesion } = useAuth();
   const rol = sesion?.rol;
   const items = rol ? itemsVisibles(nav, rol) : [];
+  const [pinAbierto, setPinAbierto] = useState(false);
 
   return (
     <div className="min-h-full md:grid md:grid-cols-[260px_1fr]">
@@ -68,6 +70,13 @@ export function AppShell({ nav, titulo, children }: AppShellProps) {
               </p>
               <p className="text-xs text-ink-soft">{rolLabel[sesion.rol]}</p>
             </div>
+            <button
+              onClick={() => setPinAbierto(true)}
+              className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-ink-soft transition-colors hover:bg-hairline/50 hover:text-ink"
+            >
+              <KeyRound className="h-5 w-5" aria-hidden />
+              Cambiar mi PIN
+            </button>
             <button
               onClick={cerrarSesion}
               className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-ink-soft transition-colors hover:bg-danger/10 hover:text-danger"
@@ -123,6 +132,8 @@ export function AppShell({ nav, titulo, children }: AppShellProps) {
           ))}
         </nav>
       </div>
+
+      <CambiarMiPinModal open={pinAbierto} onClose={() => setPinAbierto(false)} />
     </div>
   );
 }

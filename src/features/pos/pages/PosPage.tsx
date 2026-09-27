@@ -1,21 +1,25 @@
 import { useMemo, useState } from "react";
-import { Minus, Plus, ShoppingCart, Trash2, Package } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Minus, Plus, Receipt, Settings2, ShoppingCart, Trash2, Package } from "lucide-react";
 import { PageHeader } from "@/components/molecules/PageHeader";
 import {
   Badge,
   Button,
   Card,
   CardContent,
+  Select,
   Spinner,
 } from "@/components/ui";
 import { useAuth } from "@/features/auth";
 import { useVeterinariaId } from "@/features/auth/useVeterinariaId";
+import { useClientes } from "@/features/clientes/hooks";
 import { ApiError } from "@/lib/http";
 import { categoriaProductoLabel } from "@/lib/enums";
 import { formatCurrency } from "@/lib/format";
 import { RolUsuario, type Producto } from "@/types/api";
 import { useCatalogo, useRegistrarVenta } from "../hooks";
 import { AgregarProductoModal } from "../components/AgregarProductoModal";
+import { EditarProductoModal } from "../components/EditarProductoModal";
 
 interface LineaCarrito {
   producto: Producto;
@@ -31,10 +35,13 @@ export function PosPage() {
 
   const [carrito, setCarrito] = useState<Record<string, LineaCarrito>>({});
   const [modalProducto, setModalProducto] = useState(false);
+  const [editando, setEditando] = useState<Producto | null>(null);
+  const [clienteId, setClienteId] = useState<string>("");
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const esAdmin = sesion?.rol === RolUsuario.Administrador;
+  const { data: clientes } = useClientes();
 
   const lineas = Object.values(carrito);
   const total = useMemo(
@@ -68,6 +75,7 @@ export function PosPage() {
     try {
       const resp = await registrarVenta.mutateAsync({
         veterinariaId,
+        clienteId: clienteId || null,
         items: lineas.map((l) => ({
           productoId: l.producto.id,
           cantidad: l.cantidad,
@@ -75,6 +83,7 @@ export function PosPage() {
       });
       setMensaje(`Venta registrada por ${formatCurrency(resp.total)} 🎉`);
       setCarrito({});
+      setClienteId("");
     } catch (err) {
       setError(
         err instanceof ApiError ? err.message : "No se pudo registrar la venta.",
@@ -89,10 +98,18 @@ export function PosPage() {
         descripcion="Selecciona productos y registra la venta"
         accion={
           esAdmin ? (
-            <Button variant="secondary" onClick={() => setModalProducto(true)}>
-              <Plus className="h-4 w-4" aria-hidden />
-              Producto
-            </Button>
+            <div className="flex gap-2">
+              <Link to="/app/ventas">
+                <Button variant="ghost">
+                  <Receipt className="h-4 w-4" aria-hidden />
+                  Historial
+                </Button>
+              </Link>
+              <Button variant="secondary" onClick={() => setModalProducto(true)}>
+                <Plus className="h-4 w-4" aria-hidden />
+                Producto
+              </Button>
+            </div>
           ) : undefined
         }
       />
@@ -130,14 +147,26 @@ export function PosPage() {
                         <span className="font-bold text-ink">
                           {formatCurrency(p.precio)}
                         </span>
-                        <Button
-                          size="sm"
-                          onClick={() => agregar(p)}
-                          disabled={agotado}
-                        >
-                          <Plus className="h-4 w-4" aria-hidden />
-                          Agregar
-                        </Button>
+                        <div className="flex gap-1.5">
+                          {esAdmin && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setEditando(p)}
+                              aria-label={`Editar ${p.nombre}`}
+                            >
+                              <Settings2 className="h-4 w-4" aria-hidden />
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            onClick={() => agregar(p)}
+                            disabled={agotado}
+                          >
+                            <Plus className="h-4 w-4" aria-hidden />
+                            Agregar
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -218,6 +247,18 @@ export function PosPage() {
                 </ul>
               )}
 
+              <div className="mt-4">
+                <Select
+                  label="Cliente (opcional)"
+                  value={clienteId}
+                  onChange={(e) => setClienteId(e.target.value)}
+                  options={[
+                    { value: "", label: "Público en general" },
+                    ...(clientes ?? []).map((c) => ({ value: c.id, label: c.nombre })),
+                  ]}
+                />
+              </div>
+
               <div className="mt-4 flex items-center justify-between border-t border-hairline pt-3">
                 <span className="text-ink-soft">Total</span>
                 <span className="text-xl font-bold text-ink">
@@ -261,6 +302,13 @@ export function PosPage() {
         <AgregarProductoModal
           open={modalProducto}
           onClose={() => setModalProducto(false)}
+        />
+      )}
+      {esAdmin && editando && (
+        <EditarProductoModal
+          open={!!editando}
+          onClose={() => setEditando(null)}
+          producto={editando}
         />
       )}
     </div>

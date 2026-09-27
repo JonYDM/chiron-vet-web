@@ -1,6 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useVeterinariaId } from "@/features/auth/useVeterinariaId";
-import { buscarClientes, crearAccesoDueno, listarMascotas, registroRapido } from "./api";
+import {
+  agregarMascota,
+  buscarClientes,
+  crearAccesoDueno,
+  crearCliente,
+  editarCliente,
+  editarMascota,
+  listarMascotas,
+  registroRapido,
+  type DatosMascota,
+} from "./api";
 import type { RegistroRapidoRequest } from "@/types/api";
 
 /** Lista/busca clientes de la veterinaria actual. */
@@ -45,5 +55,57 @@ export function useCrearAccesoDueno() {
         queryKey: ["usuarios", "cliente", variables.clienteId],
       });
     },
+  });
+}
+
+/** Crea solo un cliente e invalida la lista. */
+export function useCrearCliente() {
+  const queryClient = useQueryClient();
+  const veterinariaId = useVeterinariaId();
+  return useMutation({
+    mutationFn: (body: { nombre: string; telefono: string; origen: number }) =>
+      crearCliente(body),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["clientes", veterinariaId] }),
+  });
+}
+
+/** Edita un cliente e invalida la lista. */
+export function useEditarCliente() {
+  const queryClient = useQueryClient();
+  const veterinariaId = useVeterinariaId();
+  return useMutation({
+    mutationFn: ({
+      clienteId,
+      ...body
+    }: {
+      clienteId: string;
+      nombre: string;
+      telefono: string;
+      origen: number;
+    }) => editarCliente(clienteId, body),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["clientes", veterinariaId] }),
+  });
+}
+
+/** Agrega una mascota a un cliente e invalida sus mascotas. */
+export function useAgregarMascota() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ clienteId, datos }: { clienteId: string; datos: DatosMascota }) =>
+      agregarMascota(clienteId, datos),
+    onSuccess: (_data, variables) =>
+      queryClient.invalidateQueries({ queryKey: ["mascotas", variables.clienteId] }),
+  });
+}
+
+/** Edita una mascota e invalida las listas de mascotas. */
+export function useEditarMascota() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ mascotaId, datos }: { mascotaId: string; datos: DatosMascota }) =>
+      editarMascota(mascotaId, datos),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["mascotas"] }),
   });
 }

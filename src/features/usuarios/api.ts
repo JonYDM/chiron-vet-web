@@ -21,6 +21,19 @@ export function resetearPin(usuarioId: string, nuevoPin: string): Promise<unknow
   return http.post(`/api/usuarios/${usuarioId}/resetear-pin`, { nuevoPin });
 }
 
+/** Cambia el PIN del usuario autenticado (autoservicio). */
+export function cambiarMiPin(pinActual: string, nuevoPin: string): Promise<unknown> {
+  return http.post("/api/mi-pin", { pinActual, nuevoPin });
+}
+
+/** Edita nombre y/o activa-desactiva un usuario (Admin/SuperAdmin). */
+export function gestionarUsuario(
+  usuarioId: string,
+  body: { nuevoNombre?: string | null; accion?: 1 | 2 | null },
+): Promise<unknown> {
+  return http.post(`/api/usuarios/${usuarioId}/gestionar`, body);
+}
+
 /**
  * Obtiene el usuario (acceso al portal) de un cliente, o null si no tiene acceso.
  * El backend devuelve 204 (sin contenido) cuando el cliente no tiene usuario.

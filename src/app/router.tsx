@@ -39,6 +39,9 @@ const CitasPage = lazy(() =>
 const PosPage = lazy(() =>
   import("@/features/pos").then((m) => ({ default: m.PosPage })),
 );
+const HistorialVentasPage = lazy(() =>
+  import("@/features/pos").then((m) => ({ default: m.HistorialVentasPage })),
+);
 const MisMascotasPage = lazy(() =>
   import("@/features/portal").then((m) => ({ default: m.MisMascotasPage })),
 );
@@ -109,6 +112,14 @@ const router = createBrowserRouter([
       { path: "mascotas/:mascotaId", element: <ExpedientePage /> },
       { path: "citas", element: <CitasPage /> },
       { path: "pos", element: <PosPage /> },
+      {
+        path: "ventas",
+        element: (
+          <ProtectedRoute roles={[RolUsuario.Administrador]}>
+            <HistorialVentasPage />
+          </ProtectedRoute>
+        ),
+      },
       { path: "recordatorios", element: <EnConstruccion titulo="Recordatorios" /> },
       {
         path: "equipo",

@@ -16,3 +16,11 @@ export function proximasCitas(
 export function agendarCita(body: AgendarCitaRequest): Promise<string> {
   return http.post<string>("/api/citas", body);
 }
+
+/** Acción sobre una cita (coincide con el enum AccionCita del backend). */
+export type AccionCita = 1 | 2 | 3; // 1=Atender, 2=Cancelar, 3=NoAsistio
+
+/** Cambia el estado de una cita. */
+export function cambiarEstadoCita(citaId: string, accion: AccionCita): Promise<unknown> {
+  return http.post(`/api/citas/${citaId}/estado`, { accion });
+}

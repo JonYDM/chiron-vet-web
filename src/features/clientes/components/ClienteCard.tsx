@@ -1,6 +1,13 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ChevronDown, KeyRound, PawPrint, Phone } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  ChevronDown,
+  KeyRound,
+  PawPrint,
+  Pencil,
+  Phone,
+  Plus,
+} from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Badge, Button, Card, Spinner } from "@/components/ui";
 import { especieLabel } from "@/lib/enums";
@@ -8,41 +15,57 @@ import { useUsuarioDeCliente } from "@/features/usuarios/hooks";
 import { ResetearPinModal } from "@/features/usuarios";
 import { useMascotas } from "../hooks";
 import { DarAccesoModal } from "./DarAccesoModal";
-import type { Cliente } from "@/types/api";
+import { EditarClienteModal } from "./EditarClienteModal";
+import { MascotaModal } from "./MascotaModal";
+import type { Cliente, Mascota } from "@/types/api";
 
-/** Tarjeta de cliente: al expandir, carga sus mascotas y su estado de acceso al portal. */
+/** Tarjeta de cliente con acciones: editar, mascotas (agregar/editar), acceso al portal. */
 export function ClienteCard({ cliente }: { cliente: Cliente }) {
+  const navigate = useNavigate();
   const [abierto, setAbierto] = useState(false);
   const [accesoAbierto, setAccesoAbierto] = useState(false);
   const [resetAbierto, setResetAbierto] = useState(false);
+  const [editarClienteAbierto, setEditarClienteAbierto] = useState(false);
+  const [mascotaNueva, setMascotaNueva] = useState(false);
+  const [mascotaEditar, setMascotaEditar] = useState<Mascota | null>(null);
+
   const { data: mascotas, isLoading } = useMascotas(abierto ? cliente.id : null);
-  // Consulta si el cliente ya tiene acceso al portal (usuario dueño).
   const { data: usuario, isLoading: cargandoUsuario } = useUsuarioDeCliente(
     abierto ? cliente.id : null,
   );
 
   return (
     <Card>
-      <button
-        onClick={() => setAbierto((v) => !v)}
-        aria-expanded={abierto}
-        className="flex w-full items-center justify-between gap-3 p-4 text-left"
-      >
-        <div className="min-w-0">
-          <p className="truncate font-semibold text-ink">{cliente.nombre}</p>
-          <p className="flex items-center gap-1.5 text-sm text-ink-soft">
-            <Phone className="h-3.5 w-3.5" aria-hidden />
-            {cliente.telefono}
-          </p>
-        </div>
-        <ChevronDown
-          className={cn(
-            "h-5 w-5 shrink-0 text-ink-soft transition-transform",
-            abierto && "rotate-180",
-          )}
-          aria-hidden
-        />
-      </button>
+      <div className="flex items-center gap-2 p-4">
+        <button
+          onClick={() => setAbierto((v) => !v)}
+          aria-expanded={abierto}
+          className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left"
+        >
+          <div className="min-w-0">
+            <p className="truncate font-semibold text-ink">{cliente.nombre}</p>
+            <p className="flex items-center gap-1.5 text-sm text-ink-soft">
+              <Phone className="h-3.5 w-3.5" aria-hidden />
+              {cliente.telefono}
+            </p>
+          </div>
+          <ChevronDown
+            className={cn(
+              "h-5 w-5 shrink-0 text-ink-soft transition-transform",
+              abierto && "rotate-180",
+            )}
+            aria-hidden
+          />
+        </button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setEditarClienteAbierto(true)}
+          aria-label="Editar cliente"
+        >
+          <Pencil className="h-4 w-4" aria-hidden />
+        </Button>
+      </div>
 
       {abierto && (
         <div className="space-y-3 border-t border-hairline p-4">
@@ -51,17 +74,27 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
           ) : mascotas && mascotas.length > 0 ? (
             <ul className="space-y-2">
               {mascotas.map((m) => (
-                <li key={m.id}>
-                  <Link
-                    to={`/app/mascotas/${m.id}`}
-                    className="flex items-center justify-between gap-3 rounded-xl bg-canvas p-3 transition-colors hover:bg-primary-50"
+                <li
+                  key={m.id}
+                  className="flex items-center justify-between gap-3 rounded-xl bg-canvas p-3"
+                >
+                  <button
+                    onClick={() => navigate(`/app/mascotas/${m.id}`)}
+                    className="flex min-w-0 flex-1 items-center gap-2 text-left"
                   >
-                    <span className="flex items-center gap-2">
-                      <PawPrint className="h-4 w-4 text-primary" aria-hidden />
-                      <span className="font-medium text-ink">{m.nombre}</span>
-                    </span>
+                    <PawPrint className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+                    <span className="truncate font-medium text-ink">{m.nombre}</span>
+                  </button>
+                  <div className="flex items-center gap-2">
                     <Badge tone="neutral">{especieLabel[m.especie]}</Badge>
-                  </Link>
+                    <button
+                      onClick={() => setMascotaEditar(m)}
+                      aria-label={`Editar ${m.nombre}`}
+                      className="text-ink-soft hover:text-ink"
+                    >
+                      <Pencil className="h-4 w-4" aria-hidden />
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -71,7 +104,12 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
             </p>
           )}
 
-          {/* Acceso al portal: mostrar según si ya tiene usuario. */}
+          <Button variant="ghost" size="sm" fullWidth onClick={() => setMascotaNueva(true)}>
+            <Plus className="h-4 w-4" aria-hidden />
+            Agregar mascota
+          </Button>
+
+          {/* Acceso al portal */}
           {cargandoUsuario ? (
             <Spinner label="Verificando acceso…" />
           ) : usuario ? (
@@ -101,6 +139,25 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
         </div>
       )}
 
+      {/* Modales */}
+      <EditarClienteModal
+        open={editarClienteAbierto}
+        onClose={() => setEditarClienteAbierto(false)}
+        cliente={cliente}
+      />
+      <MascotaModal
+        open={mascotaNueva}
+        onClose={() => setMascotaNueva(false)}
+        clienteId={cliente.id}
+      />
+      {mascotaEditar && (
+        <MascotaModal
+          open={!!mascotaEditar}
+          onClose={() => setMascotaEditar(null)}
+          clienteId={cliente.id}
+          mascota={mascotaEditar}
+        />
+      )}
       <DarAccesoModal
         open={accesoAbierto}
         onClose={() => setAccesoAbierto(false)}

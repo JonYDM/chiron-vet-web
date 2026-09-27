@@ -1,14 +1,16 @@
 import { useState } from "react";
-import { KeyRound, ShieldCheck } from "lucide-react";
+import { KeyRound, Settings2, ShieldCheck } from "lucide-react";
 import { Badge, Button, Card, CardContent, Spinner } from "@/components/ui";
 import { useAdministradores } from "@/features/usuarios/hooks";
 import { ResetearPinModal } from "@/features/usuarios";
+import { GestionarUsuarioModal } from "@/features/usuarios/components/GestionarUsuarioModal";
 import type { UsuarioDto } from "@/types/api";
 
-/** Lista de Administradores con acción de resetear PIN (para el SuperAdmin). */
+/** Lista de Administradores con acciones: resetear PIN, editar/activar-desactivar (SuperAdmin). */
 export function AdministradoresSection() {
   const { data: admins, isLoading, isError } = useAdministradores();
   const [reset, setReset] = useState<UsuarioDto | null>(null);
+  const [gestion, setGestion] = useState<UsuarioDto | null>(null);
 
   return (
     <section className="mt-8">
@@ -41,6 +43,14 @@ export function AdministradoresSection() {
                   <KeyRound className="h-4 w-4" aria-hidden />
                   PIN
                 </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setGestion(a)}
+                  aria-label={`Gestionar ${a.nombre}`}
+                >
+                  <Settings2 className="h-4 w-4" aria-hidden />
+                </Button>
               </CardContent>
             </Card>
           ))}
@@ -59,6 +69,13 @@ export function AdministradoresSection() {
           onClose={() => setReset(null)}
           usuarioId={reset.id}
           nombre={reset.nombre}
+        />
+      )}
+      {gestion && (
+        <GestionarUsuarioModal
+          open={!!gestion}
+          onClose={() => setGestion(null)}
+          usuario={gestion}
         />
       )}
     </section>

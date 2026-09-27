@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button, Modal } from "@/components/ui";
 import { PinInput } from "@/components/molecules/PinInput";
 import { ApiError } from "@/lib/http";
@@ -26,6 +27,7 @@ export function DarAccesoModal({
   clienteTelefono,
 }: Props) {
   const crear = useCrearAccesoDueno();
+  const queryClient = useQueryClient();
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState(false);
@@ -37,11 +39,16 @@ export function DarAccesoModal({
       await crear.mutateAsync({ clienteId, pin });
       setOk(true);
     } catch (err) {
-      setError(
+      // Si falla (p. ej. el cliente ya tiene acceso), refrescamos su estado para
+      // que la tarjeta muestre "Con acceso" y desaparezca el botón de dar acceso.
+      queryClient.invalidateQueries({ queryKey: ["usuarios", "cliente", clienteId] });
+      const msg =
         err instanceof ApiError
-          ? err.message
-          : "No se pudo crear el acceso. Intenta de nuevo.",
-      );
+          ? err.status === 403
+            ? "No se pudo crear el acceso. Puede que este cliente ya tenga acceso o no tengas permiso."
+            : err.message
+          : "No se pudo crear el acceso. Intenta de nuevo.";
+      setError(msg);
       setPin("");
     }
   }

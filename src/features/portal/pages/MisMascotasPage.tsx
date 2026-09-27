@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ChevronRight, PawPrint } from "lucide-react";
 import { PageHeader } from "@/components/molecules/PageHeader";
+import { EmptyState } from "@/components/molecules/EmptyState";
 import { Badge, Card, CardContent, Spinner } from "@/components/ui";
 import { especieLabel, sexoLabel } from "@/lib/enums";
 import { edadEnAnios } from "@/lib/format";
@@ -61,18 +62,10 @@ export function MisMascotasPage() {
           })}
         </div>
       ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <div className="grid h-14 w-14 place-items-center rounded-2xl bg-hairline text-ink-soft">
-              <PawPrint className="h-7 w-7" aria-hidden />
-            </div>
-            <p className="font-semibold text-ink">Sin mascotas</p>
-            <p className="max-w-xs text-sm text-ink-soft">
-              Aún no tienes mascotas registradas. Pídele a tu veterinaria que las
-              agregue.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          titulo="Sin mascotas"
+          descripcion="Aún no tienes mascotas registradas. Pídele a tu veterinaria que las agregue 🐾"
+        />
       )}
     </div>
   );

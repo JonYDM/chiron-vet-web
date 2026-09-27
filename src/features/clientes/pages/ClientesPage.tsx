@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Plus, Search, UserX } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { PageHeader } from "@/components/molecules/PageHeader";
 import { FiltroEstadoTabs } from "@/components/molecules/FiltroEstadoTabs";
 import { Paginacion } from "@/components/molecules/Paginacion";
-import { Button, Card, CardContent, Input, Spinner } from "@/components/ui";
+import { EmptyState } from "@/components/molecules/EmptyState";
+import { Button, Card, CardContent, Input, SkeletonFila } from "@/components/ui";
+import { Reveal } from "@/lib/anim";
 import { useDebounce } from "@/lib/useDebounce";
 import { FiltroEstado } from "@/types/api";
 import { useClientes } from "../hooks";
@@ -67,8 +69,10 @@ export function ClientesPage() {
       </div>
 
       {isLoading ? (
-        <div className="grid place-items-center py-12">
-          <Spinner label="Cargando clientes…" />
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonFila key={i} />
+          ))}
         </div>
       ) : isError ? (
         <Card>
@@ -78,11 +82,11 @@ export function ClientesPage() {
         </Card>
       ) : clientes.length > 0 ? (
         <>
-          <div className="space-y-3">
+          <Reveal stagger className="space-y-3">
             {clientes.map((c) => (
               <ClienteCard key={c.id} cliente={c} />
             ))}
-          </div>
+          </Reveal>
           {data && (
             <Paginacion
               pagina={data.pagina}
@@ -92,19 +96,14 @@ export function ClientesPage() {
           )}
         </>
       ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <div className="grid h-14 w-14 place-items-center rounded-2xl bg-hairline text-ink-soft">
-              <UserX className="h-7 w-7" aria-hidden />
-            </div>
-            <p className="font-semibold text-ink">Sin clientes</p>
-            <p className="max-w-xs text-sm text-ink-soft">
-              {textoBuscado
-                ? "No hay resultados para tu búsqueda."
-                : "Aún no hay clientes. Registra el primero."}
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          titulo="Sin clientes"
+          descripcion={
+            textoBuscado
+              ? "No hay resultados para tu búsqueda."
+              : "Aún no hay clientes. Registra el primero 🐾"
+          }
+        />
       )}
 
       <RegistroRapidoModal

@@ -1,9 +1,12 @@
 import { useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/features/auth/AuthContext";
+import { ToastProvider } from "@/components/feedback/ToastProvider";
+import { ConfirmProvider } from "@/components/feedback/ConfirmProvider";
 
 /**
- * Providers globales de la app: TanStack Query (estado de servidor) + Auth.
+ * Providers globales de la app: TanStack Query (estado de servidor) + Auth +
+ * feedback (toasts y confirmaciones).
  * El QueryClient se crea una sola vez con useState para que sea estable.
  */
 export function Providers({ children }: { children: ReactNode }) {
@@ -22,7 +25,11 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>{children}</AuthProvider>
+      <ToastProvider>
+        <ConfirmProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ConfirmProvider>
+      </ToastProvider>
     </QueryClientProvider>
   );
 }

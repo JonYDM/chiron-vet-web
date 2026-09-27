@@ -5,6 +5,7 @@ import { ApiError } from "@/lib/http";
 import { opcionesDeEnum } from "@/lib/opciones";
 import { tipoRegistroLabel } from "@/lib/enums";
 import { TipoRegistroMedico, type AgregarRegistroMedicoRequest } from "@/types/api";
+import { SelectorVeterinario } from "@/features/citas/components/SelectorVeterinario";
 import { useAgregarRegistro } from "../hooks";
 
 interface Props {
@@ -29,6 +30,7 @@ export function AgregarRegistroModal({ open, onClose, mascotaId }: Props) {
   const [peso, setPeso] = useState("");
   const [temperatura, setTemperatura] = useState("");
   const [notas, setNotas] = useState("");
+  const [atendidoPorId, setAtendidoPorId] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const requiereProxima =
@@ -60,6 +62,7 @@ export function AgregarRegistroModal({ open, onClose, mascotaId }: Props) {
       pesoKg: peso ? Number(peso) : null,
       temperaturaC: temperatura ? Number(temperatura) : null,
       notas: notas.trim() || null,
+      atendidoPorId: atendidoPorId || null,
     };
     try {
       await agregar.mutateAsync(body);
@@ -144,6 +147,11 @@ export function AgregarRegistroModal({ open, onClose, mascotaId }: Props) {
               label="Notas"
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
+            />
+            <SelectorVeterinario
+              value={atendidoPorId}
+              onChange={setAtendidoPorId}
+              label="Atendido por (opcional)"
             />
           </div>
         </div>

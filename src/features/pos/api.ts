@@ -5,6 +5,7 @@ import type {
   RegistrarVentaRequest,
   VentaResponse,
   VentaHistorial,
+  ResumenVentas,
 } from "@/types/api";
 
 /** Historial de ventas de la veterinaria (Admin), rango de fechas opcional. */
@@ -30,6 +31,23 @@ export function listarVentasDeCliente(
   signal?: AbortSignal,
 ): Promise<VentaHistorial[]> {
   return http.get<VentaHistorial[]>(`/api/clientes/${clienteId}/ventas`, signal);
+}
+
+/** Resumen de ventas de un período (total, conteo, desglose por método). */
+export function resumenVentas(
+  veterinariaId: string,
+  desde?: string,
+  hasta?: string,
+  signal?: AbortSignal,
+): Promise<ResumenVentas> {
+  const params = new URLSearchParams();
+  if (desde) params.set("desde", desde);
+  if (hasta) params.set("hasta", hasta);
+  const qs = params.toString() ? `?${params.toString()}` : "";
+  return http.get<ResumenVentas>(
+    `/api/veterinarias/${veterinariaId}/ventas/resumen${qs}`,
+    signal,
+  );
 }
 
 /** Catálogo de productos de la veterinaria. */

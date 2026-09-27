@@ -15,6 +15,20 @@ Casi todo el backlog de mejoras quedó **implementado full-stack** en dos tandas
 > El backend va por Pull Request porque `main` está protegida con ruleset. El usuario compila
 > con `dotnet build` y mergea los PRs; luego Railway despliega y el frontend queda 100% funcional.
 
+### Cierre de MVP con calidad (tanda "crud-completo")
+Rama backend `feature/crud-completo` + frontend `feature/crud-completo-ui`. Todo el
+procesamiento (filtros, paginación, búsqueda, cálculos) se hace **server-side**.
+- **Baja lógica** de cliente/mascota (campo `Activo`) + reactivar, con **filtros de estado**
+  (Activos/Inactivos/Todos) en todos los listados.
+- **Paginación y búsqueda** server-side de clientes (`ResultadoPaginado`).
+- **Ventas:** método de pago (Efectivo/Tarjeta/Transferencia), cálculo de **vuelto**,
+  **filtro por mes** y **resumen** (total + desglose por método) — todo en el servidor.
+- **Responsable:** `VeterinarioId` en la cita y `AtendidoPorId` en consulta/cirugía.
+- **Dashboard con métricas reales** (ventas hoy/mes, citas próximas, clientes activos).
+- **UX:** toasts globales, confirmaciones en acciones destructivas, recibo de venta.
+- Migración EF requerida (columnas nuevas: Activo, VeterinarioId, AtendidoPorId, MetodoPago,
+  MontoRecibido, Cambio).
+
 ---
 
 ## ✅ Implementado
@@ -86,4 +100,9 @@ migración al desplegar si el proyecto la incluye.
 ### Otros
 - Notificaciones push web (PWA + Web Push) — requiere endpoint de suscripciones.
 - Integración real de WhatsApp (feature futura).
+- **Ficha de mascota** (encabezado con datos clínicos sobre el expediente): pendiente; requiere
+  un endpoint `GET /api/mascotas/{id}` que hoy no existe (solo se listan por cliente).
+- **Mostrar nombre del responsable** en cita/expediente: hoy se guarda el `VeterinarioId`/
+  `AtendidoPorId`; para mostrar el nombre conviene que los DTOs de Cita/RegistroMedico incluyan
+  el nombre resuelto, o consultarlo en el front.
 - Métricas/dashboard con datos reales (totales, próximos, etc.).

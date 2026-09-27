@@ -3,6 +3,8 @@ import { useVeterinariaId } from "@/features/auth/useVeterinariaId";
 import {
   agregarMascota,
   buscarClientes,
+  cambiarEstadoCliente,
+  cambiarEstadoMascota,
   crearAccesoDueno,
   crearCliente,
   editarCliente,
@@ -11,23 +13,56 @@ import {
   registroRapido,
   type DatosMascota,
 } from "./api";
-import type { RegistroRapidoRequest } from "@/types/api";
+import type { FiltroEstado, RegistroRapidoRequest } from "@/types/api";
 
-/** Lista/busca clientes de la veterinaria actual. */
-export function useClientes(texto?: string) {
+/** Lista/busca clientes (paginado + filtro de estado). */
+export function useClientes(opciones: {
+  texto?: string;
+  estado?: FiltroEstado;
+  pagina?: number;
+  tamano?: number;
+} = {}) {
   const veterinariaId = useVeterinariaId();
   return useQuery({
-    queryKey: ["clientes", veterinariaId, texto ?? ""],
-    queryFn: ({ signal }) => buscarClientes(veterinariaId, texto, signal),
+    queryKey: [
+      "clientes",
+      veterinariaId,
+      opciones.texto ?? "",
+      opciones.estado ?? "",
+      opciones.pagina ?? 1,
+    ],
+    queryFn: ({ signal }) => buscarClientes(veterinariaId, opciones, signal),
   });
 }
 
-/** Lista las mascotas de un cliente. */
-export function useMascotas(clienteId: string | null) {
+/** Lista las mascotas de un cliente (con filtro de estado). */
+export function useMascotas(clienteId: string | null, estado?: FiltroEstado) {
   return useQuery({
-    queryKey: ["mascotas", clienteId],
-    queryFn: ({ signal }) => listarMascotas(clienteId as string, signal),
+    queryKey: ["mascotas", clienteId, estado ?? ""],
+    queryFn: ({ signal }) => listarMascotas(clienteId as string, estado, signal),
     enabled: !!clienteId,
+  });
+}
+
+/** Activa o desactiva un cliente e invalida la lista. */
+export function useCambiarEstadoCliente() {
+  const queryClient = useQueryClient();
+  const veterinariaId = useVeterinariaId();
+  return useMutation({
+    mutationFn: ({ clienteId, activar }: { clienteId: string; activar: boolean }) =>
+      cambiarEstadoCliente(clienteId, activar),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["clientes", veterinariaId] }),
+  });
+}
+
+/** Activa o desactiva una mascota e invalida las mascotas del cliente. */
+export function useCambiarEstadoMascota() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ mascotaId, activar }: { mascotaId: string; activar: boolean }) =>
+      cambiarEstadoMascota(mascotaId, activar),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["mascotas"] }),
   });
 }
 

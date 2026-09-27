@@ -7,13 +7,16 @@ import {
   Pencil,
   Phone,
   Plus,
+  Power,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Badge, Button, Card, Spinner } from "@/components/ui";
 import { especieLabel } from "@/lib/enums";
 import { useUsuarioDeCliente } from "@/features/usuarios/hooks";
 import { ResetearPinModal } from "@/features/usuarios";
-import { useMascotas } from "../hooks";
+import { useMascotas, useCambiarEstadoCliente } from "../hooks";
+import { useConfirm } from "@/components/feedback/ConfirmProvider";
+import { useToast } from "@/components/feedback/ToastProvider";
 import { DarAccesoModal } from "./DarAccesoModal";
 import { EditarClienteModal } from "./EditarClienteModal";
 import { MascotaModal } from "./MascotaModal";
@@ -30,6 +33,28 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
   const [mascotaEditar, setMascotaEditar] = useState<Mascota | null>(null);
 
   const { data: mascotas, isLoading } = useMascotas(abierto ? cliente.id : null);
+  const cambiarEstado = useCambiarEstadoCliente();
+  const confirmar = useConfirm();
+  const toast = useToast();
+
+  async function alternarEstado() {
+    const desactivar = cliente.activo;
+    const ok = await confirmar({
+      titulo: desactivar ? "Desactivar cliente" : "Reactivar cliente",
+      mensaje: desactivar
+        ? `¿Dar de baja a ${cliente.nombre}? Su historial se conserva y podrás reactivarlo después.`
+        : `¿Reactivar a ${cliente.nombre}?`,
+      textoConfirmar: desactivar ? "Desactivar" : "Reactivar",
+      peligroso: desactivar,
+    });
+    if (!ok) return;
+    try {
+      await cambiarEstado.mutateAsync({ clienteId: cliente.id, activar: !cliente.activo });
+      toast.exito(desactivar ? "Cliente desactivado." : "Cliente reactivado.");
+    } catch {
+      toast.error("No se pudo cambiar el estado del cliente.");
+    }
+  }
   const { data: usuario, isLoading: cargandoUsuario } = useUsuarioDeCliente(
     abierto ? cliente.id : null,
   );
@@ -43,7 +68,10 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
           className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left"
         >
           <div className="min-w-0">
-            <p className="truncate font-semibold text-ink">{cliente.nombre}</p>
+            <p className="flex items-center gap-2 truncate font-semibold text-ink">
+              {cliente.nombre}
+              {!cliente.activo && <Badge tone="danger">Inactivo</Badge>}
+            </p>
             <p className="flex items-center gap-1.5 text-sm text-ink-soft">
               <Phone className="h-3.5 w-3.5" aria-hidden />
               {cliente.telefono}
@@ -57,6 +85,15 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
             aria-hidden
           />
         </button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={alternarEstado}
+          aria-label={cliente.activo ? "Desactivar cliente" : "Reactivar cliente"}
+          loading={cambiarEstado.isPending}
+        >
+          <Power className="h-4 w-4" aria-hidden />
+        </Button>
         <Button
           variant="ghost"
           size="sm"

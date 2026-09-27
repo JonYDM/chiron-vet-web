@@ -9,6 +9,7 @@ import {
   listarVentasDeCliente,
   reabastecerStock,
   registrarVenta,
+  resumenVentas,
 } from "./api";
 import type { AgregarProductoRequest, RegistrarVentaRequest } from "@/types/api";
 
@@ -99,6 +100,15 @@ export function useVentas(desde?: string, hasta?: string) {
   return useQuery({
     queryKey: ["ventas", veterinariaId, desde ?? "", hasta ?? ""],
     queryFn: ({ signal }) => listarVentas(veterinariaId, desde, hasta, signal),
+  });
+}
+
+/** Resumen de ventas de un período. */
+export function useResumenVentas(desde?: string, hasta?: string) {
+  const veterinariaId = useVeterinariaId();
+  return useQuery({
+    queryKey: ["ventas", "resumen", veterinariaId, desde ?? "", hasta ?? ""],
+    queryFn: ({ signal }) => resumenVentas(veterinariaId, desde, hasta, signal),
   });
 }
 

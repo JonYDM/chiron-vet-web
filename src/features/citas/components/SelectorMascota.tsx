@@ -13,7 +13,8 @@ interface Props {
  */
 export function SelectorMascota({ onSelect }: Props) {
   const [clienteId, setClienteId] = useState<string>("");
-  const { data: clientes } = useClientes();
+  const { data: clientesPag } = useClientes({ tamano: 100 });
+  const clientes = clientesPag?.items ?? [];
   const { data: mascotas } = useMascotas(clienteId || null);
 
   return (

@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
-import { Download, Receipt } from "lucide-react";
+import { Download } from "lucide-react";
 import { PageHeader } from "@/components/molecules/PageHeader";
-import { Button, Card, CardContent, Input, Spinner } from "@/components/ui";
+import { EmptyState } from "@/components/molecules/EmptyState";
+import { Button, Card, CardContent, Input, SkeletonFila } from "@/components/ui";
+import { Reveal } from "@/lib/anim";
 import { descargarCsv } from "@/lib/csv";
 import { formatCurrency, formatDateTime } from "@/lib/format";
 import { metodoPagoLabel } from "@/lib/enums";
@@ -84,8 +86,10 @@ export function HistorialVentasPage() {
       )}
 
       {isLoading ? (
-        <div className="grid place-items-center py-12">
-          <Spinner label="Cargando ventas…" />
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonFila key={i} />
+          ))}
         </div>
       ) : isError ? (
         <Card>
@@ -94,9 +98,9 @@ export function HistorialVentasPage() {
           </CardContent>
         </Card>
       ) : ventas && ventas.length > 0 ? (
-        <ul className="space-y-3">
+        <Reveal stagger className="space-y-3">
           {ventas.map((v) => (
-            <li key={v.id}>
+            <div key={v.id}>
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between gap-2">
@@ -119,21 +123,14 @@ export function HistorialVentasPage() {
                   </ul>
                 </CardContent>
               </Card>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <div className="grid h-14 w-14 place-items-center rounded-2xl bg-hairline text-ink-soft">
-              <Receipt className="h-7 w-7" aria-hidden />
             </div>
-            <p className="font-semibold text-ink">Sin ventas</p>
-            <p className="max-w-xs text-sm text-ink-soft">
-              No hay ventas registradas en el mes seleccionado.
-            </p>
-          </CardContent>
-        </Card>
+          ))}
+        </Reveal>
+      ) : (
+        <EmptyState
+          titulo="Sin ventas"
+          descripcion="No hay ventas registradas en el mes seleccionado."
+        />
       )}
     </div>
   );

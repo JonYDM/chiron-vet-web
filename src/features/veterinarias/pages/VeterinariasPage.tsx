@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Building2, Plus, Power, Shield, UserCog } from "lucide-react";
 import { PageHeader } from "@/components/molecules/PageHeader";
-import { Badge, Button, Card, CardContent, Spinner } from "@/components/ui";
+import { EmptyState } from "@/components/molecules/EmptyState";
+import { Badge, Button, Card, CardContent, SkeletonFila } from "@/components/ui";
+import { Reveal } from "@/lib/anim";
 import { formatDate } from "@/lib/format";
 import type { Veterinaria } from "@/types/api";
 import {
@@ -35,8 +37,10 @@ export function VeterinariasPage() {
       />
 
       {isLoading ? (
-        <div className="grid place-items-center py-12">
-          <Spinner label="Cargando veterinarias…" />
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <SkeletonFila key={i} />
+          ))}
         </div>
       ) : isError ? (
         <Card>
@@ -45,7 +49,7 @@ export function VeterinariasPage() {
           </CardContent>
         </Card>
       ) : veterinarias && veterinarias.length > 0 ? (
-        <div className="space-y-3">
+        <Reveal stagger className="space-y-3">
           {veterinarias.map((v) => (
             <Card key={v.id}>
               <CardContent className="flex flex-wrap items-center gap-3 p-4">
@@ -107,19 +111,12 @@ export function VeterinariasPage() {
               </CardContent>
             </Card>
           ))}
-        </div>
+        </Reveal>
       ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <div className="grid h-14 w-14 place-items-center rounded-2xl bg-hairline text-ink-soft">
-              <Building2 className="h-7 w-7" aria-hidden />
-            </div>
-            <p className="font-semibold text-ink">Sin veterinarias</p>
-            <p className="max-w-xs text-sm text-ink-soft">
-              Da de alta la primera veterinaria cliente.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          titulo="Sin veterinarias"
+          descripcion="Da de alta la primera veterinaria cliente."
+        />
       )}
 
       <AdministradoresSection />

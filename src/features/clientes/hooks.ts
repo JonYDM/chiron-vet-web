@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useVeterinariaId } from "@/features/auth";
+import { useVeterinariaId } from "@/features/auth/useVeterinariaId";
 import { buscarClientes, listarMascotas, registroRapido } from "./api";
 import type { RegistroRapidoRequest } from "@/types/api";
 

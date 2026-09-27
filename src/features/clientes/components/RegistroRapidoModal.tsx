@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Button, Input, Modal, Select } from "@/components/ui";
-import { useVeterinariaId } from "@/features/auth";
+import { useVeterinariaId } from "@/features/auth/useVeterinariaId";
 import { ApiError } from "@/lib/http";
 import { opcionesDeEnum } from "@/lib/opciones";
 import { especieLabel, origenClienteLabel, sexoLabel } from "@/lib/enums";

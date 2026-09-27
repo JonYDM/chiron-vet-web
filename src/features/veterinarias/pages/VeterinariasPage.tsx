@@ -7,6 +7,7 @@ import type { Veterinaria } from "@/types/api";
 import { useCambiarEstadoVeterinaria, useVeterinarias } from "../hooks";
 import { CrearVeterinariaModal } from "../components/CrearVeterinariaModal";
 import { CrearAdminModal } from "../components/CrearAdminModal";
+import { AdministradoresSection } from "../components/AdministradoresSection";
 
 /** Panel SuperAdmin: gestión de veterinarias y suscripciones (F5). */
 export function VeterinariasPage() {
@@ -98,6 +99,8 @@ export function VeterinariasPage() {
           </CardContent>
         </Card>
       )}
+
+      <AdministradoresSection />
 
       <CrearVeterinariaModal open={modalCrear} onClose={() => setModalCrear(false)} />
       {adminDe && (

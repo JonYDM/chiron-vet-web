@@ -252,3 +252,13 @@ export interface VentaResponse {
 export interface ApiErrorBody {
   error: string;
 }
+
+/** DTO seguro de usuario (sin hash de PIN) que devuelve la API. */
+export interface UsuarioDto {
+  id: string;
+  nombreUsuario: string;
+  nombre: string;
+  rol: RolUsuario;
+  activo: boolean;
+  clienteId: string | null;
+}

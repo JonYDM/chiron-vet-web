@@ -7,6 +7,7 @@ import {
   Users,
   Bell,
   Building2,
+  UserCog,
 } from "lucide-react";
 import { RolUsuario } from "@/types/api";
 
@@ -50,6 +51,12 @@ export const navStaff: NavItem[] = [
     to: "/app/recordatorios",
     label: "Recordatorios",
     icon: Bell,
+    roles: [RolUsuario.Administrador],
+  },
+  {
+    to: "/app/equipo",
+    label: "Equipo",
+    icon: UserCog,
     roles: [RolUsuario.Administrador],
   },
 ];

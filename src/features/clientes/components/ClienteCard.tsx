@@ -4,15 +4,22 @@ import { ChevronDown, KeyRound, PawPrint, Phone } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Badge, Button, Card, Spinner } from "@/components/ui";
 import { especieLabel } from "@/lib/enums";
+import { useUsuarioDeCliente } from "@/features/usuarios/hooks";
+import { ResetearPinModal } from "@/features/usuarios";
 import { useMascotas } from "../hooks";
 import { DarAccesoModal } from "./DarAccesoModal";
 import type { Cliente } from "@/types/api";
 
-/** Tarjeta de cliente: al expandir, carga y muestra sus mascotas (lazy). */
+/** Tarjeta de cliente: al expandir, carga sus mascotas y su estado de acceso al portal. */
 export function ClienteCard({ cliente }: { cliente: Cliente }) {
   const [abierto, setAbierto] = useState(false);
   const [accesoAbierto, setAccesoAbierto] = useState(false);
+  const [resetAbierto, setResetAbierto] = useState(false);
   const { data: mascotas, isLoading } = useMascotas(abierto ? cliente.id : null);
+  // Consulta si el cliente ya tiene acceso al portal (usuario dueño).
+  const { data: usuario, isLoading: cargandoUsuario } = useUsuarioDeCliente(
+    abierto ? cliente.id : null,
+  );
 
   return (
     <Card>
@@ -64,15 +71,33 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
             </p>
           )}
 
-          <Button
-            variant="secondary"
-            size="sm"
-            fullWidth
-            onClick={() => setAccesoAbierto(true)}
-          >
-            <KeyRound className="h-4 w-4" aria-hidden />
-            Dar acceso al portal
-          </Button>
+          {/* Acceso al portal: mostrar según si ya tiene usuario. */}
+          {cargandoUsuario ? (
+            <Spinner label="Verificando acceso…" />
+          ) : usuario ? (
+            <div className="flex items-center gap-2">
+              <Badge tone="success">Con acceso al portal</Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-auto"
+                onClick={() => setResetAbierto(true)}
+              >
+                <KeyRound className="h-4 w-4" aria-hidden />
+                Resetear PIN
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="secondary"
+              size="sm"
+              fullWidth
+              onClick={() => setAccesoAbierto(true)}
+            >
+              <KeyRound className="h-4 w-4" aria-hidden />
+              Dar acceso al portal
+            </Button>
+          )}
         </div>
       )}
 
@@ -83,6 +108,14 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
         clienteNombre={cliente.nombre}
         clienteTelefono={cliente.telefono}
       />
+      {usuario && (
+        <ResetearPinModal
+          open={resetAbierto}
+          onClose={() => setResetAbierto(false)}
+          usuarioId={usuario.id}
+          nombre={cliente.nombre}
+        />
+      )}
     </Card>
   );
 }

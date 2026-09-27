@@ -67,6 +67,29 @@ export enum TipoRecordatorio {
   Cita = 2,
 }
 
+/** Filtro de estado para listados (coincide con el backend). */
+export enum FiltroEstado {
+  Activos = 0,
+  Inactivos = 1,
+  Todos = 2,
+}
+
+/** Método de pago de una venta (coincide con el backend). */
+export enum MetodoPago {
+  Efectivo = 1,
+  Tarjeta = 2,
+  Transferencia = 3,
+}
+
+/** Resultado paginado genérico que devuelve el backend. */
+export interface ResultadoPaginado<T> {
+  items: T[];
+  total: number;
+  pagina: number;
+  tamanoPagina: number;
+  totalPaginas: number;
+}
+
 // ─────────────────────────── Auth ───────────────────────────────────────────
 
 export interface LoginRequest {
@@ -113,6 +136,7 @@ export interface Cliente {
   fechaRegistro: string;
   origen: OrigenCliente;
   aceptaWhatsApp: boolean;
+  activo: boolean;
 }
 
 export interface Mascota {
@@ -127,6 +151,7 @@ export interface Mascota {
   pesoKg: number | null;
   padecimientos: string | null;
   esterilizado: boolean | null;
+  activo: boolean;
 }
 
 export interface RegistroMedico {
@@ -142,6 +167,7 @@ export interface RegistroMedico {
   pesoKg: number | null;
   temperaturaC: number | null;
   notas: string | null;
+  atendidoPorId: string | null;
 }
 
 export interface Cita {
@@ -151,6 +177,7 @@ export interface Cita {
   fechaHora: string;
   motivo: string;
   estado: EstadoCita;
+  veterinarioId: string | null;
 }
 
 export interface Producto {
@@ -178,7 +205,28 @@ export interface VentaHistorial {
   clienteId: string | null;
   fechaHora: string;
   total: number;
+  metodoPago: MetodoPago;
+  montoRecibido: number | null;
+  cambio: number | null;
   lineas: LineaVentaHistorial[];
+}
+
+/** Resumen de ventas de un período. */
+export interface ResumenVentas {
+  total: number;
+  numeroVentas: number;
+  efectivo: number;
+  tarjeta: number;
+  transferencia: number;
+}
+
+/** Métricas del dashboard. */
+export interface MetricasDashboard {
+  ventasHoy: number;
+  ventasMes: number;
+  numeroVentasMes: number;
+  citasProximas: number;
+  clientesActivos: number;
 }
 
 export interface RecordatorioDetectado {
@@ -247,6 +295,7 @@ export interface AgregarRegistroMedicoRequest {
   pesoKg?: number | null;
   temperaturaC?: number | null;
   notas?: string | null;
+  atendidoPorId?: string | null;
 }
 
 export interface AgendarCitaRequest {
@@ -254,6 +303,7 @@ export interface AgendarCitaRequest {
   mascotaId: string;
   fechaHora: string;
   motivo: string;
+  veterinarioId?: string | null;
 }
 
 export interface AgregarProductoRequest {
@@ -273,11 +323,14 @@ export interface RegistrarVentaRequest {
   veterinariaId: string;
   clienteId?: string | null;
   items: ItemVenta[];
+  metodoPago: MetodoPago;
+  montoRecibido?: number | null;
 }
 
 export interface VentaResponse {
   ventaId: string;
   total: number;
+  cambio: number | null;
 }
 
 /** Forma del error que devuelve el backend: { error: "mensaje" }. */

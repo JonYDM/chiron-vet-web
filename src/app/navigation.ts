@@ -7,6 +7,7 @@ import {
   Users,
   Building2,
   UserCog,
+  BellRing,
 } from "lucide-react";
 import type { Accion } from "@/lib/permisos";
 
@@ -21,25 +22,35 @@ export interface NavItem {
    * usuarios del área (ej: Inicio). El AppShell filtra con `puede`.
    */
   permiso: Accion | null;
+  /**
+   * Si true, el ítem NO va en la barra inferior sino en el menú "Más" (módulos
+   * secundarios/administrativos: recordatorios, ventas, equipo).
+   */
+  secundario?: boolean;
 }
 
 /**
  * Navegación de la app de staff (/app/*). Cada ítem declara el permiso que requiere;
  * el shell lo filtra según la sesión (rol + AdminOperativo). Una sola fuente de verdad.
+ *
+ * La barra inferior muestra hasta 4 ítems PRIMARIOS + un botón "Más" que agrupa los
+ * `secundario: true` junto con el perfil. Inicio va al CENTRO y resaltado.
  */
 export const navStaff: NavItem[] = [
-  { to: "/app", label: "Inicio", icon: Home, permiso: null },
   { to: "/app/clientes", label: "Clientes", icon: Users, permiso: "operar_clientes" },
   { to: "/app/pacientes", label: "Pacientes", icon: PawPrint, permiso: "operar_clientes" },
+  { to: "/app", label: "Inicio", icon: Home, permiso: null },
   { to: "/app/citas", label: "Citas", icon: Calendar, permiso: "gestionar_citas" },
-  { to: "/app/pos", label: "Ventas", icon: ShoppingCart, permiso: "usar_pos" },
-  { to: "/app/equipo", label: "Equipo", icon: UserCog, permiso: "gestionar_equipo" },
+  // Secundarios → menú "Más".
+  { to: "/app/pos", label: "Ventas", icon: ShoppingCart, permiso: "usar_pos", secundario: true },
+  { to: "/app/recordatorios", label: "Recordatorios", icon: BellRing, permiso: null, secundario: true },
+  { to: "/app/equipo", label: "Equipo", icon: UserCog, permiso: "gestionar_equipo", secundario: true },
 ];
 
 /** Navegación del portal del dueño (/portal/*). */
 export const navPortal: NavItem[] = [
   { to: "/portal", label: "Mis mascotas", icon: PawPrint, permiso: null },
-  { to: "/portal/recordatorios", label: "Recordatorios", icon: Home, permiso: null },
+  { to: "/portal/recordatorios", label: "Recordatorios", icon: BellRing, permiso: null },
 ];
 
 /** Navegación del panel SuperAdmin (/admin/*). */

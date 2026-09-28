@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from "react";
-import { NavLink } from "react-router-dom";import { Bell, Check, ChevronDown, KeyRound, LogOut, MapPin, PawPrint } from "lucide-react";
+import { NavLink } from "react-router-dom";import { Bell, Check, ChevronDown, KeyRound, LogOut, MapPin, MoreHorizontal, PawPrint } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useAuth } from "@/features/auth";
 import { rolLabel } from "@/lib/enums";
@@ -62,6 +62,8 @@ function AppShellInterno({ nav, children }: { nav: NavItem[]; children: ReactNod
   const { sesion, cerrarSesion } = useAuth();
   const p = usePermisos();
   const items = nav.filter((i) => i.permiso === null || p(i.permiso));
+  const primarios = items.filter((i) => !i.secundario);
+  const secundarios = items.filter((i) => i.secundario);
   const [pinAbierto, setPinAbierto] = useState(false);
   const { titulo, subtitulo, accion, tituloSuave, colapsado } = useHeaderTitulo();
 
@@ -169,35 +171,54 @@ function AppShellInterno({ nav, children }: { nav: NavItem[]; children: ReactNod
               "inset 0 1px 2px rgba(13,110,110,0.18), inset 0 -1px 3px rgba(13,110,110,0.10), 0 10px 24px -6px rgba(8,76,76,0.22)",
           }}
         >
-          {items.slice(0, 5).map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to.split("/").length <= 2}
-              className={({ isActive }) =>
-                cn(
-                  "flex flex-1 flex-col items-center gap-0.5 rounded-full py-1 text-[9px] font-semibold transition-colors",
-                  isActive
-                    ? "text-primary-container"
-                    : "text-on-surface-variant hover:text-on-surface",
-                )
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <span
-                    className={cn(
-                      "grid h-7 w-7 place-items-center rounded-full transition-colors",
-                      isActive && "bg-primary-container/10",
-                    )}
-                  >
-                    <item.icon className="h-[18px] w-[18px]" aria-hidden />
-                  </span>
-                  <span className="truncate px-0.5">{item.label}</span>
-                </>
-              )}
-            </NavLink>
-          ))}
+          {primarios.map((item) => {
+            const esInicio = item.to === "/app";
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to.split("/").length <= 2}
+                className="flex flex-1 flex-col items-center"
+              >
+                {({ isActive }) =>
+                  esInicio ? (
+                    // Inicio: destacado al centro (pastilla verde).
+                    <span
+                      className={cn(
+                        "flex flex-col items-center gap-0.5 rounded-full px-3 py-1 text-[9px] font-bold transition-colors",
+                        isActive
+                          ? "bg-primary-container text-on-primary shadow-primary-glow"
+                          : "text-primary-container",
+                      )}
+                    >
+                      <item.icon className="h-[20px] w-[20px]" aria-hidden />
+                      <span>{item.label}</span>
+                    </span>
+                  ) : (
+                    <span
+                      className={cn(
+                        "flex flex-col items-center gap-0.5 rounded-full py-1 text-[9px] font-semibold transition-colors",
+                        isActive ? "text-primary-container" : "text-on-surface-variant hover:text-on-surface",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "grid h-7 w-7 place-items-center rounded-full transition-colors",
+                          isActive && "bg-primary-container/10",
+                        )}
+                      >
+                        <item.icon className="h-[18px] w-[18px]" aria-hidden />
+                      </span>
+                      <span className="truncate px-0.5">{item.label}</span>
+                    </span>
+                  )
+                }
+              </NavLink>
+            );
+          })}
+
+          {/* Botón "Más": módulos secundarios. */}
+          {secundarios.length > 0 && <MenuMas items={secundarios} />}
         </div>
       </nav>
 
@@ -305,7 +326,67 @@ function NotificacionesMock() {
   );
 }
 
-/** Menú de perfil (avatar → PIN / salir). */
+/**
+ * Botón "Más" del bottom-nav: agrupa los módulos secundarios (recordatorios, ventas,
+ * equipo). El perfil (PIN / cerrar sesión) vive en el avatar del header. Abre hacia ARRIBA.
+ */
+function MenuMas({ items }: { items: NavItem[] }) {
+  const [abierto, setAbierto] = useState(false);
+  return (
+    <div className="flex flex-1 flex-col items-center">
+      <button
+        onClick={() => setAbierto((v) => !v)}
+        aria-label="Más opciones"
+        aria-expanded={abierto}
+        className={cn(
+          "flex flex-col items-center gap-0.5 rounded-full py-1 text-[9px] font-semibold transition-colors",
+          abierto ? "text-primary-container" : "text-on-surface-variant hover:text-on-surface",
+        )}
+      >
+        <span
+          className={cn(
+            "grid h-7 w-7 place-items-center rounded-full transition-colors",
+            abierto && "bg-primary-container/10",
+          )}
+        >
+          <MoreHorizontal className="h-[18px] w-[18px]" aria-hidden />
+        </span>
+        <span>Más</span>
+      </button>
+
+      {abierto && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setAbierto(false)} />
+          <div className="absolute bottom-full right-0 z-50 mb-2 w-56 rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-1.5 shadow-lift">
+            <p className="px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+              Más módulos
+            </p>
+            {items.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={() => setAbierto(false)}
+                className={({ isActive }) =>
+                  cn(
+                    "flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-label-md font-medium transition-colors",
+                    isActive
+                      ? "bg-primary-container/10 text-primary-container"
+                      : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface",
+                  )
+                }
+              >
+                <item.icon className="h-4 w-4" aria-hidden />
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/** Menú de perfil del header (avatar → PIN / salir). */
 function PerfilMenu({
   nombre,
   rol,

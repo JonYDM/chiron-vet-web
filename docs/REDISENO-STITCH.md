@@ -199,3 +199,39 @@ directamente. Se separa en dos secciones relacionadas pero navegables por separa
   la vista Pacientes usa el hook con fallback (estado de error elegante).
 - Opcional: `GET /mascotas/{id}` para recuperar el paciente por id al recargar el perfil
   (ya anotado en PENDIENTES-TECNICOS.md).
+
+
+---
+
+## 6. Análisis del Dashboard y plan (para retomar)
+
+### Problema: el Panel Operativo se ve comprimido
+Tiene ~6 secciones apiladas (acciones, métricas bento, alerta farmacéutica, sala de espera,
+agenda, recordatorios) y varias son **[MOCK]**. Se siente denso.
+
+### Mejoras de diseño propuestas
+1. **Jerarquía tipográfica:** métrica del día como héroe (número grande, text-metric/display);
+   títulos de sección más grandes y con más margen superior.
+2. **Menos texto:** quitar los subtítulos de las 4 acciones rápidas (dejar título + ícono).
+3. **Mostrar solo lo real en el MVP:** ocultar los mock puros (sala de espera, alerta
+   farmacéutica, turno) hasta que exista backend → dashboard más limpio y honesto.
+4. **Más espaciado** entre secciones y dentro de las tarjetas.
+5. **Priorizar por uso:** lo más usado arriba y grande; lo secundario abajo/pequeño.
+
+### Conectar lo REAL que ya tiene backend (siguiente paso recomendado)
+El dashboard muestra mock, pero varias cosas YA existen en el backend y solo falta conectarlas:
+- **MetricasDashboard** → métricas del día (ampliar con citas del día / en espera si se quiere).
+- **ResumenVentas** → desglose de caja (Efectivo/Tarjeta/Transferencia) real.
+- **VerAgenda** → agenda de citas del día real.
+- **GenerarRecordatorios** → recordatorios reales (+ conectar con notificaciones in-app).
+
+### Endpoints/módulos NUEVOS que requieren los elementos mock del dashboard
+- Sala de espera / triage → módulo de cola de atención (estado, consultorio, tiempo).
+- Alerta farmacéutica → inventario con lotes/caducidad/stock.
+- Avisos a dueños → notificaciones in-app (rol DuenoMascota).
+- Turno activo → control de turnos (probablemente descartable).
+
+### Orden sugerido al retomar
+1. Rediseñar dashboard con más aire (tipografía, menos subtítulos, ocultar mock puro).
+2. Conectar lo real (métricas, agenda, resumen ventas, recordatorios).
+3. Planear PRs de backend para los módulos nuevos (triage, inventario, notificaciones).

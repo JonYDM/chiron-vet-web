@@ -138,15 +138,16 @@ export function useAgregarMascota() {
   });
 }
 
-/** Edita una mascota e invalida las listas de mascotas y de pacientes. */
+/** Edita una mascota e invalida las listas y el detalle (para refrescar sin recargar). */
 export function useEditarMascota() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ mascotaId, datos }: { mascotaId: string; datos: DatosMascota }) =>
       editarMascota(mascotaId, datos),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["mascotas"] });
       queryClient.invalidateQueries({ queryKey: ["pacientes"] });
+      queryClient.invalidateQueries({ queryKey: ["mascota", variables.mascotaId] });
     },
   });
 }

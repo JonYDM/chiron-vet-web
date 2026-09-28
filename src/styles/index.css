@@ -12,7 +12,7 @@
  */
 @layer base {
   :root {
-    --background: 210 40% 98%;      /* #F8FAFC canvas */
+    --background: 210 40% 96%;      /* gris-azulado suave (no blanco puro) */
     --foreground: 222 47% 11%;      /* #0F172A texto */
 
     --card: 0 0% 100%;

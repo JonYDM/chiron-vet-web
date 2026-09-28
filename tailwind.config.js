@@ -56,6 +56,47 @@ export default {
         // Escalas de primary/accent usadas en algunos lugares.
         "primary-50": "hsl(var(--secondary))",
         "primary-100": "hsl(var(--secondary))",
+
+        // ── Tokens del design system Stitch (calco fiel del markup) ──
+        // Superficies en capas
+        "surface-container-lowest": "#ffffff",
+        "surface-container-low": "#eff4ff",
+        "surface-container": "#e5eeff",
+        "surface-container-high": "#dce9ff",
+        "surface-container-highest": "#d3e4fe",
+        "surface-variant": "#d3e4fe",
+        "surface-dim": "#cbdbf5",
+        "on-surface": "#0b1c30",
+        "on-surface-variant": "#3e4948",
+        outline: "#6e7979",
+        "outline-variant": "#bec9c8",
+        // Primary (teal) — Stitch
+        "st-primary": "#005454",
+        "primary-container": "#0d6e6e",
+        "on-primary": "#ffffff",
+        "on-primary-container": "#9dedec",
+        "primary-fixed": "#a0f0f0",
+        "primary-fixed-dim": "#84d4d3",
+        "on-primary-fixed": "#002020",
+        // Secondary (terracota) — Stitch
+        "st-secondary": "#994703",
+        "secondary-container": "#fc934f",
+        "on-secondary": "#ffffff",
+        "secondary-fixed": "#ffdbc9",
+        "secondary-fixed-dim": "#ffb68c",
+        "on-secondary-fixed": "#321200",
+        "on-secondary-fixed-variant": "#753400",
+        "on-secondary-container": "#6d3000",
+        // Tertiary (teal profundo)
+        tertiary: "#145353",
+        "tertiary-container": "#316b6b",
+        "tertiary-fixed": "#b3edec",
+        "on-tertiary-fixed-variant": "#0e4f4f",
+        "on-tertiary-container": "#afe9e9",
+        // Error
+        "error-st": "#ba1a1a",
+        "error-container": "#ffdad6",
+        "on-error-container": "#93000a",
       },
       fontFamily: {
         sans: ["Plus Jakarta Sans", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
@@ -66,6 +107,19 @@ export default {
         h2: ["1.375rem", { lineHeight: "1.75rem", fontWeight: "600" }],
         h3: ["1.125rem", { lineHeight: "1.5rem", fontWeight: "600" }],
         metric: ["2rem", { lineHeight: "2.375rem", letterSpacing: "-0.03em", fontWeight: "700" }],
+        // Escala Stitch (calco fiel)
+        "headline-xl": ["36px", { lineHeight: "44px", letterSpacing: "-0.02em", fontWeight: "700" }],
+        "headline-lg": ["28px", { lineHeight: "36px", letterSpacing: "-0.01em", fontWeight: "700" }],
+        "headline-lg-mobile": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+        "headline-md": ["22px", { lineHeight: "28px", fontWeight: "600" }],
+        "headline-sm": ["18px", { lineHeight: "24px", fontWeight: "600" }],
+        "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+        "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+        "body-sm": ["12px", { lineHeight: "16px", fontWeight: "400" }],
+        "label-lg": ["14px", { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "600" }],
+        "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "600" }],
+        "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.04em", fontWeight: "700" }],
+        "metric-display": ["32px", { lineHeight: "38px", letterSpacing: "-0.03em", fontWeight: "700" }],
       },
       borderRadius: {
         lg: "var(--radius)",

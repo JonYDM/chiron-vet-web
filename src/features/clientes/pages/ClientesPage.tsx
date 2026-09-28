@@ -11,7 +11,7 @@ import { useToast } from "@/components/feedback/useToast";
 import { useDebounce } from "@/lib/useDebounce";
 import { FiltroEstado, type Cliente } from "@/types/api";
 import { useClientes } from "../hooks";
-import { RegistroRapidoModal } from "../components/RegistroRapidoModal";
+import { CrearClienteModal } from "../components/CrearClienteModal";
 
 /**
  * Clientes & mascotas (calco Stitch): buscador, chips de filtro y tarjetas de cliente.
@@ -150,7 +150,7 @@ export function ClientesPage() {
         )}
       </div>
 
-      <RegistroRapidoModal open={modalAbierto} onClose={() => setModalAbierto(false)} />
+      <CrearClienteModal open={modalAbierto} onClose={() => setModalAbierto(false)} />
     </PantallaConHeader>
   );
 }

@@ -30,6 +30,16 @@
 
 ## Backend — features / lógica pendiente (para próximos PRs de `chiron`)
 
+- **[MEJORA] Agenda de citas con nombre de paciente/dueño:**
+  - Hoy `VerAgenda` (`GET /citas/proximas`) devuelve `Cita` con `mascotaId` pero SIN el
+    nombre de la mascota ni del dueño. El frontend (CitasPage y el widget del dashboard)
+    resuelve el nombre **cruzando en cliente** con la lista de pacientes (`usePacientes`).
+    Funciona, pero depende de que esa lista esté cargada y no es lo ideal.
+  - **Backend a crear:** un DTO `CitaAgenda` (o ampliar la respuesta) con `mascotaNombre`,
+    `mascotaEspecie` y `clienteNombre`, resueltos en el servidor. Así la agenda no depende
+    del cruce en el front. Aplica también al timeline del dashboard.
+
+
 - **[LEGAL / PENDIENTE] Licencia de íconos 3D (things.co):**
   - Íconos 3D de **things.co** usados en la app: `public/vet.png` (identidad del rol clínico
     en el header del Panel Operativo) y `public/empty.png` (ilustración global de estado

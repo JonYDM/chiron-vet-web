@@ -30,6 +30,44 @@
 
 ## Backend — features / lógica pendiente (para próximos PRs de `chiron`)
 
+- **[DEMO — camino feliz] Checklist para el primer despliegue del front (mostrar al cliente):**
+  Flujo objetivo (sin enfocarse en permisos finos de vet/cajero por ahora):
+  1. **SuperAdmin** crea **veterinaria** (wizard) → en su card, botón "Administrador" crea el
+     **admin** (usuario + PIN). Ambos usan hooks reales (`useCrearVeterinaria`, `useCrearAdmin`). ✅
+  2. **Admin** inicia sesión y hace TODO (acceso completo, ya resuelto). ✅
+  3. **Dueño de mascota** ve en su portal **"Mis pagos"** (`GET /api/portal/mis-compras`) lo
+     que se le cobró (consultas/artículos con desglose). ✅ (front + backend nuevos)
+  - Backend del camino feliz va en rama `fix/metricas-por-rol` (incluye métricas por rol +
+    `mis-compras`). MERGEAR antes de la demo.
+  - Para que el dueño vea pagos: el cobro en el POS debe **asociar el clienteId** (ya se puede
+    elegir cliente en el cobro). Recordar seleccionar al cliente al cobrar en la demo.
+
+
+- **[DEFINIDO] Permisos y métricas por rol (Fase 1 — HECHO backend `fix/metricas-por-rol` + front):**
+  - **Admin:** hace TODO (veterinario + cajero + gestión de equipo) — puede atender la
+    veterinaria él solo. Métricas COMPLETAS (ventas día + mes + negocio).
+  - **Recepcionista:** citas, clientes, POS/cobrar. NO consultas (expediente). Métricas:
+    solo **venta del DÍA** (su caja), sin desglose acumulado del negocio.
+  - **Veterinario:** citas, clientes, consultas (expediente). NO POS/ventas. Métricas: solo
+    **operativas** (citas del día, clientes activos), CERO dinero.
+  - Backend: `MetricasDashboard` recibe `AlcanceMetricas` (Completo/SoloHoy/Ninguno) según
+    rol; `/metricas` permite los 3 roles y filtra el dinero. Catálogo POS y ResumenVentas =
+    Admin+Recepcionista. Expediente = Admin+Veterinario. RegistrarVenta = Admin+Recepcionista.
+  - PENDIENTE: mergear `fix/metricas-por-rol`.
+
+- **[ÉPICA — Fase 2, PLANEADA] Flujo de cobros (veterinario genera cargo → caja cobra):**
+  - Idea del usuario (validada, patrón de la industria: separar quién genera el cargo de
+    quién lo cobra):
+    `Veterinario hace consulta/servicio → genera un CARGO (concepto + monto) → queda
+     PENDIENTE DE COBRO → aparece en la caja de Recepcionista/Admin → cobran con el POS →
+     se cierra la venta → nota/recibo le llega al cliente en su portal (notificación).`
+  - Modelo nuevo: **Cargo / Cuenta por cobrar** (veterinariaId, mascotaId/clienteId,
+    concepto, monto, estado pendiente/cobrado, origen consulta, quién lo generó/cobró).
+  - Nueva sección "Cobros pendientes" en el POS/caja. Se conecta con el POS existente y con
+    las notificaciones (épica §8) para avisar al cliente.
+  - Es un módulo mediano; construir después de cerrar las restricciones de rol.
+
+
 - **[MEJORA] Agenda de citas con nombre de paciente/dueño:**
   - Hoy `VerAgenda` (`GET /citas/proximas`) devuelve `Cita` con `mascotaId` pero SIN el
     nombre de la mascota ni del dueño. El frontend (CitasPage y el widget del dashboard)
@@ -42,9 +80,9 @@
 
 - **[LEGAL / PENDIENTE] Licencia de íconos 3D (things.co):**
   - Íconos 3D de **things.co** usados en la app: `public/vet.png` (identidad del rol clínico
-    en el header del Panel Operativo) y `public/empty.png` (ilustración global de estado
-    vacío / "sin resultados" en todas las listas). Su **uso comercial requiere licencia de
-    pago**.
+    en el header del Panel Operativo), `public/empty.png` (ilustración global de estado
+    vacío / "sin resultados" en todas las listas) y `public/pet-store.png` (identidad del
+    header del Punto de venta). Su **uso comercial requiere licencia de pago**.
   - Estado: NO pagado aún (todavía sin cliente). **Compromiso: pagar la licencia ANTES de
     salir a producción / cobrar al primer cliente.** No olvidar: es un tema legal.
   - Nota técnica: `vet.png` pesa ~1.6 MB (muy grande para un ícono). **Optimizar** ambos

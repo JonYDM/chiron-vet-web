@@ -30,6 +30,24 @@
 
 ## Backend — features / lógica pendiente (para próximos PRs de `chiron`)
 
+- **Panel SuperAdmin — ampliar modelos (Veterinaria + Administrador):**
+  - **Veterinaria** (hoy: Nombre, Telefono, Activa, FechaAlta). Agregar:
+    - `Direccion` (texto).
+    - `Plan` (enum: Mensual / Anual) — para el modelo de cobro/renovación.
+    - `FechaRenovacion` (calculada: FechaAlta/último pago + 1 mes o 1 año según Plan).
+      El panel muestra "Renueva el [fecha]" y resalta las próximas a vencer.
+  - **Administrador** (Usuario staff rol Administrador). Agregar:
+    - `Curp` — se **PIDE** al usuario (NO se genera) + validar formato (18 chars, patrón
+      CURP). Dato personal sensible: validar y no exponer de más en UI.
+    - `Telefono` de contacto.
+    - **Usuario de login autogenerado** a partir de nombre + parte de la CURP
+      (ej. `mariana.hegm`), para que sea único y no lo escriban a mano. El PIN se crea
+      como ya se hace.
+  - Migraciones EF para ambos + DTOs + endpoints (crear/editar) + validación de CURP.
+  - Nota: la CURP NO se autogenera (la homoclave la asigna RENAPO y no es calculable);
+    se pide y se valida. Opcional: validar coherencia con nombre/fecha de nacimiento.
+
+
 - **Identificar usuario antes del PIN (login estilo Nubank):** endpoint público
   `POST /auth/identificar { identificador }` → `{ existe: bool, nombre?: string }`.
   Permite validar el usuario y saludarlo por su nombre real antes de pedir el PIN.

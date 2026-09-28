@@ -67,7 +67,12 @@ export function LoginPage() {
     try {
       const sesion = await iniciarSesion(identificador.trim(), pin);
       const state = location.state as LocationState | null;
-      const destino = state?.from?.pathname ?? rutaInicialPorRol(sesion.rol);
+      const home = rutaInicialPorRol(sesion.rol);
+      const from = state?.from?.pathname;
+      // Solo respetar "from" si pertenece al área del rol; si no, ir al home del rol.
+      // Evita el parpadeo de "Sin acceso" al volver a una ruta que no corresponde.
+      const areaHome = home.split("/")[1]; // app | portal | admin
+      const destino = from && from.split("/")[1] === areaHome ? from : home;
       navigate(destino, { replace: true });
     } catch (e) {
       const msg =

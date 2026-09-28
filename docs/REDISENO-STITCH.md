@@ -16,6 +16,30 @@
 Foco: el **ciclo de valor** que hace que una veterinaria LATAM adopte el sistema →
 `Cliente → Paciente (expediente/foto) → Cita → Consulta/Cobro → Recordatorio → regresa`.
 
+### Contexto de negocio — cliente ancla (Morelos)
+Primer cliente potencial: **veterinaria mediana-grande en Morelos** (2+ veterinarios — el
+principal descansa domingos —, un ayudante que hace de cajero, **inventario/caja** donde
+venden alimento y accesorios, y posible **2ª sucursal** a futuro).
+
+**Dolor identificado (el "gancho" de venta):** llegan **clientes nuevos** (desparasitación,
+baño, etc.) y **no vuelven** porque se pierde el contacto ("perdí el número"). Cliente que
+no regresa = **ingreso perdido**. Chiron lo resuelve: registrar cliente/paciente desde la
+1ª visita + **recordatorios** (próxima vacuna/desparasitación) que los hacen volver. Este
+dolor es **universal** (chicas y grandes), por eso el MVP sirve a este cliente Y al mercado
+general — no es "a la medida".
+
+**Estrategia:** el cliente ancla da **feedback real**, pero el producto se mantiene
+**general**. Features "de clínica grande" (sala de espera, hospitalización, varios
+consultorios) serán **opcionales/activables por veterinaria**, no obligatorias, para
+adaptarse a todo el mercado. Multi-sucursal ya previsto aunque hoy tengan una.
+
+**Prioridad para enganchar (cliente ancla + mercado):**
+1. Clientes/Pacientes/Expediente [casi listo].
+2. **Recordatorios + notificaciones in-app** ← el gancho ("que vuelvan"). ALTA.
+3. Citas (modelo cita/consulta) — agenda con varios vets.
+4. POS simple — su caja/inventario.
+5. Panel SuperAdmin + multi-sucursal — para su 2ª sucursal.
+
 ### SÍ entra al MVP
 - **Clientes + Pacientes + Expediente + galería de fotos** [REAL, hecho].
 - **Foto de perfil del paciente** (avatar) separada de la galería [REAL].

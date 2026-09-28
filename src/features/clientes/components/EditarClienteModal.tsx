@@ -57,7 +57,8 @@ export function EditarClienteModal({ open, onClose, cliente }: Props) {
                   label="Teléfono"
                   inputMode="numeric"
                   value={telefono}
-                  onChange={(e) => setTelefono(e.target.value)}
+                  onChange={(e) => setTelefono(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                  hint="10 dígitos"
                   required
                 />
               </div>

@@ -149,11 +149,14 @@ export function MascotaModal({ open, onClose, clienteId, mascota, abrirEnFoto }:
             />
             <Input
               label="Peso (kg)"
-              type="number"
-              step="0.01"
-              min="0"
+              inputMode="decimal"
               value={peso}
-              onChange={(e) => setPeso(e.target.value)}
+              onChange={(e) => {
+                // Solo dígitos y un punto decimal; hasta 3 enteros y 2 decimales.
+                const limpio = e.target.value.replace(/[^\d.]/g, "");
+                if (/^\d{0,3}(\.\d{0,2})?$/.test(limpio) || limpio === "") setPeso(limpio);
+              }}
+              hint="En kilogramos"
             />
           </div>
         </div>

@@ -139,6 +139,8 @@ export interface Cliente {
   origen: OrigenCliente;
   aceptaWhatsApp: boolean;
   activo: boolean;
+  /** Conteo de mascotas del cliente. Opcional: lo envía el backend al listar (feature). */
+  totalMascotas?: number;
 }
 
 export interface Mascota {

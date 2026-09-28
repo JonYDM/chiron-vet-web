@@ -1,0 +1,247 @@
+import { useState } from "react";
+import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
+import { ArrowLeft, KeyRound, PawPrint, Pencil, Phone, Plus, Power } from "lucide-react";
+import { Avatar, Badge, Button, Spinner } from "@/components/ui";
+import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
+import { EmptyState } from "@/components/molecules/EmptyState";
+import { especieLabel } from "@/lib/enums";
+import { usePermisos } from "@/lib/usePermisos";
+import { Reveal } from "@/lib/anim";
+import { useConfirm } from "@/components/feedback/ConfirmProvider";
+import { useToast } from "@/components/feedback/useToast";
+import { useUsuarioDeCliente } from "@/features/usuarios/hooks";
+import { ResetearPinModal } from "@/features/usuarios";
+import type { Cliente, Mascota } from "@/types/api";
+import { useMascotas, useCambiarEstadoCliente } from "../hooks";
+import { EditarClienteModal } from "../components/EditarClienteModal";
+import { MascotaModal } from "../components/MascotaModal";
+import { DarAccesoModal } from "../components/DarAccesoModal";
+
+/**
+ * Detalle de cliente (reemplaza el acordeón): datos, sus mascotas y acceso al portal.
+ * El cliente llega por router state (desde la lista); si se entra directo por URL, se
+ * degrada mostrando lo esencial (falta endpoint GET /clientes/{id}).
+ */
+export function ClienteDetallePage() {
+  const { clienteId = "" } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const cliente = (location.state as { cliente?: Cliente } | null)?.cliente ?? null;
+  const p = usePermisos();
+  const puedeAcceso = p("gestionar_acceso_portal");
+
+  const [editarAbierto, setEditarAbierto] = useState(false);
+  const [mascotaNueva, setMascotaNueva] = useState(false);
+  const [mascotaEditar, setMascotaEditar] = useState<Mascota | null>(null);
+  const [accesoAbierto, setAccesoAbierto] = useState(false);
+  const [resetAbierto, setResetAbierto] = useState(false);
+
+  const { data: mascotas, isLoading } = useMascotas(clienteId);
+  const { data: usuario, isLoading: cargandoUsuario } = useUsuarioDeCliente(
+    clienteId,
+    puedeAcceso,
+  );
+  const cambiarEstado = useCambiarEstadoCliente();
+  const confirmar = useConfirm();
+  const toast = useToast();
+
+  async function alternarEstado() {
+    if (!cliente) return;
+    const desactivar = cliente.activo;
+    const ok = await confirmar({
+      titulo: desactivar ? "Desactivar cliente" : "Reactivar cliente",
+      mensaje: desactivar
+        ? `¿Dar de baja a ${cliente.nombre}? Su historial se conserva.`
+        : `¿Reactivar a ${cliente.nombre}?`,
+      textoConfirmar: desactivar ? "Desactivar" : "Reactivar",
+      peligroso: desactivar,
+    });
+    if (!ok) return;
+    try {
+      await cambiarEstado.mutateAsync({ clienteId, activar: !cliente.activo });
+      toast.exito(desactivar ? "Cliente desactivado." : "Cliente reactivado.");
+    } catch {
+      toast.error("No se pudo cambiar el estado.");
+    }
+  }
+
+  return (
+    <PantallaConHeader
+      titulo={cliente?.nombre ?? "Cliente"}
+      subtitulo={
+        <Link
+          to="/app/clientes"
+          className="inline-flex items-center gap-1 text-body-sm font-medium text-primary-container"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden />
+          Clientes
+        </Link>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        {/* Tarjeta del cliente */}
+        <div className="rounded-2xl bg-surface-container-lowest p-4 shadow-soft">
+          <div className="flex items-center gap-3">
+            <Avatar nombre={cliente?.nombre ?? "?"} size="lg" />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-headline-md font-bold text-on-surface">
+                  {cliente?.nombre ?? "Cliente"}
+                </h2>
+                {cliente && !cliente.activo && <Badge tone="danger">Inactivo</Badge>}
+              </div>
+              {cliente && (
+                <p className="flex items-center gap-1.5 text-body-sm text-on-surface-variant">
+                  <Phone className="h-3.5 w-3.5" aria-hidden />
+                  {cliente.telefono}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {cliente && (
+            <div className="mt-4 flex gap-2">
+              <Button variant="soft" size="sm" fullWidth onClick={() => setEditarAbierto(true)}>
+                <Pencil className="h-4 w-4" aria-hidden />
+                Editar
+              </Button>
+              <Button
+                variant={cliente.activo ? "ghost" : "secondary"}
+                size="sm"
+                fullWidth
+                onClick={alternarEstado}
+                loading={cambiarEstado.isPending}
+              >
+                <Power className="h-4 w-4" aria-hidden />
+                {cliente.activo ? "Desactivar" : "Reactivar"}
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Acceso al portal */}
+        {puedeAcceso && (
+          <div className="rounded-2xl bg-surface-container-lowest p-4 shadow-soft">
+            {cargandoUsuario ? (
+              <Spinner label="Verificando acceso…" />
+            ) : usuario ? (
+              <div className="flex items-center gap-2">
+                <Badge tone="success">Con acceso al portal</Badge>
+                <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setResetAbierto(true)}>
+                  <KeyRound className="h-4 w-4" aria-hidden />
+                  Resetear PIN
+                </Button>
+              </div>
+            ) : (
+              <Button variant="secondary" size="sm" fullWidth onClick={() => setAccesoAbierto(true)}>
+                <KeyRound className="h-4 w-4" aria-hidden />
+                Dar acceso al portal
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* Mascotas */}
+        <section className="rounded-2xl bg-surface-container-lowest p-4 shadow-soft">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <PawPrint className="h-5 w-5 text-primary-container" aria-hidden />
+              <h2 className="text-headline-sm font-bold text-on-surface">Mascotas</h2>
+              {mascotas && mascotas.length > 0 && (
+                <span className="rounded-full bg-secondary px-2 py-0.5 text-label-sm font-semibold text-primary-container">
+                  {mascotas.length}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {isLoading ? (
+            <Spinner label="Cargando mascotas…" />
+          ) : mascotas && mascotas.length > 0 ? (
+            <Reveal stagger className="flex flex-col gap-2">
+              {mascotas.map((m) => (
+                <div key={m.id} className="flex items-center justify-between gap-3 rounded-xl bg-surface-container p-3">
+                  <button
+                    onClick={() => navigate(`/app/mascotas/${m.id}`, { state: { mascota: m } })}
+                    className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+                  >
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-secondary text-primary-container">
+                      <PawPrint className="h-5 w-5" aria-hidden />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-label-md font-semibold text-on-surface">
+                        {m.nombre}
+                      </span>
+                      <span className="block text-body-sm text-on-surface-variant">
+                        {especieLabel[m.especie]}
+                        {m.raza ? ` · ${m.raza}` : ""}
+                      </span>
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setMascotaEditar(m)}
+                    aria-label={`Editar ${m.nombre}`}
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
+                  >
+                    <Pencil className="h-4 w-4" aria-hidden />
+                  </button>
+                </div>
+              ))}
+            </Reveal>
+          ) : (
+            <p className="py-4 text-center text-body-sm text-on-surface-variant">
+              Este cliente no tiene mascotas registradas.
+            </p>
+          )}
+
+          <Button variant="soft" size="sm" fullWidth className="mt-3" onClick={() => setMascotaNueva(true)}>
+            <Plus className="h-4 w-4" aria-hidden />
+            Agregar mascota
+          </Button>
+        </section>
+
+        {!cliente && (
+          <EmptyState
+            titulo="Abre el cliente desde la lista"
+            descripcion="Recarga desde la lista de clientes para ver todos los datos."
+          />
+        )}
+      </div>
+
+      {/* Modales */}
+      {cliente && (
+        <EditarClienteModal
+          open={editarAbierto}
+          onClose={() => setEditarAbierto(false)}
+          cliente={cliente}
+        />
+      )}
+      <MascotaModal open={mascotaNueva} onClose={() => setMascotaNueva(false)} clienteId={clienteId} />
+      {mascotaEditar && (
+        <MascotaModal
+          open={!!mascotaEditar}
+          onClose={() => setMascotaEditar(null)}
+          clienteId={clienteId}
+          mascota={mascotaEditar}
+        />
+      )}
+      {cliente && (
+        <DarAccesoModal
+          open={accesoAbierto}
+          onClose={() => setAccesoAbierto(false)}
+          clienteId={clienteId}
+          clienteNombre={cliente.nombre}
+          clienteTelefono={cliente.telefono}
+        />
+      )}
+      {usuario && (
+        <ResetearPinModal
+          open={resetAbierto}
+          onClose={() => setResetAbierto(false)}
+          usuarioId={usuario.id}
+          nombre={cliente?.nombre ?? ""}
+        />
+      )}
+    </PantallaConHeader>
+  );
+}

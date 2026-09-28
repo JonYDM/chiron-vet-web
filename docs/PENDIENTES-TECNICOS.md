@@ -66,6 +66,10 @@
   (todas las mascotas con búsqueda/paginación). El dominio ya tiene
   `IMascotaRepository.ListarPorVeterinariaAsync`; falta exponer el endpoint en Program.cs
   tomando el veterinariaId del token. Mientras, la vista usa fallback.
+- **Conteo de mascotas en el listado de clientes (`totalMascotas`):** agregar el campo al
+  DTO de cliente al listar (query eficiente, evitar N+1) para mostrarlo en la fila de la
+  lista de Clientes. El frontend ya lee `cliente.totalMascotas` (opcional): si no viene,
+  no lo muestra.
 - **Nombre de la veterinaria en la sesión:** hoy el token/login solo trae `veterinariaId`,
   no el nombre. El header muestra la sucursal quemada ("Roma Norte"). Falta incluir el
   nombre de la veterinaria en `LoginResponse`/claims para mostrarlo real.

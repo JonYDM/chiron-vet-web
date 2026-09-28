@@ -1,6 +1,4 @@
 import { type ReactNode } from "react";
-import { MascotaVacio } from "@/components/ilustraciones";
-import { Reveal } from "@/lib/anim";
 
 interface Props {
   titulo: string;
@@ -8,18 +6,27 @@ interface Props {
   accion?: ReactNode;
 }
 
-/** Estado vacío ilustrado (estilo Nubank: amigable, con carácter, no texto plano). */
+/**
+ * Estado vacío / "sin resultados" global de la app. Usa la ilustración `empty.png`
+ * (documento + lupa) en lugar de una animación HTML, para dar una imagen consistente
+ * en todas las listas y búsquedas sin resultados.
+ */
 export function EmptyState({ titulo, descripcion, accion }: Props) {
   return (
-    <Reveal className="flex flex-col items-center gap-4 py-14 text-center">
-      <MascotaVacio className="h-36 w-36" />
+    <div className="flex flex-col items-center gap-4 py-14 text-center">
+      <img
+        src="/empty.png"
+        alt=""
+        aria-hidden
+        className="h-36 w-36 object-contain drop-shadow-sm"
+      />
       <div>
-        <p className="text-h3 text-ink">{titulo}</p>
+        <p className="text-headline-sm font-bold text-on-surface">{titulo}</p>
         {descripcion && (
-          <p className="mx-auto mt-1 max-w-xs text-sm text-ink-soft">{descripcion}</p>
+          <p className="mx-auto mt-1 max-w-xs text-body-md text-on-surface-variant">{descripcion}</p>
         )}
       </div>
       {accion}
-    </Reveal>
+    </div>
   );
 }

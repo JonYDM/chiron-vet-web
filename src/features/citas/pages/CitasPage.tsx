@@ -3,14 +3,14 @@ import { CalendarClock, Check, Plus, Search, X, UserX } from "lucide-react";
 import { Badge, Button, Input, SkeletonFila } from "@/components/ui";
 import { EmptyState } from "@/components/molecules/EmptyState";
 import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
+import { useToast } from "@/components/feedback/useToast";
 import { cn } from "@/lib/cn";
-import { estadoCitaLabel, estadoCitaTone, especieLabel } from "@/lib/enums";
+import { estadoCitaLabel, estadoCitaTone } from "@/lib/enums";
 import { formatDate } from "@/lib/format";
 import { useDebounce } from "@/lib/useDebounce";
-import { EstadoCita, type Cita } from "@/types/api";
-import { usePacientes } from "@/features/mascotas/hooks";
-import type { MascotaConDueno } from "@/features/mascotas/api";
-import { useCambiarEstadoCita, useProximasCitas } from "../hooks";
+import { EstadoCita } from "@/types/api";
+import type { CitaConPaciente } from "../api";
+import { useCambiarEstadoCita, useCitas } from "../hooks";
 import { AgendarCitaModal } from "../components/AgendarCitaModal";
 
 /** Chips de filtro por estado (null = todas). */
@@ -22,55 +22,55 @@ const CHIPS: { valor: EstadoCita | null; label: string }[] = [
   { valor: EstadoCita.Cancelada, label: "Canceladas" },
 ];
 
-function agruparPorDia(citas: Cita[]) {
-  const grupos = new Map<string, Cita[]>();
+function agruparPorDia(citas: CitaConPaciente[]) {
+  const grupos = new Map<string, CitaConPaciente[]>();
   for (const c of citas) {
     const dia = c.fechaHora.slice(0, 10);
     const arr = grupos.get(dia) ?? [];
     arr.push(c);
     grupos.set(dia, arr);
   }
-  return [...grupos.entries()].sort(([a], [b]) => a.localeCompare(b));
+  return [...grupos.entries()].sort(([a], [b]) => b[0].localeCompare(a[0]));
 }
 
 function horaCorta(iso: string): string {
   return new Date(iso).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
 }
 
-/** Página de agenda: próximas citas con búsqueda, filtro por estado y acciones. */
+/** Página de agenda: citas con búsqueda, filtro por estado (real) y acciones. */
 export function CitasPage() {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [texto, setTexto] = useState("");
   const [filtro, setFiltro] = useState<EstadoCita | null>(null);
   const textoBuscado = useDebounce(texto);
+  const toast = useToast();
 
-  const { data: citas, isLoading, isError } = useProximasCitas();
-  const { data: pacientesData } = usePacientes();
+  const { data: citas, isLoading, isError } = useCitas(filtro ?? undefined);
   const cambiar = useCambiarEstadoCita();
 
-  const porId = useMemo(() => {
-    const mapa = new Map<string, MascotaConDueno>();
-    for (const m of pacientesData?.items ?? []) mapa.set(m.id, m);
-    return mapa;
-  }, [pacientesData]);
-
-  // Filtro por estado + búsqueda (motivo / paciente / dueño).
+  // Búsqueda en cliente sobre lo que ya trae el filtro de estado (por nombre/dueño/motivo).
   const filtradas = useMemo(() => {
     const q = textoBuscado.trim().toLowerCase();
-    return (citas ?? []).filter((c) => {
-      if (filtro !== null && c.estado !== filtro) return false;
-      if (!q) return true;
-      const m = porId.get(c.mascotaId);
-      return (
+    if (!q) return citas ?? [];
+    return (citas ?? []).filter(
+      (c) =>
         c.motivo.toLowerCase().includes(q) ||
-        (m?.nombre.toLowerCase().includes(q) ?? false) ||
-        (m?.clienteNombre.toLowerCase().includes(q) ?? false)
-      );
-    });
-  }, [citas, filtro, textoBuscado, porId]);
+        c.mascotaNombre.toLowerCase().includes(q) ||
+        c.clienteNombre.toLowerCase().includes(q),
+    );
+  }, [citas, textoBuscado]);
 
   const grupos = useMemo(() => agruparPorDia(filtradas), [filtradas]);
-  const total = citas?.length ?? 0;
+
+  function accionar(citaId: string, accion: 1 | 2 | 3, ok: string) {
+    cambiar.mutate(
+      { citaId, accion },
+      {
+        onSuccess: () => toast.exito(ok),
+        onError: () => toast.error("No se pudo actualizar la cita."),
+      },
+    );
+  }
 
   return (
     <PantallaConHeader
@@ -78,7 +78,7 @@ export function CitasPage() {
       subtitulo={
         <p className="flex items-center gap-1 text-body-sm text-on-surface-variant">
           <CalendarClock className="h-4 w-4 text-primary-container" aria-hidden />
-          {total === 0 ? "Agenda de la clínica" : `${total} cita${total === 1 ? "" : "s"} próxima${total === 1 ? "" : "s"}`}
+          Agenda de la clínica
         </p>
       }
       accion={
@@ -104,7 +104,7 @@ export function CitasPage() {
           />
         </div>
 
-        {/* Chips de filtro por estado */}
+        {/* Chips de filtro por estado (real, server-side) */}
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {CHIPS.map((chip) => {
             const activo = filtro === chip.valor;
@@ -146,9 +146,10 @@ export function CitasPage() {
                     <CitaCard
                       key={c.id}
                       cita={c}
-                      mascota={porId.get(c.mascotaId)}
                       cambiando={cambiar.isPending && cambiar.variables?.citaId === c.id}
-                      onAccion={(accion) => cambiar.mutate({ citaId: c.id, accion })}
+                      onAtender={() => accionar(c.id, 1, "Cita atendida ✓")}
+                      onNoAsistio={() => accionar(c.id, 3, "Marcada como no asistió")}
+                      onCancelar={() => accionar(c.id, 2, "Cita cancelada")}
                     />
                   ))}
                 </div>
@@ -157,7 +158,7 @@ export function CitasPage() {
           </div>
         ) : (
           <EmptyState
-            titulo={textoBuscado || filtro !== null ? "Sin resultados" : "Sin citas próximas"}
+            titulo={textoBuscado || filtro !== null ? "Sin resultados" : "Sin citas"}
             descripcion={
               textoBuscado || filtro !== null
                 ? "No hay citas que coincidan con el filtro."
@@ -172,17 +173,19 @@ export function CitasPage() {
   );
 }
 
-/** Card de una cita: cabecera clara (hora + estado), paciente/dueño, motivo y acciones. */
+/** Card de una cita: cabecera (hora + estado), paciente/dueño, motivo y acciones. */
 function CitaCard({
   cita,
-  mascota,
   cambiando,
-  onAccion,
+  onAtender,
+  onNoAsistio,
+  onCancelar,
 }: {
-  cita: Cita;
-  mascota?: MascotaConDueno;
+  cita: CitaConPaciente;
   cambiando: boolean;
-  onAccion: (accion: 1 | 2 | 3) => void;
+  onAtender: () => void;
+  onNoAsistio: () => void;
+  onCancelar: () => void;
 }) {
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-soft">
@@ -197,19 +200,8 @@ function CitaCard({
 
       {/* Paciente + dueño */}
       <div>
-        <p className="text-headline-sm font-bold leading-tight text-on-surface">
-          {mascota ? mascota.nombre : "Cita"}
-          {mascota && (
-            <span className="ml-1.5 text-body-md font-normal text-on-surface-variant">
-              {especieLabel[mascota.especie]}
-            </span>
-          )}
-        </p>
-        {mascota && (
-          <p className="mt-0.5 truncate text-body-md text-on-surface-variant">
-            Dueño: {mascota.clienteNombre}
-          </p>
-        )}
+        <p className="text-headline-sm font-bold leading-tight text-on-surface">{cita.mascotaNombre}</p>
+        <p className="mt-0.5 truncate text-body-md text-on-surface-variant">Dueño: {cita.clienteNombre}</p>
       </div>
 
       {/* Motivo */}
@@ -217,17 +209,17 @@ function CitaCard({
         <p className="truncate text-body-md text-on-surface">{cita.motivo}</p>
       </div>
 
-      {/* Acciones en UNA sola fila */}
+      {/* Acciones (solo si está programada) */}
       {cita.estado === EstadoCita.Programada && (
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="primary" fullWidth loading={cambiando} onClick={() => onAccion(1)}>
+          <Button size="sm" variant="primary" fullWidth loading={cambiando} onClick={onAtender}>
             <Check className="h-4 w-4" aria-hidden />
             Atender
           </Button>
-          <Button size="sm" variant="warning" onClick={() => onAccion(3)} aria-label="No asistió">
+          <Button size="sm" variant="warning" onClick={onNoAsistio} aria-label="No asistió">
             <UserX className="h-4 w-4" aria-hidden />
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => onAccion(2)} aria-label="Cancelar">
+          <Button size="sm" variant="ghost" onClick={onCancelar} aria-label="Cancelar">
             <X className="h-4 w-4" aria-hidden />
           </Button>
         </div>

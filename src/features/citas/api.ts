@@ -1,5 +1,26 @@
 import { http } from "@/lib/http";
-import type { AgendarCitaRequest, Cita } from "@/types/api";
+import type { AgendarCitaRequest, Cita, EstadoCita } from "@/types/api";
+
+/** Cita enriquecida con nombre de mascota y dueño (del endpoint GET /citas). */
+export interface CitaConPaciente {
+  id: string;
+  mascotaId: string;
+  mascotaNombre: string;
+  clienteNombre: string;
+  fechaHora: string;
+  motivo: string;
+  estado: EstadoCita;
+  veterinarioId: string | null;
+}
+
+/** Lista las citas de la veterinaria, opcionalmente filtradas por estado. */
+export function listarCitas(
+  estado?: EstadoCita,
+  signal?: AbortSignal,
+): Promise<CitaConPaciente[]> {
+  const qs = estado != null ? `?estado=${estado}` : "";
+  return http.get<CitaConPaciente[]>(`/api/citas${qs}`, signal);
+}
 
 /** Próximas citas de la veterinaria (a partir de ahora). */
 export function proximasCitas(

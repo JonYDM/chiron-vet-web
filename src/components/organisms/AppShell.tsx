@@ -63,7 +63,7 @@ function AppShellInterno({ nav, children }: { nav: NavItem[]; children: ReactNod
     <div className="min-h-screen bg-surface">
       {/* HEADER de dos alturas, fijo, integrado con el contenido */}
       <header className="fixed inset-x-0 top-0 z-40 bg-surface/80 backdrop-blur-xl">
-        <div className="mx-auto w-full max-w-2xl px-4">
+        <div className="mx-auto w-[90%] max-w-2xl">
           {/* Fila-barra: marca/sucursal + título compacto (al colapsar) + acciones */}
           <div className="relative flex h-16 items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2.5">
@@ -136,7 +136,7 @@ function AppShellInterno({ nav, children }: { nav: NavItem[]; children: ReactNod
       {/* MAIN scrolleable. El padding-top se ajusta según el header (expandido/colapsado). */}
       <main
         className={cn(
-          "mx-auto w-full max-w-2xl px-4 pb-28 transition-[padding] duration-300 ease-out",
+          "mx-auto w-[90%] max-w-2xl pb-28 transition-[padding] duration-300 ease-out",
           colapsado ? "pt-20" : "pt-[8.5rem]",
         )}
       >

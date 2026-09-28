@@ -152,7 +152,7 @@ function AppShellInterno({ nav, children }: { nav: NavItem[]; children: ReactNod
       <main
         className={cn(
           "mx-auto w-[90%] max-w-2xl pb-28 transition-[padding] duration-300 ease-out",
-          colapsado ? "pt-20" : "pt-[8.5rem]",
+          colapsado ? "pt-20" : "pt-36",
         )}
       >
         {children}

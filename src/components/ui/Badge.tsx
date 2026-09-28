@@ -3,15 +3,17 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/cn";
 
 const badgeVariants = cva(
-  "inline-flex items-center gap-1 rounded-full border font-medium",
+  "inline-flex items-center gap-1 rounded-full font-semibold",
   {
     variants: {
       tone: {
-        neutral: "border-transparent bg-muted text-muted-foreground",
-        primary: "border-transparent bg-secondary text-secondary-foreground",
-        success: "border-transparent bg-success/10 text-success",
-        warning: "border-transparent bg-accent/15 text-accent-strong",
-        danger: "border-transparent bg-destructive/10 text-destructive",
+        // Colores de badge del DESIGN.md de Stitch: fondo claro + texto oscuro (buen contraste).
+        neutral: "bg-surface-container text-on-surface-variant",
+        primary: "bg-[#CCE5E5] text-[#084C4C]",
+        success: "bg-[#DCFCE7] text-[#15803D]",
+        warning: "bg-[#FEF3C7] text-[#B45309]",
+        danger: "bg-[#FEE2E2] text-[#B91C1C]",
+        info: "bg-[#E0F2FE] text-[#0369A1]",
       },
       size: {
         sm: "px-2 py-0.5 text-[11px]",

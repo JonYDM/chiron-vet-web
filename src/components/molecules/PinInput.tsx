@@ -65,12 +65,12 @@ export function PinInput({
             <div
               key={i}
               className={cn(
-                "grid h-14 w-11 place-items-center rounded-xl border-2 text-2xl font-bold text-ink transition-all sm:w-12",
+                "tabular grid h-14 w-11 place-items-center rounded-xl border-2 text-2xl font-bold text-on-surface transition-all sm:w-12",
                 lleno
-                  ? "border-primary bg-primary-50"
+                  ? "border-primary-container bg-secondary"
                   : activo
-                    ? "border-primary"
-                    : "border-hairline bg-surface",
+                    ? "border-primary-container"
+                    : "border-outline-variant/40 bg-surface-container-lowest",
               )}
             >
               {value[i] ? "•" : ""}

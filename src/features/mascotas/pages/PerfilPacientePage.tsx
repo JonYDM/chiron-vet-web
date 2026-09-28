@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   CalendarClock,
   FileText,
+  Pencil,
   Plus,
   Stethoscope,
   Syringe,
@@ -17,6 +18,8 @@ import { TipoRegistroMedico, type Mascota } from "@/types/api";
 import { useExpediente } from "@/features/expedientes/hooks";
 import { AgregarRegistroModal } from "@/features/expedientes/components/AgregarRegistroModal";
 import { GaleriaFotos } from "../components/GaleriaFotos";
+import { useMascota } from "../hooks";
+import { MascotaModal } from "@/features/clientes/components/MascotaModal";
 
 /**
  * Perfil de paciente (pantalla estrella, calco Stitch): alerta médica, datos del
@@ -27,10 +30,15 @@ import { GaleriaFotos } from "../components/GaleriaFotos";
 export function PerfilPacientePage() {
   const { mascotaId = "" } = useParams();
   const location = useLocation();
-  const mascota = (location.state as { mascota?: Mascota } | null)?.mascota ?? null;
+  const mascotaState = (location.state as { mascota?: Mascota } | null)?.mascota ?? null;
+  const { data: mascotaApi } = useMascota(mascotaId);
+  // Prioriza los datos completos del backend; si no hay (endpoint ausente), usa el state.
+  const mascota = mascotaApi ?? mascotaState;
   const p = usePermisos();
   const puedeEditar = p("editar_expediente");
   const [modalRegistro, setModalRegistro] = useState(false);
+  const [modalEditar, setModalEditar] = useState(false);
+  const [modalFoto, setModalFoto] = useState(false);
 
   const { data: registros } = useExpediente(mascotaId);
   const proxima = registros?.find((r) => r.fechaProximaAplicacion)?.fechaProximaAplicacion;
@@ -39,27 +47,19 @@ export function PerfilPacientePage() {
   return (
     <PantallaConHeader titulo="Acerca de..." volverA={-1} tituloSuave>
       <div className="flex flex-col gap-4">
-        {/* Alerta médica crítica (si hay padecimientos/alergias) */}
-        {mascota?.padecimientos && (
-          <div className="flex items-start gap-3 rounded-2xl bg-error-container/70 p-4">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-error-st text-white">
-              <AlertTriangle className="h-5 w-5" aria-hidden />
-            </div>
-            <div className="min-w-0">
-              <p className="text-label-sm font-bold uppercase tracking-wide text-on-error-container">
-                Alerta médica
-              </p>
-              <p className="mt-0.5 text-body-sm font-medium text-on-error-container">
-                {mascota.padecimientos}
-              </p>
-            </div>
-          </div>
-        )}
-
         {/* Tarjeta del paciente */}
         <div className="rounded-2xl bg-surface-container-lowest p-4 shadow-soft">
           <div className="flex items-center gap-3">
-            <Avatar nombre={mascota?.nombre ?? "?"} size="lg" tone="accent" />
+            <button
+              onClick={() => mascota && setModalFoto(true)}
+              className="relative shrink-0"
+              aria-label="Cambiar foto del paciente"
+            >
+              <Avatar nombre={mascota?.nombre ?? "?"} size="lg" tone="accent" />
+              <span className="absolute -bottom-1 -right-1 grid h-6 w-6 place-items-center rounded-full bg-primary-container text-on-primary shadow-soft ring-2 ring-surface-container-lowest">
+                <Pencil className="h-3 w-3" aria-hidden />
+              </span>
+            </button>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-headline-md font-bold text-on-surface">
@@ -97,6 +97,23 @@ export function PerfilPacientePage() {
           )}
         </div>
 
+        {/* Alerta médica (entre la card y las acciones) */}
+        {mascota?.padecimientos && (
+          <div className="flex items-start gap-3 rounded-2xl bg-error-container/70 p-4">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-error-st text-white">
+              <AlertTriangle className="h-5 w-5" aria-hidden />
+            </div>
+            <div className="min-w-0">
+              <p className="text-label-sm font-bold uppercase tracking-wide text-on-error-container">
+                Alerta médica
+              </p>
+              <p className="mt-0.5 text-body-sm font-medium text-on-error-container">
+                {mascota.padecimientos}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Próxima cita / dosis */}
         {proxima && (
           <div className="flex items-center gap-3 rounded-2xl bg-accent/10 p-4">
@@ -120,10 +137,12 @@ export function PerfilPacientePage() {
               Nueva consulta
             </Button>
           )}
-          <Button variant="soft" className="h-12" onClick={() => setModalRegistro(true)}>
-            <Syringe className="h-4 w-4" aria-hidden />
-            Vacuna
-          </Button>
+          {mascota && (
+            <Button variant="soft" className="h-12" onClick={() => setModalEditar(true)}>
+              <Pencil className="h-4 w-4" aria-hidden />
+              Editar
+            </Button>
+          )}
         </div>
 
         {/* Galería de fotos (R2) */}
@@ -181,6 +200,23 @@ export function PerfilPacientePage() {
           open={modalRegistro}
           onClose={() => setModalRegistro(false)}
           mascotaId={mascotaId}
+        />
+      )}
+      {mascota && (
+        <MascotaModal
+          open={modalEditar}
+          onClose={() => setModalEditar(false)}
+          clienteId={mascota.clienteId}
+          mascota={mascota}
+        />
+      )}
+      {mascota && (
+        <MascotaModal
+          open={modalFoto}
+          onClose={() => setModalFoto(false)}
+          clienteId={mascota.clienteId}
+          mascota={mascota}
+          abrirEnFoto
         />
       )}
     </PantallaConHeader>

@@ -58,6 +58,10 @@
 - **Filtros de clientes "Con cita hoy" / "Con adeudo":** hoy son chips [MOCK] en la vista
   Clientes (marcan pero no filtran). Requieren: consulta de clientes con cita en el día
   y un concepto de adeudo/saldo (cuentas por cobrar) que hoy no existe en el POS.
+- **Obtener mascota por id (`GET /mascotas/{id}`):** el Perfil de Paciente recibe la mascota
+  por router state (al entrar desde Clientes). Al recargar (F5) se pierde el state y falta
+  un endpoint para recuperar los datos del paciente por id. La galería y el expediente sí
+  cargan por id.
 - **Nombre de la veterinaria en la sesión:** hoy el token/login solo trae `veterinariaId`,
   no el nombre. El header muestra la sucursal quemada ("Roma Norte"). Falta incluir el
   nombre de la veterinaria en `LoginResponse`/claims para mostrarlo real.

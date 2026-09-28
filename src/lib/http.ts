@@ -106,4 +106,36 @@ export const http = {
     request<T>(path, { method: "PUT", body, signal }),
   delete: <T>(path: string, signal?: AbortSignal) =>
     request<T>(path, { method: "DELETE", signal }),
+  /** POST multipart/form-data (para subir archivos). No fija Content-Type (lo hace el navegador con el boundary). */
+  postForm: async <T>(path: string, form: FormData, signal?: AbortSignal): Promise<T> => {
+    const headers: Record<string, string> = {};
+    const token = tokenAccessor();
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const response = await fetch(`${BASE_URL}${path}`, {
+      method: "POST",
+      headers,
+      body: form,
+      signal,
+    });
+
+    if (response.status === 401) {
+      onUnauthorized?.();
+      throw new ApiError(401, "Sesión expirada. Inicia sesión de nuevo.");
+    }
+    if (response.status === 403) {
+      throw new ApiError(403, "No tienes permiso para esta acción.");
+    }
+    if (response.status === 204) return undefined as T;
+
+    const text = await response.text();
+    const data = text ? safeJsonParse(text) : null;
+    if (!response.ok) {
+      const message =
+        (data as ApiErrorBody | null)?.error ??
+        `Error ${response.status}. Intenta de nuevo.`;
+      throw new ApiError(response.status, message);
+    }
+    return data as T;
+  },
 };

@@ -30,6 +30,18 @@
 
 ## Backend — features / lógica pendiente (para próximos PRs de `chiron`)
 
+- **[LEGAL / PENDIENTE] Licencia de íconos 3D (things.co):**
+  - Íconos 3D de **things.co** usados en la app: `public/vet.png` (identidad del rol clínico
+    en el header del Panel Operativo) y `public/empty.png` (ilustración global de estado
+    vacío / "sin resultados" en todas las listas). Su **uso comercial requiere licencia de
+    pago**.
+  - Estado: NO pagado aún (todavía sin cliente). **Compromiso: pagar la licencia ANTES de
+    salir a producción / cobrar al primer cliente.** No olvidar: es un tema legal.
+  - Nota técnica: `vet.png` pesa ~1.6 MB (muy grande para un ícono). **Optimizar** ambos
+    antes de prod (redimensionar a ~96–256px y convertir a WebP) para no penalizar la carga
+    de la PWA.
+
+
 - **Recordatorios del STAFF (el "gancho" — FRONTEND HECHO, backend PENDIENTE de merge):**
   - Estado actual: el DUEÑO ya ve sus recordatorios (`GET /api/portal/mis-recordatorios`
     conectado y funcional).

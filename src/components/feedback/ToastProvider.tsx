@@ -11,22 +11,23 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <>
       {children}
       <Toaster
-        position="top-center"
+        position="bottom-center"
+        containerStyle={{ bottom: 90 }}
         toastOptions={{
           duration: 3500,
           style: {
-            background: "hsl(0 0% 100%)",
-            color: "hsl(230 28% 14%)",
-            border: "1px solid hsl(230 24% 92%)",
-            borderRadius: "0.75rem",
+            background: "#FFFFFF",
+            color: "#0F172A",
+            border: "1px solid #E2E8F0",
+            borderRadius: "0.875rem",
             boxShadow:
-              "0 4px 12px rgba(26,29,46,0.08), 0 12px 32px rgba(26,29,46,0.10)",
+              "0 10px 24px -4px rgba(8,76,76,0.12), 0 4px 10px -2px rgba(15,23,42,0.06)",
             fontSize: "0.875rem",
-            fontWeight: 500,
+            fontWeight: 600,
             padding: "0.75rem 1rem",
           },
-          success: { iconTheme: { primary: "hsl(160 76% 37%)", secondary: "#fff" } },
-          error: { iconTheme: { primary: "hsl(350 84% 63%)", secondary: "#fff" } },
+          success: { iconTheme: { primary: "#0D6E6E", secondary: "#fff" } },
+          error: { iconTheme: { primary: "#EF4444", secondary: "#fff" } },
         }}
       />
     </>

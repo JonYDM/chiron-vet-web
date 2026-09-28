@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import {
   AlertTriangle,
@@ -17,8 +17,9 @@ import { usePermisos } from "@/lib/usePermisos";
 import { TipoRegistroMedico, type Mascota } from "@/types/api";
 import { useExpediente } from "@/features/expedientes/hooks";
 import { AgregarRegistroModal } from "@/features/expedientes/components/AgregarRegistroModal";
+import { useToast } from "@/components/feedback/useToast";
 import { GaleriaFotos } from "../components/GaleriaFotos";
-import { useMascota } from "../hooks";
+import { useMascota, useSubirFotoPerfil } from "../hooks";
 import { MascotaModal } from "@/features/clientes/components/MascotaModal";
 
 /**
@@ -38,7 +39,21 @@ export function PerfilPacientePage() {
   const puedeEditar = p("editar_expediente");
   const [modalRegistro, setModalRegistro] = useState(false);
   const [modalEditar, setModalEditar] = useState(false);
-  const [modalFoto, setModalFoto] = useState(false);
+  const inputPerfilRef = useRef<HTMLInputElement>(null);
+  const subirPerfil = useSubirFotoPerfil(mascotaId);
+  const toast = useToast();
+
+  async function onFotoPerfil(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (!f) return;
+    try {
+      await subirPerfil.mutateAsync(f);
+      toast.exito("Foto de perfil actualizada 📸");
+    } catch {
+      toast.error("No se pudo subir la foto de perfil.");
+    }
+  }
 
   const { data: registros } = useExpediente(mascotaId);
   const proxima = registros?.find((r) => r.fechaProximaAplicacion)?.fechaProximaAplicacion;
@@ -50,16 +65,25 @@ export function PerfilPacientePage() {
         {/* Tarjeta del paciente */}
         <div className="rounded-2xl bg-surface-container-lowest p-4 shadow-soft">
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => mascota && setModalFoto(true)}
-              className="relative shrink-0"
-              aria-label="Cambiar foto del paciente"
-            >
-              <Avatar nombre={mascota?.nombre ?? "?"} size="lg" tone="accent" />
-              <span className="absolute -bottom-1 -right-1 grid h-6 w-6 place-items-center rounded-full bg-primary-container text-on-primary shadow-soft ring-2 ring-surface-container-lowest">
+            <div className="relative shrink-0">
+              <Avatar nombre={mascota?.nombre ?? "?"} size="lg" tone="accent" src={mascota?.fotoPerfilUrl} />
+              <input
+                ref={inputPerfilRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={onFotoPerfil}
+              />
+              <button
+                onClick={() => inputPerfilRef.current?.click()}
+                disabled={subirPerfil.isPending}
+                className="absolute -bottom-1 -right-1 grid h-6 w-6 place-items-center rounded-full bg-primary-container text-on-primary shadow-soft ring-2 ring-surface-container-lowest"
+                aria-label="Cambiar foto de perfil"
+              >
                 <Pencil className="h-3 w-3" aria-hidden />
-              </span>
-            </button>
+              </button>
+            </div>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-headline-md font-bold text-on-surface">
@@ -208,15 +232,6 @@ export function PerfilPacientePage() {
           onClose={() => setModalEditar(false)}
           clienteId={mascota.clienteId}
           mascota={mascota}
-        />
-      )}
-      {mascota && (
-        <MascotaModal
-          open={modalFoto}
-          onClose={() => setModalFoto(false)}
-          clienteId={mascota.clienteId}
-          mascota={mascota}
-          abrirEnFoto
         />
       )}
     </PantallaConHeader>

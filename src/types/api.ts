@@ -156,6 +156,8 @@ export interface Mascota {
   padecimientos: string | null;
   esterilizado: boolean | null;
   activo: boolean;
+  /** URL de la foto de perfil (avatar). Null si no tiene. */
+  fotoPerfilUrl?: string | null;
 }
 
 export interface RegistroMedico {

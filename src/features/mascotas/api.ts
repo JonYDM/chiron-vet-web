@@ -17,7 +17,12 @@ export interface MascotaConDueno {
   especie: EspecieMascota;
   raza: string | null;
   sexo: SexoMascota;
+  fechaNacimiento: string | null;
+  pesoKg: number | null;
+  padecimientos: string | null;
+  esterilizado: boolean | null;
   activo: boolean;
+  fotoPerfilUrl: string | null;
   clienteId: string;
   clienteNombre: string;
 }
@@ -64,6 +69,13 @@ export function subirFoto(
   form.append("archivo", archivo);
   const query = registroMedicoId ? `?registroMedicoId=${registroMedicoId}` : "";
   return http.postForm<FotoMascota>(`/api/mascotas/${mascotaId}/fotos${query}`, form);
+}
+
+/** Sube (o reemplaza) la foto de PERFIL (avatar) de la mascota. Devuelve la URL. */
+export function subirFotoPerfil(mascotaId: string, archivo: File | Blob): Promise<string> {
+  const form = new FormData();
+  form.append("archivo", archivo);
+  return http.postForm<string>(`/api/mascotas/${mascotaId}/foto-perfil`, form);
 }
 
 /** Elimina una foto de la galería. */

@@ -107,7 +107,12 @@ function PacienteCard({ mascota }: { mascota: MascotaConDueno }) {
               especie: mascota.especie,
               raza: mascota.raza,
               sexo: mascota.sexo,
+              fechaNacimiento: mascota.fechaNacimiento,
+              pesoKg: mascota.pesoKg,
+              padecimientos: mascota.padecimientos,
+              esterilizado: mascota.esterilizado,
               activo: mascota.activo,
+              fotoPerfilUrl: mascota.fotoPerfilUrl,
               clienteId: mascota.clienteId,
             },
           },
@@ -115,8 +120,12 @@ function PacienteCard({ mascota }: { mascota: MascotaConDueno }) {
       }
       className="group flex w-full items-center gap-3.5 rounded-xl bg-surface-container-lowest p-3.5 text-left shadow-soft transition-colors active:bg-surface-container"
     >
-      <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-secondary text-primary-container">
-        <PawPrint className="h-6 w-6" aria-hidden />
+      <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-secondary text-primary-container">
+        {mascota.fotoPerfilUrl ? (
+          <img src={mascota.fotoPerfilUrl} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <PawPrint className="h-6 w-6" aria-hidden />
+        )}
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">

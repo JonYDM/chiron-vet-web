@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useVeterinariaId } from "@/features/auth/useVeterinariaId";
 import { comprimirImagen } from "@/lib/imagen";
-import { eliminarFoto, listarFotos, listarPacientes, obtenerMascota, subirFoto } from "./api";
+import { eliminarFoto, listarFotos, listarPacientes, obtenerMascota, subirFoto, subirFotoPerfil } from "./api";
 
 /** Obtiene una mascota completa por id (con fallback si el endpoint no existe). */
 export function useMascota(mascotaId: string) {
@@ -40,6 +40,21 @@ export function useSubirFoto(mascotaId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["fotos", mascotaId] });
+    },
+  });
+}
+
+/** Sube la foto de perfil (avatar) de la mascota e invalida sus datos. */
+export function useSubirFotoPerfil(mascotaId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (archivo: File) => {
+      const blob = await comprimirImagen(archivo);
+      return subirFotoPerfil(mascotaId, blob);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["mascota", mascotaId] });
+      queryClient.invalidateQueries({ queryKey: ["pacientes"] });
     },
   });
 }

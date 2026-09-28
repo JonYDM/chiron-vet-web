@@ -6,7 +6,7 @@ import { opcionesDeEnum } from "@/lib/opciones";
 import { especieLabel, sexoLabel } from "@/lib/enums";
 import { EspecieMascota, SexoMascota, FiltroEstado, type Mascota } from "@/types/api";
 import { useToast } from "@/components/feedback/useToast";
-import { subirFoto } from "@/features/mascotas/api";
+import { subirFotoPerfil } from "@/features/mascotas/api";
 import { comprimirImagen } from "@/lib/imagen";
 import { useAgregarMascota, useEditarMascota, useClientes } from "../hooks";
 import type { DatosMascota } from "../api";
@@ -74,22 +74,14 @@ export function MascotaModal({ open, onClose, clienteId, mascota, abrirEnFoto }:
     try {
       if (esEdicion) {
         await editar.mutateAsync({ mascotaId: mascota!.id, datos });
-        if (foto) {
-          try {
-            const blob = await comprimirImagen(foto);
-            await subirFoto(mascota!.id, blob);
-          } catch {
-            toast.error("Los datos se guardaron, pero la foto no se pudo subir.");
-          }
-        }
         toast.exito("Mascota actualizada");
       } else {
         const nuevoId = await agregar.mutateAsync({ clienteId: clienteFinal, datos });
-        // Si se eligió foto, súbela al nuevo paciente (opcional, no bloquea el alta).
+        // La foto del alta se usa como foto de PERFIL (avatar) del nuevo paciente.
         if (foto && typeof nuevoId === "string") {
           try {
             const blob = await comprimirImagen(foto);
-            await subirFoto(nuevoId, blob);
+            await subirFotoPerfil(nuevoId, blob);
           } catch {
             toast.error("La mascota se creó, pero la foto no se pudo subir.");
           }
@@ -196,9 +188,10 @@ export function MascotaModal({ open, onClose, clienteId, mascota, abrirEnFoto }:
     },
   ];
 
-  // Paso de foto (último) en ambos modos: alta y edición.
-  pasos.push({
-    contenido: (
+  // Paso de foto (último) solo en alta: será la foto de perfil del nuevo paciente.
+  if (!esEdicion) {
+    pasos.push({
+      contenido: (
         <div className="flex flex-col items-center gap-3">
           <input
             ref={inputFotoRef}
@@ -228,6 +221,7 @@ export function MascotaModal({ open, onClose, clienteId, mascota, abrirEnFoto }:
         </div>
       ),
     });
+  }
 
   return (
     <Drawer open={open} onClose={onClose} title={esEdicion ? "Editar mascota" : "Nueva mascota"}>

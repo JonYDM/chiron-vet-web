@@ -23,14 +23,23 @@ const avatarVariants = cva(
 interface AvatarProps extends VariantProps<typeof avatarVariants> {
   nombre: string;
   className?: string;
+  /** URL de imagen (foto de perfil). Si se pasa, muestra la foto en vez de iniciales. */
+  src?: string | null;
 }
 
 function iniciales(nombre: string): string {
   return nombre.trim().split(/\s+/).slice(0, 2).map((p) => p[0] ?? "").join("");
 }
 
-/** Avatar con iniciales derivadas del nombre. */
-export function Avatar({ nombre, size, tone, className }: AvatarProps) {
+/** Avatar con iniciales o foto (si se pasa src). */
+export function Avatar({ nombre, size, tone, className, src }: AvatarProps) {
+  if (src) {
+    return (
+      <span className={cn(avatarVariants({ size, tone }), "overflow-hidden", className)} aria-hidden>
+        <img src={src} alt="" className="h-full w-full object-cover" />
+      </span>
+    );
+  }
   return (
     <span className={cn(avatarVariants({ size, tone }), className)} aria-hidden>
       {iniciales(nombre)}

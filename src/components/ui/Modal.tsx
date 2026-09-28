@@ -30,7 +30,7 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur-sm p-0 sm:items-center sm:p-6"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-on-surface/40 p-0 backdrop-blur-sm sm:items-center sm:p-6"
       onClick={onClose}
       role="presentation"
     >
@@ -40,21 +40,21 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
         aria-label={title}
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          "w-full max-w-md animate-fade-in-up rounded-t-2xl border border-border bg-card shadow-float sm:rounded-2xl",
+          "w-full max-w-md animate-fade-in-up rounded-t-3xl bg-surface-container-lowest shadow-float sm:rounded-3xl",
           className,
         )}
       >
-        <div className="flex items-center justify-between border-b border-border p-5">
-          <h2 className="text-lg font-semibold tracking-tight text-foreground">{title}</h2>
+        <div className="flex items-center justify-between px-5 pb-3 pt-5">
+          <h2 className="text-headline-sm font-bold tracking-tight text-on-surface">{title}</h2>
           <button
             onClick={onClose}
             aria-label="Cerrar"
-            className="grid h-9 w-9 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="grid h-9 w-9 place-items-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
           >
             <X className="h-5 w-5" aria-hidden />
           </button>
         </div>
-        <div className="max-h-[70vh] overflow-y-auto p-5">{children}</div>
+        <div className="max-h-[75vh] overflow-y-auto px-5 pb-5">{children}</div>
       </div>
     </div>
   );

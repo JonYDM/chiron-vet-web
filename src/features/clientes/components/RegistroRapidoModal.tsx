@@ -71,7 +71,7 @@ export function RegistroRapidoModal({ open, onClose }: Props) {
   return (
     <Modal open={open} onClose={onClose} title="Registro rápido">
       <form onSubmit={enviar} className="space-y-4">
-        <p className="text-sm font-semibold text-ink-soft">Datos del dueño</p>
+        <p className="text-label-md font-bold uppercase tracking-wide text-on-surface-variant">Datos del dueño</p>
         <Input
           label="Nombre del dueño"
           value={nombreCliente}
@@ -93,8 +93,8 @@ export function RegistroRapidoModal({ open, onClose }: Props) {
           options={opcionesDeEnum(origenClienteLabel)}
         />
 
-        <hr className="border-hairline" />
-        <p className="text-sm font-semibold text-ink-soft">Datos de la mascota</p>
+        <hr className="border-outline-variant/30" />
+        <p className="text-label-md font-bold uppercase tracking-wide text-on-surface-variant">Datos de la mascota</p>
         <Input
           label="Nombre de la mascota"
           value={nombreMascota}
@@ -124,7 +124,7 @@ export function RegistroRapidoModal({ open, onClose }: Props) {
         {error && (
           <p
             role="alert"
-            className="rounded-xl bg-danger/10 px-4 py-3 text-sm text-danger"
+            className="rounded-xl bg-error-container/60 px-4 py-3 text-body-sm font-medium text-on-error-container"
           >
             {error}
           </p>

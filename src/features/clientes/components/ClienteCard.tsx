@@ -114,7 +114,7 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
                   className="flex items-center justify-between gap-3 rounded-xl bg-surface-container p-3"
                 >
                   <button
-                    onClick={() => navigate(`/app/mascotas/${m.id}`)}
+                    onClick={() => navigate(`/app/mascotas/${m.id}`, { state: { mascota: m } })}
                     className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
                   >
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-secondary text-primary-container">

@@ -22,7 +22,7 @@ export function Paginacion({ pagina, totalPaginas, onCambio }: Props) {
       >
         <ChevronLeft className="h-4 w-4" aria-hidden />
       </Button>
-      <span className="text-sm text-ink-soft">
+      <span className="text-body-sm font-medium text-on-surface-variant">
         Página {pagina} de {totalPaginas}
       </span>
       <Button

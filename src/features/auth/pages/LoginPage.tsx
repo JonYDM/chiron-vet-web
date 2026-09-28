@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, PawPrint } from "lucide-react";
 import { Button, Input } from "@/components/ui";
 import { PinInput } from "@/components/molecules/PinInput";
 import { Reveal } from "@/lib/anim";
+import { saludoPorHora } from "@/lib/saludo";
 import { ApiError } from "@/lib/http";
 import { useAuth } from "../AuthContext";
 import { identificar } from "../api";
@@ -113,7 +114,7 @@ export function LoginPage() {
             {/* Encabezado grande, asimétrico */}
             <div className="mt-8">
               <h1 className="text-display font-bold leading-tight tracking-tight text-on-surface">
-                Hola 👋
+                {saludoPorHora()} 👋
               </h1>
               <p className="mt-2 text-body-lg text-on-surface-variant">
                 Ingresa tu usuario o teléfono para entrar a Chiron.
@@ -171,10 +172,12 @@ export function LoginPage() {
             {/* Saludo grande con nombre real (si el backend lo dio) */}
             <div className="mt-8">
               <h1 className="text-display font-bold leading-tight tracking-tight text-on-surface">
-                {nombreReal ? `Hola, ${nombreReal.split(" ")[0]}` : "Tu PIN"}
+                {nombreReal ? `¡Qué gusto verte, ${nombreReal.split(" ")[0]}!` : "Tu PIN"}
               </h1>
               <p className="mt-2 text-body-lg text-on-surface-variant">
-                Ingresa tu PIN de {PIN_LENGTH} dígitos para continuar.
+                {nombreReal
+                  ? "Ingresa tu PIN para entrar."
+                  : `Ingresa tu PIN de ${PIN_LENGTH} dígitos para continuar.`}
               </p>
             </div>
 

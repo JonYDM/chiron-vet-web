@@ -30,6 +30,15 @@
 
 ## Backend — features / lógica pendiente (para próximos PRs de `chiron`)
 
+- **Identificar usuario antes del PIN (login estilo Nubank):** endpoint público
+  `POST /auth/identificar { identificador }` → `{ existe: bool, nombre?: string }`.
+  Permite validar el usuario y saludarlo por su nombre real antes de pedir el PIN.
+  - **Nota de seguridad:** habilita enumeración de usuarios. Mitigar con **rate-limiting**
+    y devolviendo solo el primer nombre (no datos sensibles). Para app interna es
+    aceptable, pero decidir a conciencia.
+  - El frontend YA está preparado: si el endpoint no existe (404/405), hace fallback y
+    continúa al PIN sin validar (`identificar()` en `features/auth/api.ts`).
+
 - **Notificaciones in-app (avisos a dueños):** en lugar de integrar WhatsApp/Meta
   (reglas, plantillas aprobadas, costo por mensaje), usar el rol **DuenoMascota** y
   enviarle avisos **dentro del portal**. Requiere:

@@ -60,6 +60,8 @@ _(se irá llenando vista por vista)_
 |---|---|---|
 | Design System (tokens) | [REAL] paleta teal/terracota, Plus Jakarta Sans, tnum, dark mode | — |
 | Panel Operativo (dashboard) | Calcado de Stitch (mobile-first) | Desglose caja SPEI, alerta farmacéutica, sala de espera/triage, agenda; solo venta del día y nombre son [REAL]. Turno DESCARTADO. |
+| Login | Rediseñado estilo Nubank (sin bordes, saludo por hora, difuminado) | Validación de identificador [REAL] (endpoint /auth/identificar mergeado) |
+| Clientes | Calcado de Stitch (buscador soft, chips pill, tarjetas con avatar) | Chips "Con cita hoy" / "Con adeudo" son [MOCK] (marcan pero no filtran) |
 
 ### Decisiones de esta iteración
 - **Avisos a dueños (no WhatsApp):** se descarta integrar WhatsApp/Meta (reglas, plantillas

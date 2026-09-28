@@ -1,16 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  ChevronDown,
-  KeyRound,
-  PawPrint,
-  Pencil,
-  Phone,
-  Plus,
-  Power,
-} from "lucide-react";
+import { ChevronDown, KeyRound, PawPrint, Pencil, Phone, Plus, Power } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { Badge, Button, Card, Spinner } from "@/components/ui";
+import { Avatar, Badge, Button, Spinner } from "@/components/ui";
 import { especieLabel } from "@/lib/enums";
 import { useUsuarioDeCliente } from "@/features/usuarios/hooks";
 import { usePermisos } from "@/lib/usePermisos";
@@ -23,7 +15,7 @@ import { EditarClienteModal } from "./EditarClienteModal";
 import { MascotaModal } from "./MascotaModal";
 import type { Cliente, Mascota } from "@/types/api";
 
-/** Tarjeta de cliente con acciones: editar, mascotas (agregar/editar), acceso al portal. */
+/** Tarjeta de cliente (estilo Stitch): avatar + datos + mascotas + acciones. */
 export function ClienteCard({ cliente }: { cliente: Cliente }) {
   const navigate = useNavigate();
   const [abierto, setAbierto] = useState(false);
@@ -57,6 +49,7 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
       toast.error("No se pudo cambiar el estado del cliente.");
     }
   }
+
   const puedeAcceso = p("gestionar_acceso_portal");
   const { data: usuario, isLoading: cargandoUsuario } = useUsuarioDeCliente(
     abierto ? cliente.id : null,
@@ -64,26 +57,27 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
   );
 
   return (
-    <Card>
+    <div className="overflow-hidden rounded-2xl bg-surface-container-lowest shadow-soft">
       <div className="flex items-center gap-2 p-4">
         <button
           onClick={() => setAbierto((v) => !v)}
           aria-expanded={abierto}
-          className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left"
+          className="flex min-w-0 flex-1 items-center gap-3 text-left"
         >
-          <div className="min-w-0">
-            <p className="flex items-center gap-2 truncate font-semibold text-ink">
+          <Avatar nombre={cliente.nombre} size="md" />
+          <div className="min-w-0 flex-1">
+            <p className="flex items-center gap-2 truncate text-label-lg font-bold text-on-surface">
               {cliente.nombre}
               {!cliente.activo && <Badge tone="danger">Inactivo</Badge>}
             </p>
-            <p className="flex items-center gap-1.5 text-sm text-ink-soft">
+            <p className="flex items-center gap-1.5 text-body-sm text-on-surface-variant">
               <Phone className="h-3.5 w-3.5" aria-hidden />
               {cliente.telefono}
             </p>
           </div>
           <ChevronDown
             className={cn(
-              "h-5 w-5 shrink-0 text-ink-soft transition-transform",
+              "h-5 w-5 shrink-0 text-on-surface-variant transition-transform",
               abierto && "rotate-180",
             )}
             aria-hidden
@@ -91,7 +85,7 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
         </button>
         <Button
           variant="ghost"
-          size="sm"
+          size="icon"
           onClick={alternarEstado}
           aria-label={cliente.activo ? "Desactivar cliente" : "Reactivar cliente"}
           loading={cambiarEstado.isPending}
@@ -100,7 +94,7 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
         </Button>
         <Button
           variant="ghost"
-          size="sm"
+          size="icon"
           onClick={() => setEditarClienteAbierto(true)}
           aria-label="Editar cliente"
         >
@@ -109,7 +103,7 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
       </div>
 
       {abierto && (
-        <div className="space-y-3 border-t border-hairline p-4">
+        <div className="space-y-3 border-t border-outline-variant/20 p-4">
           {isLoading ? (
             <Spinner label="Cargando mascotas…" />
           ) : mascotas && mascotas.length > 0 ? (
@@ -117,35 +111,42 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
               {mascotas.map((m) => (
                 <li
                   key={m.id}
-                  className="flex items-center justify-between gap-3 rounded-xl bg-canvas p-3"
+                  className="flex items-center justify-between gap-3 rounded-xl bg-surface-container p-3"
                 >
                   <button
                     onClick={() => navigate(`/app/mascotas/${m.id}`)}
-                    className="flex min-w-0 flex-1 items-center gap-2 text-left"
+                    className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
                   >
-                    <PawPrint className="h-4 w-4 shrink-0 text-primary" aria-hidden />
-                    <span className="truncate font-medium text-ink">{m.nombre}</span>
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-secondary text-primary-container">
+                      <PawPrint className="h-4 w-4" aria-hidden />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-label-md font-semibold text-on-surface">
+                        {m.nombre}
+                      </span>
+                      <span className="block text-body-sm text-on-surface-variant">
+                        {especieLabel[m.especie]}
+                        {m.raza ? ` · ${m.raza}` : ""}
+                      </span>
+                    </span>
                   </button>
-                  <div className="flex items-center gap-2">
-                    <Badge tone="neutral">{especieLabel[m.especie]}</Badge>
-                    <button
-                      onClick={() => setMascotaEditar(m)}
-                      aria-label={`Editar ${m.nombre}`}
-                      className="text-ink-soft hover:text-ink"
-                    >
-                      <Pencil className="h-4 w-4" aria-hidden />
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => setMascotaEditar(m)}
+                    aria-label={`Editar ${m.nombre}`}
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
+                  >
+                    <Pencil className="h-4 w-4" aria-hidden />
+                  </button>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-ink-soft">
+            <p className="text-body-sm text-on-surface-variant">
               Este cliente no tiene mascotas registradas.
             </p>
           )}
 
-          <Button variant="ghost" size="sm" fullWidth onClick={() => setMascotaNueva(true)}>
+          <Button variant="soft" size="sm" fullWidth onClick={() => setMascotaNueva(true)}>
             <Plus className="h-4 w-4" aria-hidden />
             Agregar mascota
           </Button>
@@ -215,6 +216,6 @@ export function ClienteCard({ cliente }: { cliente: Cliente }) {
           nombre={cliente.nombre}
         />
       )}
-    </Card>
+    </div>
   );
 }

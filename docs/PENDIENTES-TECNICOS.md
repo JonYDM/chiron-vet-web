@@ -55,6 +55,9 @@
   por día del mes, citas por día) para alimentar Recharts, no solo totales.
 - **Multi-sucursal:** relación usuario ↔ N veterinarias + cambio de contexto (ver
   REDISENO-STITCH.md §1).
+- **Filtros de clientes "Con cita hoy" / "Con adeudo":** hoy son chips [MOCK] en la vista
+  Clientes (marcan pero no filtran). Requieren: consulta de clientes con cita en el día
+  y un concepto de adeudo/saldo (cuentas por cobrar) que hoy no existe en el POS.
 - **Nombre de la veterinaria en la sesión:** hoy el token/login solo trae `veterinariaId`,
   no el nombre. El header muestra la sucursal quemada ("Roma Norte"). Falta incluir el
   nombre de la veterinaria en `LoginResponse`/claims para mostrarlo real.

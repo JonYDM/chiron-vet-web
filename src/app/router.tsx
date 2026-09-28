@@ -36,6 +36,9 @@ const ClienteDetallePage = lazy(() =>
 const PerfilPacientePage = lazy(() =>
   import("@/features/mascotas").then((m) => ({ default: m.PerfilPacientePage })),
 );
+const PacientesPage = lazy(() =>
+  import("@/features/mascotas").then((m) => ({ default: m.PacientesPage })),
+);
 const CitasPage = lazy(() =>
   import("@/features/citas").then((m) => ({ default: m.CitasPage })),
 );
@@ -113,6 +116,7 @@ const router = createBrowserRouter([
       { index: true, element: <StaffDashboard /> },
       { path: "clientes", element: <ClientesPage /> },
       { path: "clientes/:clienteId", element: <ClienteDetallePage /> },
+      { path: "pacientes", element: <PacientesPage /> },
       { path: "mascotas/:mascotaId", element: <PerfilPacientePage /> },
       { path: "citas", element: <CitasPage /> },
       { path: "pos", element: <PosPage /> },

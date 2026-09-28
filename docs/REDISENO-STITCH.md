@@ -64,6 +64,16 @@ _(se irá llenando vista por vista)_
 | Clientes | Calcado de Stitch (buscador soft, chips pill, tarjetas con avatar) | Chips "Con cita hoy" / "Con adeudo" son [MOCK] (marcan pero no filtran) |
 
 ### Decisiones de esta iteración
+- **AdminOperativo obsoleto (todos los Admin ven lo mismo):** se elimina la distinción
+  "Admin operativo / supervisor" que recortaba módulos. Ahora **todos los Administradores
+  tienen acceso completo** a los módulos; lo único que el SuperAdmin controla del Admin es
+  el **alcance de veterinarias/sucursales** (multi-sucursal, §1). Frontend: `lib/permisos.ts`
+  ya da acceso completo al Admin sin depender de `sesion.adminOperativo`.
+  - Pendiente UI: quitar el toggle "Admin operativo/supervisor" y su badge de
+    `VeterinariasPage` (panel SuperAdmin) cuando se rediseñe esa vista.
+  - Pendiente backend: el flag `AdminOperativo` (token/dominio/endpoint
+    `/admin/veterinarias/{id}/admin-operativo`) queda sin efecto para módulos. Decidir si
+    se elimina o se deja inerte. Documentado en PENDIENTES-TECNICOS.md.
 - **Avisos a dueños (no WhatsApp):** se descarta integrar WhatsApp/Meta (reglas, plantillas
   aprobadas, costo por mensaje). En su lugar, avisos **in-app** al rol **DuenoMascota** vía
   su portal. En el dashboard, la acción "WhatsApp Masivo" se renombró a **"Avisos a dueños"**.

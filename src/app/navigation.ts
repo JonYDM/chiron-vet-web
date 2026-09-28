@@ -30,6 +30,7 @@ export interface NavItem {
 export const navStaff: NavItem[] = [
   { to: "/app", label: "Inicio", icon: Home, permiso: null },
   { to: "/app/clientes", label: "Clientes", icon: Users, permiso: "operar_clientes" },
+  { to: "/app/pacientes", label: "Pacientes", icon: PawPrint, permiso: "operar_clientes" },
   { to: "/app/citas", label: "Citas", icon: Calendar, permiso: "gestionar_citas" },
   { to: "/app/pos", label: "Ventas", icon: ShoppingCart, permiso: "usar_pos" },
   { to: "/app/equipo", label: "Equipo", icon: UserCog, permiso: "gestionar_equipo" },

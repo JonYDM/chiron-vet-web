@@ -55,6 +55,10 @@
   por día del mes, citas por día) para alimentar Recharts, no solo totales.
 - **Multi-sucursal:** relación usuario ↔ N veterinarias + cambio de contexto (ver
   REDISENO-STITCH.md §1).
+- **AdminOperativo obsoleto:** el flag `AdminOperativo` ya no controla módulos (todos los
+  Admin ven lo mismo). Decidir en backend si se elimina del dominio/token/endpoint
+  `/admin/veterinarias/{id}/admin-operativo` o se deja inerte. El front ya no lo usa para
+  permisos.
 - **Filtros de clientes "Con cita hoy" / "Con adeudo":** hoy son chips [MOCK] en la vista
   Clientes (marcan pero no filtran). Requieren: consulta de clientes con cita en el día
   y un concepto de adeudo/saldo (cuentas por cobrar) que hoy no existe en el POS.

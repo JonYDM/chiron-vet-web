@@ -3,23 +3,28 @@ import { Button, Input, Modal, Select } from "@/components/ui";
 import { ApiError } from "@/lib/http";
 import { opcionesDeEnum } from "@/lib/opciones";
 import { especieLabel, sexoLabel } from "@/lib/enums";
-import { EspecieMascota, SexoMascota, type Mascota } from "@/types/api";
-import { useAgregarMascota, useEditarMascota } from "../hooks";
+import { EspecieMascota, SexoMascota, FiltroEstado, type Mascota } from "@/types/api";
+import { useAgregarMascota, useEditarMascota, useClientes } from "../hooks";
 import type { DatosMascota } from "../api";
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  clienteId: string;
+  /** Cliente dueño. Si no se pasa (alta desde Pacientes), se muestra un selector. */
+  clienteId?: string;
   /** Si se pasa, el modal edita esa mascota; si no, crea una nueva. */
   mascota?: Mascota;
 }
 
-/** Modal para agregar o editar una mascota (con campos clínicos). */
+/** Modal para agregar o editar una mascota (con campos clínicos y selector de dueño). */
 export function MascotaModal({ open, onClose, clienteId, mascota }: Props) {
   const esEdicion = !!mascota;
   const agregar = useAgregarMascota();
   const editar = useEditarMascota();
+  // Si no viene clienteId (alta desde Pacientes), se elige el dueño con un selector.
+  const necesitaSelector = !esEdicion && !clienteId;
+  const { data: clientesData } = useClientes({ estado: FiltroEstado.Activos, tamano: 100 });
+  const [clienteSel, setClienteSel] = useState("");
 
   const [nombre, setNombre] = useState(mascota?.nombre ?? "");
   const [especie, setEspecie] = useState<number>(mascota?.especie ?? EspecieMascota.Perro);
@@ -36,6 +41,11 @@ export function MascotaModal({ open, onClose, clienteId, mascota }: Props) {
   async function enviar(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    const clienteFinal = clienteId ?? clienteSel;
+    if (!esEdicion && !clienteFinal) {
+      setError("Selecciona el dueño de la mascota.");
+      return;
+    }
     const datos: DatosMascota = {
       nombre: nombre.trim(),
       especie,
@@ -50,7 +60,7 @@ export function MascotaModal({ open, onClose, clienteId, mascota }: Props) {
       if (esEdicion) {
         await editar.mutateAsync({ mascotaId: mascota!.id, datos });
       } else {
-        await agregar.mutateAsync({ clienteId, datos });
+        await agregar.mutateAsync({ clienteId: clienteFinal, datos });
       }
       onClose();
     } catch (err) {
@@ -63,6 +73,17 @@ export function MascotaModal({ open, onClose, clienteId, mascota }: Props) {
   return (
     <Modal open={open} onClose={onClose} title={esEdicion ? "Editar mascota" : "Nueva mascota"}>
       <form onSubmit={enviar} className="space-y-4">
+        {necesitaSelector && (
+          <Select
+            label="Dueño"
+            value={clienteSel}
+            onChange={(e) => setClienteSel(e.target.value)}
+            options={[
+              { value: "", label: "Selecciona un cliente…" },
+              ...(clientesData?.items ?? []).map((c) => ({ value: c.id, label: c.nombre })),
+            ]}
+          />
+        )}
         <Input label="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
         <div className="grid grid-cols-2 gap-3">
           <Select

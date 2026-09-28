@@ -89,3 +89,40 @@
 ## Notas de implementación
 - Cualquier dependencia nueva: versión pineada, revisar peso (bundle) y encaje con tokens.
 - Priorizar componentes propios sobre librerías pesadas salvo que aporten mucho (charts).
+
+## Conceptos detectados en los mock (features candidatas) — con filtro LATAM
+
+> Criterio: anotar lo útil que aparece en los datos mock, PERO filtrar por contexto LATAM.
+> Descartar lo que no sea determinante para que una veterinaria adopte el sistema (evitar
+> features "de más" que no mueven la aguja aquí).
+
+### Sala de espera / triage
+- **Enum de urgencia/triage:** `Normal`, `Urgencia leve`, `Urgencia mayor` (o similar).
+  Útil para priorizar atención. → CONSERVAR (simple y aporta).
+- **Tiempo de espera** del paciente en sala. → CONSERVAR (dato operativo real).
+- **Dueño** visible en la tarjeta de sala. → CONSERVAR.
+- **"Ver ficha"** (acceso rápido al perfil desde la sala). → CONSERVAR.
+- **Consultorio asignado** ("Consultorio 2"). → EVALUAR: útil solo si la clínica tiene
+  varios consultorios; muchas LATAM son de 1 consultorio. Hacerlo opcional/configurable.
+- Requiere módulo backend de **cola de atención** (entidad con estado, urgencia, tiempo,
+  consultorio opcional).
+
+### Citas — enum de estado
+- Estados observados: **Atendido / Por confirmar / En proceso / (Quirófano)**.
+  - CONSERVAR: `Programada`, `Atendida`, `No asistió`, `Cancelada` (ya existen en el enum
+    `EstadoCita` del backend) + posiblemente **`En proceso`** y **`Por confirmar`**.
+  - EVALUAR/DESCARTAR: **"Quirófano"** — muchas veterinarias LATAM pequeñas no operan o no
+    manejan estados de quirófano. No hacerlo determinante; dejarlo fuera del MVP o como
+    etiqueta opcional.
+
+### Filtro LATAM — qué probablemente DESCARTAR (no determinante para adopción)
+- **SPEI con CLABE/QR** en el POS: útil pero no crítico; muchas cobran efectivo/tarjeta.
+  Mantener método de pago simple (efectivo/tarjeta/transferencia) que ya existe.
+- **Turno matutino/vespertino activo:** poco valor real; candidato a descartar.
+- **"En línea · Sincronizado":** solo si se hace PWA offline de verdad; si no, quitar.
+- **Alerta farmacéutica con lotes/refrigerador:** valioso para clínicas grandes; para el
+  grueso LATAM (pequeñas) puede ser over-engineering al inicio. Priorizar bajo.
+
+### Qué SÍ es determinante (priorizar)
+- Expediente + galería de fotos (ya hecho), clientes/pacientes, citas con estados simples,
+  POS simple, recordatorios de vacunas/desparasitación (muy valorado en LATAM).

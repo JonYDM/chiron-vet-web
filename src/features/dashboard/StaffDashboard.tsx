@@ -21,18 +21,22 @@ import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
 import { formatCurrency, fechaHoyLarga } from "@/lib/format";
 import { usePermisos } from "@/lib/usePermisos";
 import { useMetricas } from "./hooks";
+import { useRecordatorios } from "@/features/recordatorios";
 
 /**
  * Panel Operativo — calco fiel del diseño Stitch (mobile-first, estética clínica).
- * [REAL] Métrica de venta del día y nombre del usuario vienen del backend.
- * [MOCK] Turno, desglose de caja, alerta farmacéutica, sala de espera, agenda y
- * recordatorios son datos quemados (ver docs/REDISENO-STITCH.md §4) — features futuras.
+ * [REAL] Métrica de venta del día, nombre del usuario y recordatorios pendientes vienen
+ * del backend.
+ * [MOCK] Turno, desglose de caja, alerta farmacéutica, sala de espera y agenda son datos
+ * quemados (ver docs/REDISENO-STITCH.md §4) — features futuras.
  */
 export function StaffDashboard() {
   const { sesion } = useAuth();
   const p = usePermisos();
   const { data: metricas } = useMetricas();
   const ventaHoy = metricas?.ventasHoy ?? 14850;
+  const { data: recordatorios } = useRecordatorios();
+  const pendientes = recordatorios?.length ?? 0;
 
   return (
     <PantallaConHeader
@@ -276,22 +280,29 @@ export function StaffDashboard() {
       </div>
 
       {/* Recordatorios */}
-      <div className="flex items-center justify-between rounded-[0.75rem] bg-surface-container p-4 shadow-soft">
+      <Link
+        to="/app/recordatorios"
+        className="flex items-center justify-between rounded-[0.75rem] bg-surface-container p-4 shadow-soft active:scale-[0.99]"
+      >
         <div className="flex items-center gap-3">
           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary-container text-on-primary-container">
             <BellRing className="h-[22px] w-[22px]" aria-hidden />
           </div>
           <div>
-            <div className="text-label-lg font-bold text-on-surface">12 Recordatorios Pendientes</div>
+            <div className="text-label-lg font-bold text-on-surface">
+              {pendientes > 0
+                ? `${pendientes} recordatorio${pendientes === 1 ? "" : "s"} pendiente${pendientes === 1 ? "" : "s"}`
+                : "Sin recordatorios pendientes"}
+            </div>
             <div className="text-body-sm text-on-surface-variant">
-              Vacunas y desparasitaciones para hoy
+              Vacunas, desparasitaciones y citas próximas
             </div>
           </div>
         </div>
-        <button className="rounded-lg bg-surface-container-lowest px-3 py-1.5 text-label-sm font-bold text-primary-container shadow-soft active:scale-95">
-          Enviar
-        </button>
-      </div>
+        <span className="rounded-lg bg-surface-container-lowest px-3 py-1.5 text-label-sm font-bold text-primary-container shadow-soft">
+          Ver
+        </span>
+      </Link>
       </div>
     </PantallaConHeader>
   );

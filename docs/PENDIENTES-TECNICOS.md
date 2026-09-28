@@ -30,6 +30,25 @@
 
 ## Backend — features / lógica pendiente (para próximos PRs de `chiron`)
 
+- **Recordatorios del STAFF (el "gancho" — FRONTEND HECHO, backend PENDIENTE de merge):**
+  - Estado actual: el DUEÑO ya ve sus recordatorios (`GET /api/portal/mis-recordatorios`
+    conectado y funcional).
+  - **Backend (rama `feature/listar-recordatorios` en `chiron`, PENDIENTE de merge por el
+    usuario):** `GET /api/recordatorios` (veterinariaId del token; roles Admin/Veterinario/
+    Recepcionista) + método `DetectarParaStaffAsync` en `GenerarRecordatorios` (todos los
+    pendientes de la clínica, sin filtrar por consentimiento de WhatsApp). El POST
+    `/recordatorios/enviar` ya existía.
+  - **Frontend (HECHO en `feature/rediseno-clinico`):** feature `features/recordatorios`
+    (api + hooks `useRecordatorios`/`useEnviarRecordatorios`), vista `RecordatoriosPage`
+    (métricas + lista agrupada por fecha con teléfono copiable + botón "Avisar"),
+    ruta `/app/recordatorios` conectada (ya no es `EnConstruccion`), y el widget del
+    dashboard ahora muestra el conteo REAL y enlaza a la vista.
+  - Es el gancho de negocio del cliente ancla: que la clínica vea a quién recordar para
+    que el cliente vuelva.
+  - PENDIENTE: que el usuario mergee `feature/listar-recordatorios` (backend) para que el
+    GET responda en vivo.
+
+
 - **Panel SuperAdmin — ampliar modelos (Veterinaria + Administrador):**
   - **Veterinaria** (hoy: Nombre, Telefono, Activa, FechaAlta). Agregar:
     - `Direccion` (texto).

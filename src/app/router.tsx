@@ -7,8 +7,6 @@ import {
 import { RolUsuario } from "@/types/api";
 import { ProtectedRoute, useAuth, rutaInicialPorRol } from "@/features/auth";
 import { Spinner } from "@/components/ui";
-import { EnConstruccion } from "@/components/organisms/EnConstruccion";
-
 // Lazy loading por área (code-splitting por rol).
 const LoginPage = lazy(() =>
   import("@/features/auth/pages/LoginPage").then((m) => ({ default: m.LoginPage })),
@@ -56,6 +54,9 @@ const MiExpedientePage = lazy(() =>
 );
 const MisRecordatoriosPage = lazy(() =>
   import("@/features/portal").then((m) => ({ default: m.MisRecordatoriosPage })),
+);
+const RecordatoriosPage = lazy(() =>
+  import("@/features/recordatorios").then((m) => ({ default: m.RecordatoriosPage })),
 );
 const VeterinariasPage = lazy(() =>
   import("@/features/veterinarias").then((m) => ({
@@ -128,7 +129,7 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      { path: "recordatorios", element: <EnConstruccion titulo="Recordatorios" /> },
+      { path: "recordatorios", element: <RecordatoriosPage /> },
       {
         path: "equipo",
         element: (

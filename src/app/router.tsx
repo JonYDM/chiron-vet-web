@@ -7,6 +7,21 @@ import {
 import { RolUsuario } from "@/types/api";
 import { ProtectedRoute, useAuth, rutaInicialPorRol } from "@/features/auth";
 import { Spinner } from "@/components/ui";
+import { PaginaError } from "@/components/organisms/PaginaError";
+
+/** 404: página no encontrada. Lleva al inicio del rol actual (o al login). */
+function PaginaNoEncontrada() {
+  const { sesion } = useAuth();
+  const inicio = sesion ? rutaInicialPorRol(sesion.rol) : "/login";
+  return (
+    <PaginaError
+      codigo="404"
+      titulo="Página no encontrada"
+      descripcion="La página que buscas no existe o se movió de lugar."
+      irA={inicio}
+    />
+  );
+}
 // Lazy loading por área (code-splitting por rol).
 const LoginPage = lazy(() =>
   import("@/features/auth/pages/LoginPage").then((m) => ({ default: m.LoginPage })),
@@ -166,7 +181,7 @@ const router = createBrowserRouter([
     ],
   },
 
-  { path: "*", element: <Navigate to="/" replace /> },
+  { path: "*", element: <PaginaNoEncontrada /> },
 ]);
 
 export function AppRouter() {

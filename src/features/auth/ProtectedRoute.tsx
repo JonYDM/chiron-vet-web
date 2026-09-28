@@ -4,6 +4,7 @@ import { useAuth } from "./AuthContext";
 import { rutaInicialPorRol } from "./roles";
 import type { RolUsuario } from "@/types/api";
 import { Spinner } from "@/components/ui";
+import { PaginaError } from "@/components/organisms/PaginaError";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -33,7 +34,14 @@ export function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
   }
 
   if (roles && !roles.includes(sesion.rol)) {
-    return <Navigate to={rutaInicialPorRol(sesion.rol)} replace />;
+    return (
+      <PaginaError
+        codigo="403"
+        titulo="Sin acceso"
+        descripcion="No tienes permiso para ver esta sección con tu rol."
+        irA={rutaInicialPorRol(sesion.rol)}
+      />
+    );
   }
 
   return <>{children}</>;

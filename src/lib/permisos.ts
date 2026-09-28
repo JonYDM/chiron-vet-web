@@ -17,9 +17,9 @@ export type Accion =
   | "gestionar_acceso_portal"; // dar acceso / ver acceso de un cliente
 
 /**
- * Matriz base de permisos por rol. El Administrador tiene un tratamiento especial:
- * siempre puede métricas y equipo, y el resto (operar) depende del flag AdminOperativo
- * de su veterinaria.
+ * Matriz base de permisos por rol. El Administrador tiene acceso completo a los módulos;
+ * el SuperAdmin solo controla el alcance de veterinarias/sucursales del Admin, no qué
+ * módulos ve. (El flag AdminOperativo quedó obsoleto para control de módulos.)
  */
 const PERMISOS_VET: Accion[] = [
   "operar_clientes",
@@ -58,11 +58,14 @@ export function puede(sesion: Sesion | null, accion: Accion): boolean {
       return accion === "gestionar_veterinarias";
 
     case RolUsuario.Administrador:
-      // Siempre: métricas y equipo.
-      if (accion === "ver_metricas" || accion === "gestionar_equipo") return true;
-      // Operativas: solo si la veterinaria habilita al admin como operativo.
-      if (OPERATIVAS.includes(accion)) return sesion.adminOperativo;
-      return false;
+      // El Administrador tiene acceso completo a todos los módulos operativos y de
+      // gestión. Lo que el SuperAdmin controla es el alcance de veterinarias/sucursales
+      // (multi-sucursal), NO qué módulos ve. Todos los Admin ven lo mismo.
+      return (
+        accion === "ver_metricas" ||
+        accion === "gestionar_equipo" ||
+        OPERATIVAS.includes(accion)
+      );
 
     case RolUsuario.Veterinario:
       return PERMISOS_VET.includes(accion);

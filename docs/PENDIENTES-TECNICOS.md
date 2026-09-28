@@ -80,9 +80,9 @@
 
 - **[LEGAL / PENDIENTE] Licencia de íconos 3D (things.co):**
   - Íconos 3D de **things.co** usados en la app: `public/vet.png` (identidad del rol clínico
-    en el header del Panel Operativo), `public/empty.png` (ilustración global de estado
-    vacío / "sin resultados" en todas las listas) y `public/pet-store.png` (identidad del
-    header del Punto de venta). Su **uso comercial requiere licencia de pago**.
+    en el header del Panel Operativo), `public/empty.png` (estado vacío / "sin resultados"),
+    `public/pet-store.png` (header del Punto de venta) y `public/no-load.png` (monito de las
+    páginas de error 404/403). Su **uso comercial requiere licencia de pago**.
   - Estado: NO pagado aún (todavía sin cliente). **Compromiso: pagar la licencia ANTES de
     salir a producción / cobrar al primer cliente.** No olvidar: es un tema legal.
   - Nota técnica: `vet.png` pesa ~1.6 MB (muy grande para un ícono). **Optimizar** ambos

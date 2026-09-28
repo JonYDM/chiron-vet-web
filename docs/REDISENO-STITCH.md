@@ -11,37 +11,67 @@
 
 ---
 
+## 0. Alcance oficial del MVP (acordado)
+
+Foco: el **ciclo de valor** que hace que una veterinaria LATAM adopte el sistema →
+`Cliente → Paciente (expediente/foto) → Cita → Consulta/Cobro → Recordatorio → regresa`.
+
+### SÍ entra al MVP
+- **Clientes + Pacientes + Expediente + galería de fotos** [REAL, hecho].
+- **Foto de perfil del paciente** (avatar) separada de la galería [REAL].
+- **Citas** con estados simples: Programada / En proceso / Atendida / No asistió / Cancelada.
+  (SIN "Quirófano".)
+- **POS simple:** seleccionar producto + método de pago (efectivo/tarjeta/transferencia) +
+  cobrar/recibo. SIN SPEI/CLABE/QR.
+- **Recordatorios** de vacunas/desparasitación + **notificaciones in-app** al portal del
+  dueño (el "gancho" de valor en LATAM). NO WhatsApp/Meta.
+- **Alertas médicas** (alergias/padecimientos del paciente) [REAL].
+- **Multi-sucursal** (modelo definido, ver §1): el SuperAdmin crea/asigna veterinarias a un
+  Admin; el Admin cambia de contexto entre sus sucursales (cada una es un tenant aislado).
+
+### NO entra al MVP (pospuesto / descartado)
+- **Sala de espera / triage:** POSPUESTA. Poco valor para clínicas pequeñas (1 consultorio,
+  el vet ve quién llegó). Se queda como mock visual en el dashboard; se construye solo si un
+  cliente con flujo alto lo pide.
+- **SPEI con CLABE/QR:** fricción alta, valor bajo para la mayoría. Pospuesto.
+- **Turnos** (matutino/vespertino): descartado (poco valor).
+- **"En línea · Sincronizado" / offline sync:** descartado del MVP.
+- **Inventario con lotes/caducidad/alerta farmacéutica compleja:** over-engineering para
+  clínicas pequeñas. Pospuesto (el stock simple del POS basta).
+- **WhatsApp/Meta:** descartado (reglas/costos) → notificaciones in-app en su lugar.
+
+---
+
 ## 1. Roles y alcance (multi-sucursal)
 
 ### Estado actual del backend
 - Un usuario pertenece a **una** veterinaria (`veterinariaId` viaja en el token JWT).
 - Roles: SuperAdmin, Administrador, Veterinario, Recepcionista, DueñoMascota.
 
-### Regla de negocio nueva (a diseñar como MOCK, implementar después)
-- **SuperAdmin (dueño de Chiron):** da de alta veterinarias y sus administradores.
-  Su panel se centra en la **gestión de veterinarias** (alta, activar/desactivar,
-  asignar admin, configurar admin operativo), no en la operación clínica diaria.
-- **Administrador de veterinaria:** administra **su** clínica. Por defecto **una sola**
-  veterinaria.
-- **[REGLA NUEVA] Multi-sucursal por permiso:** un Administrador puede gestionar
-  **más de una veterinaria** SOLO si el SuperAdmin se lo permite explícitamente.
-  - Si tiene 1 → la topbar muestra el nombre de la clínica fijo.
-  - Si tiene varias → la topbar muestra un **selector de sucursal** (dropdown) para
-    cambiar de contexto. **[MOCK]** en esta etapa.
+### Modelo multi-sucursal (DEFINITIVO, MVP)
+- **Cada sucursal = una veterinaria independiente** (tenant aislado por `veterinariaId`,
+  como ya funciona: pacientes, empleados, citas, POS separados).
+- **Proceso comercial:** el Admin contacta al SuperAdmin pidiendo otra sucursal → el
+  **SuperAdmin crea otra veterinaria y se la asigna a ese mismo Admin**.
+- El Admin, si tiene varias, **cambia de contexto** con el selector de sucursal del header
+  y alimenta cada una por separado. NO hay vista consolidada.
+- **SuperAdmin:** su panel se centra en gestión de veterinarias (alta, activar/desactivar,
+  crear admin, **asignar veterinaria a un admin existente**). (El flag AdminOperativo quedó
+  obsoleto — ver decisiones.)
 
 ### Historia de usuario
-> Como **SuperAdmin**, quiero poder autorizar a un Administrador a gestionar varias
-> veterinarias, para soportar clínicas con múltiples sucursales bajo una misma
-> administración.
+> Como **SuperAdmin**, cuando un Admin me pide otra sucursal, creo una nueva veterinaria y
+> se la asigno, para que le aparezca en su rol y la administre por separado.
 >
-> Como **Administrador con varias sucursales**, quiero cambiar de veterinaria activa
-> desde la barra superior, para operar cada sucursal sin cerrar sesión.
+> Como **Administrador con varias sucursales**, cambio de veterinaria activa desde la barra
+> superior, para operar cada sucursal (sus pacientes, empleados, citas, POS) sin cerrar sesión.
 
-### Pendiente de backend
-- Relación **usuario ↔ N veterinarias** (hoy es 1↔1 vía token).
-- Endpoint para **listar las veterinarias del usuario** y **cambiar la veterinaria
-  activa** (emitir token con el nuevo `veterinariaId`, o manejar contexto por request).
-- Permiso/flag en el Administrador que el SuperAdmin activa ("multi-sucursal").
+### Pendiente de backend (multi-sucursal)
+- Relación **usuario ↔ N veterinarias** (hoy es 1↔1 vía token). Ej. tabla `UsuarioVeterinaria`.
+- Endpoint **listar "mis veterinarias"** (las del admin logueado).
+- **Cambiar de contexto:** al elegir sucursal, reemitir el token con el nuevo `veterinariaId`
+  (lo más limpio, ya que el tenant viaja en el token).
+- **SuperAdmin:** endpoint para **asignar** una veterinaria (nueva o existente) a un Admin.
 
 ---
 

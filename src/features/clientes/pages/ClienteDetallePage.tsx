@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, KeyRound, PawPrint, Pencil, Phone, Plus, Power } from "lucide-react";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { KeyRound, PawPrint, Pencil, Phone, Plus, Power } from "lucide-react";
 import { Avatar, Badge, Button, Spinner } from "@/components/ui";
 import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
 import { EmptyState } from "@/components/molecules/EmptyState";
 import { especieLabel } from "@/lib/enums";
 import { usePermisos } from "@/lib/usePermisos";
-import { Reveal } from "@/lib/anim";
 import { useConfirm } from "@/components/feedback/ConfirmProvider";
 import { useToast } from "@/components/feedback/useToast";
 import { useUsuarioDeCliente } from "@/features/usuarios/hooks";
@@ -67,16 +66,9 @@ export function ClienteDetallePage() {
 
   return (
     <PantallaConHeader
-      titulo={cliente?.nombre ?? "Cliente"}
-      subtitulo={
-        <Link
-          to="/app/clientes"
-          className="inline-flex items-center gap-1 text-body-sm font-medium text-primary-container"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden />
-          Clientes
-        </Link>
-      }
+      titulo="Detalles del cliente"
+      volverA={-1}
+      tituloSuave
     >
       <div className="flex flex-col gap-4">
         {/* Tarjeta del cliente */}
@@ -158,7 +150,7 @@ export function ClienteDetallePage() {
           {isLoading ? (
             <Spinner label="Cargando mascotas…" />
           ) : mascotas && mascotas.length > 0 ? (
-            <Reveal stagger className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2">
               {mascotas.map((m) => (
                 <div key={m.id} className="flex items-center justify-between gap-3 rounded-xl bg-surface-container p-3">
                   <button
@@ -187,7 +179,7 @@ export function ClienteDetallePage() {
                   </button>
                 </div>
               ))}
-            </Reveal>
+            </div>
           ) : (
             <p className="py-4 text-center text-body-sm text-on-surface-variant">
               Este cliente no tiene mascotas registradas.

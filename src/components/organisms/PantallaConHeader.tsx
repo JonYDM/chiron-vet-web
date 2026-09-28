@@ -1,4 +1,6 @@
 import { useEffect, type ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { useHeaderTitulo } from "./headerTitulo";
 
 interface Props {
@@ -6,8 +8,17 @@ interface Props {
   titulo: string;
   /** Acción a la derecha del título grande (opcional). */
   accion?: ReactNode;
-  /** Subtítulo/nota bajo el título (opcional). */
+  /** Subtítulo/nota bajo el título (opcional). Ignorado si se pasa `volverA`. */
   subtitulo?: ReactNode;
+  /**
+   * Si se pasa, muestra un botón "Volver" como subtítulo. `-1` vuelve atrás en el
+   * historial (con fallback); una ruta string navega a esa dirección.
+   */
+  volverA?: number | string;
+  /** Texto del botón volver (por defecto "Volver"). */
+  volverTexto?: string;
+  /** Si true, el título se muestra pequeño y ligero (para títulos "suaves" tipo "Acerca de"). */
+  tituloSuave?: boolean;
   children: ReactNode;
 }
 
@@ -22,11 +33,39 @@ const UMBRAL_EXPANDIR = 24;
  * título grande que se encoge a la barra). Usa histéresis para no parpadear.
  * Ver docs/PENDIENTES-TECNICOS.md.
  */
-export function PantallaConHeader({ titulo, accion, subtitulo, children }: Props) {
+export function PantallaConHeader({
+  titulo,
+  accion,
+  subtitulo,
+  volverA,
+  volverTexto = "Volver",
+  tituloSuave,
+  children,
+}: Props) {
   const { registrar, setColapsado } = useHeaderTitulo();
+  const navigate = useNavigate();
+
+  const sub =
+    volverA !== undefined ? (
+      <button
+        onClick={() =>
+          typeof volverA === "string"
+            ? navigate(volverA)
+            : window.history.length > 1
+              ? navigate(volverA)
+              : navigate("/app")
+        }
+        className="inline-flex items-center gap-1 text-body-sm font-medium text-primary-container"
+      >
+        <ArrowLeft className="h-4 w-4" aria-hidden />
+        {volverTexto}
+      </button>
+    ) : (
+      subtitulo
+    );
 
   useEffect(() => {
-    registrar({ titulo, subtitulo, accion });
+    registrar({ titulo, subtitulo: sub, accion, tituloSuave });
     return () => {
       registrar({ titulo: null });
       setColapsado(false);

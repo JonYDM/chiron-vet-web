@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { useParams, useLocation, Link } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import {
   AlertTriangle,
-  ArrowLeft,
   CalendarClock,
   FileText,
   Plus,
@@ -14,7 +13,6 @@ import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
 import { especieLabel, sexoLabel, tipoRegistroLabel } from "@/lib/enums";
 import { edadEnAnios, formatDate } from "@/lib/format";
 import { usePermisos } from "@/lib/usePermisos";
-import { Reveal } from "@/lib/anim";
 import { TipoRegistroMedico, type Mascota } from "@/types/api";
 import { useExpediente } from "@/features/expedientes/hooks";
 import { AgregarRegistroModal } from "@/features/expedientes/components/AgregarRegistroModal";
@@ -39,18 +37,7 @@ export function PerfilPacientePage() {
   const edad = mascota ? edadEnAnios(mascota.fechaNacimiento) : null;
 
   return (
-    <PantallaConHeader
-      titulo={mascota?.nombre ?? "Paciente"}
-      subtitulo={
-        <Link
-          to="/app/clientes"
-          className="inline-flex items-center gap-1 text-body-sm font-medium text-primary-container"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden />
-          Clientes
-        </Link>
-      }
-    >
+    <PantallaConHeader titulo="Acerca de..." volverA={-1} tituloSuave>
       <div className="flex flex-col gap-4">
         {/* Alerta médica crítica (si hay padecimientos/alergias) */}
         {mascota?.padecimientos && (
@@ -149,7 +136,7 @@ export function PerfilPacientePage() {
             <h2 className="text-headline-sm font-bold text-on-surface">Historial clínico</h2>
           </div>
           {registros && registros.length > 0 ? (
-            <Reveal stagger className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3">
               {registros.map((r) => {
                 const esVacuna =
                   r.tipo === TipoRegistroMedico.Vacuna ||
@@ -180,7 +167,7 @@ export function PerfilPacientePage() {
                   </div>
                 );
               })}
-            </Reveal>
+            </div>
           ) : (
             <p className="py-6 text-center text-body-sm text-on-surface-variant">
               Aún no hay registros médicos.

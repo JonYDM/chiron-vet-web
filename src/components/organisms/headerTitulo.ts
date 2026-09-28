@@ -7,9 +7,11 @@ export interface HeaderTituloValor {
   subtitulo: ReactNode;
   /** Acción a la derecha del título grande (opcional). */
   accion: ReactNode;
+  /** Si true, el título grande se muestra más pequeño y ligero (para títulos "suaves"). */
+  tituloSuave: boolean;
   /** True cuando el header está colapsado (scroll). */
   colapsado: boolean;
-  registrar: (v: { titulo: string | null; subtitulo?: ReactNode; accion?: ReactNode }) => void;
+  registrar: (v: { titulo: string | null; subtitulo?: ReactNode; accion?: ReactNode; tituloSuave?: boolean }) => void;
   setColapsado: (v: boolean) => void;
 }
 
@@ -26,6 +28,7 @@ export function useHeaderTitulo(): HeaderTituloValor {
       titulo: null,
       subtitulo: null,
       accion: null,
+      tituloSuave: false,
       colapsado: false,
       registrar: () => {},
       setColapsado: () => {},

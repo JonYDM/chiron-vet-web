@@ -24,11 +24,17 @@ function HeaderTituloProvider({ children }: { children: ReactNode }) {
     titulo: string | null;
     subtitulo: ReactNode;
     accion: ReactNode;
-  }>({ titulo: null, subtitulo: null, accion: null });
+    tituloSuave: boolean;
+  }>({ titulo: null, subtitulo: null, accion: null, tituloSuave: false });
   const [colapsado, setColapsado] = useState(false);
 
-  const registrar = (v: { titulo: string | null; subtitulo?: ReactNode; accion?: ReactNode }) =>
-    setEstado({ titulo: v.titulo, subtitulo: v.subtitulo ?? null, accion: v.accion ?? null });
+  const registrar = (v: { titulo: string | null; subtitulo?: ReactNode; accion?: ReactNode; tituloSuave?: boolean }) =>
+    setEstado({
+      titulo: v.titulo,
+      subtitulo: v.subtitulo ?? null,
+      accion: v.accion ?? null,
+      tituloSuave: v.tituloSuave ?? false,
+    });
 
   return (
     <HeaderTituloContext.Provider
@@ -57,7 +63,7 @@ function AppShellInterno({ nav, children }: { nav: NavItem[]; children: ReactNod
   const p = usePermisos();
   const items = nav.filter((i) => i.permiso === null || p(i.permiso));
   const [pinAbierto, setPinAbierto] = useState(false);
-  const { titulo, subtitulo, accion, colapsado } = useHeaderTitulo();
+  const { titulo, subtitulo, accion, tituloSuave, colapsado } = useHeaderTitulo();
 
   return (
     <div className="min-h-screen bg-surface">
@@ -121,10 +127,17 @@ function AppShellInterno({ nav, children }: { nav: NavItem[]; children: ReactNod
             <div className="min-h-0">
               <div className="flex items-start justify-between gap-3 pb-3 pt-1">
                 <div className="min-w-0">
-                  <h1 className="text-headline-lg-mobile font-bold tracking-tight text-on-surface">
+                  {subtitulo && <div className="mb-1">{subtitulo}</div>}
+                  <h1
+                    className={cn(
+                      "tracking-tight text-on-surface",
+                      tituloSuave
+                        ? "text-headline-sm font-semibold text-on-surface-variant"
+                        : "text-headline-lg-mobile font-bold",
+                    )}
+                  >
                     {titulo}
                   </h1>
-                  {subtitulo && <div className="mt-0.5">{subtitulo}</div>}
                 </div>
                 {accion && <div className="shrink-0">{accion}</div>}
               </div>

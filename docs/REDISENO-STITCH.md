@@ -210,13 +210,17 @@ Tiene ~6 secciones apiladas (acciones, métricas bento, alerta farmacéutica, sa
 agenda, recordatorios) y varias son **[MOCK]**. Se siente denso.
 
 ### Mejoras de diseño propuestas
-1. **Jerarquía tipográfica:** métrica del día como héroe (número grande, text-metric/display);
-   títulos de sección más grandes y con más margen superior.
-2. **Menos texto:** quitar los subtítulos de las 4 acciones rápidas (dejar título + ícono).
-3. **Mostrar solo lo real en el MVP:** ocultar los mock puros (sala de espera, alerta
-   farmacéutica, turno) hasta que exista backend → dashboard más limpio y honesto.
-4. **Más espaciado** entre secciones y dentro de las tarjetas.
-5. **Priorizar por uso:** lo más usado arriba y grande; lo secundario abajo/pequeño.
+> NOTA (preferencia del usuario): la estructura está BIEN organizada y se CONSERVAN todas
+> las secciones. El objetivo NO es quitar cosas, sino dar **más aire** para reducir el
+> cansancio visual. Enfoque puramente de espaciado/respiración:
+1. **Más separación entre secciones** (subir gap general, ej. gap-4 → gap-6).
+2. **Más padding interno** en las tarjetas (el contenido que no toque los bordes).
+3. **Margen extra antes de los títulos de sección** para separar grupos visualmente.
+4. **Aligerar densidad de texto** dentro de las tarjetas (interlineado, quitar datos muy
+   redundantes) sin eliminar secciones.
+5. Opcional: reducir un poco el tamaño de bloques muy cargados (ej. desglose de caja) para
+   que no compitan, pero manteniéndolos.
+(Se descarta ocultar los mock: el usuario quiere mantener las secciones como están.)
 
 ### Conectar lo REAL que ya tiene backend (siguiente paso recomendado)
 El dashboard muestra mock, pero varias cosas YA existen en el backend y solo falta conectarlas:

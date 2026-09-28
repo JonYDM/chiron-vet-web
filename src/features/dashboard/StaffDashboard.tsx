@@ -29,11 +29,18 @@ import { EstadoCita, RolUsuario, type Cita } from "@/types/api";
 export function StaffDashboard() {
   const { sesion } = useAuth();
   const p = usePermisos();
+  const rol = sesion?.rol;
+  // Quién ve dinero: Admin (todo el negocio) y Recepcionista (su caja del día).
+  // El Veterinario NO ve métricas de dinero.
+  const puedeVerVentas = rol === RolUsuario.Administrador || rol === RolUsuario.Recepcionista;
+  // El desglose acumulado / negocio es solo del Admin.
+  const puedeVerNegocio = rol === RolUsuario.Administrador;
+
   const { data: metricas } = useMetricas();
   const ventaHoy = metricas?.ventasHoy ?? 0;
   const { data: recordatorios } = useRecordatorios();
   const pendientes = recordatorios?.length ?? 0;
-  const { data: caja } = useResumenCajaHoy();
+  const { data: caja } = useResumenCajaHoy(puedeVerVentas);
   const { data: citas } = useProximasCitas();
   const citasHoy = (citas ?? []).filter((c) => esHoy(c.fechaHora));
 
@@ -66,14 +73,16 @@ export function StaffDashboard() {
           className="bg-primary-container text-on-primary"
           iconWrap="bg-white/20 text-on-primary"
         />
-        <AccionRapida
-          to={p("usar_pos") ? "/app/pos" : "/app"}
-          icon={CreditCard}
-          titulo="Cobrar en Caja"
-          sub="Punto de venta"
-          className="bg-secondary-container text-on-secondary"
-          iconWrap="bg-white/20 text-on-secondary"
-        />
+        {p("usar_pos") && (
+          <AccionRapida
+            to="/app/pos"
+            icon={CreditCard}
+            titulo="Cobrar en Caja"
+            sub="Punto de venta"
+            className="bg-secondary-container text-on-secondary"
+            iconWrap="bg-white/20 text-on-secondary"
+          />
+        )}
         <AccionRapida
           to={p("operar_clientes") ? "/app/clientes" : "/app"}
           icon={UserPlus}
@@ -131,24 +140,29 @@ export function StaffDashboard() {
             </div>
           </div>
 
-          {/* Venta en caja (REAL: total + desglose por método) */}
-          <div className="col-span-2 flex flex-col justify-between rounded-2xl bg-tertiary-fixed/50 p-3.5 shadow-inset-up">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <Store className="h-[18px] w-[18px] text-tertiary" aria-hidden />
-                <span className="text-label-md font-bold text-on-surface">Venta en Caja · Hoy</span>
+          {/* Venta en caja: total del día (Admin y Recepcionista). Desglose por método
+              solo para el Admin (métrica del negocio). */}
+          {puedeVerVentas && (
+            <div className="col-span-2 flex flex-col justify-between rounded-2xl bg-tertiary-fixed/50 p-3.5 shadow-inset-up">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Store className="h-[18px] w-[18px] text-tertiary" aria-hidden />
+                  <span className="text-label-md font-bold text-on-surface">Venta en Caja · Hoy</span>
+                </div>
+                <span className="tabular text-headline-sm font-bold text-tertiary">
+                  {formatCurrency(caja?.total ?? ventaHoy)}{" "}
+                  <span className="text-[11px] font-normal text-on-surface-variant">MXN</span>
+                </span>
               </div>
-              <span className="tabular text-headline-sm font-bold text-tertiary">
-                {formatCurrency(caja?.total ?? ventaHoy)}{" "}
-                <span className="text-[11px] font-normal text-on-surface-variant">MXN</span>
-              </span>
+              {puedeVerNegocio && (
+                <div className="mt-3 grid grid-cols-3 gap-2 rounded-xl bg-surface-container-lowest/70 p-2 text-center">
+                  <CajaDesglose label="Efectivo" valor={formatCurrency(caja?.efectivo ?? 0)} />
+                  <CajaDesglose label="Tarjeta" valor={formatCurrency(caja?.tarjeta ?? 0)} />
+                  <CajaDesglose label="Transferencia" valor={formatCurrency(caja?.transferencia ?? 0)} resaltado />
+                </div>
+              )}
             </div>
-            <div className="mt-3 grid grid-cols-3 gap-2 rounded-xl bg-surface-container-lowest/70 p-2 text-center">
-              <CajaDesglose label="Efectivo" valor={formatCurrency(caja?.efectivo ?? 0)} />
-              <CajaDesglose label="Tarjeta" valor={formatCurrency(caja?.tarjeta ?? 0)} />
-              <CajaDesglose label="Transferencia" valor={formatCurrency(caja?.transferencia ?? 0)} resaltado />
-            </div>
-          </div>
+          )}
         </div>
       </div>
 

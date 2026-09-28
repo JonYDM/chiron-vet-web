@@ -33,11 +33,12 @@ function rangoHoy(): { desde: string; hasta: string } {
 }
 
 /** Resumen de caja del día (total + desglose por método de pago). */
-export function useResumenCajaHoy() {
+export function useResumenCajaHoy(habilitado = true) {
   const veterinariaId = useVeterinariaId();
   const { desde, hasta } = rangoHoy();
   return useQuery({
     queryKey: ["resumen-caja", veterinariaId, desde.slice(0, 10)],
     queryFn: ({ signal }) => resumenVentas(veterinariaId, desde, hasta, signal),
+    enabled: habilitado,
   });
 }

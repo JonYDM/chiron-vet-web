@@ -135,6 +135,9 @@ export default {
         lift: "0 10px 24px -4px rgba(8,76,76,0.10), 0 4px 10px -2px rgba(15,23,42,0.04)",
         float: "0 20px 40px -8px rgba(15,23,42,0.22)",
         "primary-glow": "0 6px 20px hsl(var(--primary) / 0.28)",
+        // Profundidad "de abajo hacia arriba": highlight superior + sombra inferior.
+        "inset-up":
+          "inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -3px 8px -3px rgba(13,110,110,0.12), 0 6px 16px -6px rgba(8,76,76,0.14)",
       },
       backgroundImage: {
         brand: "linear-gradient(135deg, #0D6E6E 0%, #084C4C 100%)",

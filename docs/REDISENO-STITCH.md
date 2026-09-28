@@ -276,6 +276,20 @@ agenda, recordatorios) y varias son **[MOCK]**. Se siente denso.
    que no compitan, pero manteniéndolos.
 (Se descarta ocultar los mock: el usuario quiere mantener las secciones como están.)
 
+### Auditoría del dashboard (qué se conecta, qué se quita) — DECISIÓN
+- **Venta en caja (total hoy):** REAL (metricas.ventasHoy). ✅
+- **Recordatorios:** REAL (`GET /api/recordatorios`). ✅
+- **Desglose de caja (Efectivo/Tarjeta/Transferencia):** conectar `ResumenVentas`
+  (`GET /ventas/resumen`) — backend YA existe. → CONECTAR.
+- **Agenda de citas (timeline):** conectar `VerAgenda` (`GET /citas/proximas`) — backend
+  YA existe. → CONECTAR.
+- **Citas del día / métrica:** hoy `metricas.citasProximas` (genérico). Mejora futura:
+  ampliar `MetricasDashboard` con conteo por estado del día (backend chico).
+- **Sala de espera / triage:** ❌ QUITAR del dashboard. Decisión del usuario: la clínica se
+  hace responsable de eso, NO es parte de Chiron. No es "próximamente", se elimina.
+- **Alerta farmacéutica / inventario con lotes:** ❌ QUITAR del dashboard. Misma decisión:
+  fuera del alcance, la clínica lo maneja aparte.
+
 ### Conectar lo REAL que ya tiene backend (siguiente paso recomendado)
 El dashboard muestra mock, pero varias cosas YA existen en el backend y solo falta conectarlas:
 - **MetricasDashboard** → métricas del día (ampliar con citas del día / en espera si se quiere).

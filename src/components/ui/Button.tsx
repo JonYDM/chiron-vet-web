@@ -18,12 +18,17 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 hover:shadow-primary-glow",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        soft: "bg-muted text-foreground hover:bg-muted/70",
-        ghost: "text-foreground hover:bg-muted",
-        danger: "bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90",
-        outline: "border border-input bg-card text-foreground hover:bg-muted hover:text-foreground",
+        primary:
+          "bg-primary-container text-on-primary shadow-xs hover:bg-[hsl(180_81%_16%)] hover:shadow-primary-glow",
+        secondary:
+          "bg-st-secondary text-on-secondary shadow-xs hover:opacity-90",
+        soft: "bg-surface-container text-on-surface hover:bg-surface-container-high",
+        ghost: "text-on-surface-variant hover:bg-surface-container hover:text-on-surface",
+        danger: "bg-error-st text-white shadow-xs hover:opacity-90",
+        warning:
+          "bg-warning/15 text-[#B45309] hover:bg-warning/25",
+        outline:
+          "border border-outline-variant/60 bg-surface-container-lowest text-on-surface hover:bg-surface-container",
       },
       size: {
         sm: "h-10 px-3.5 text-sm",

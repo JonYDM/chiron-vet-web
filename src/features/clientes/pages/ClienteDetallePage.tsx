@@ -102,7 +102,7 @@ export function ClienteDetallePage() {
                 Editar
               </Button>
               <Button
-                variant={cliente.activo ? "ghost" : "secondary"}
+                variant={cliente.activo ? "warning" : "secondary"}
                 size="sm"
                 fullWidth
                 onClick={alternarEstado}
@@ -146,7 +146,7 @@ export function ClienteDetallePage() {
                 </span>
               )}
             </div>
-            <Button size="icon" variant="soft" onClick={() => setMascotaNueva(true)} aria-label="Agregar mascota">
+            <Button size="icon" onClick={() => setMascotaNueva(true)} aria-label="Agregar mascota">
               <Plus className="h-5 w-5" aria-hidden />
             </Button>
           </div>
@@ -193,7 +193,7 @@ export function ClienteDetallePage() {
               <p className="text-body-sm text-on-surface-variant">
                 Este cliente no tiene mascotas registradas.
               </p>
-              <Button variant="soft" size="sm" onClick={() => setMascotaNueva(true)}>
+              <Button size="sm" onClick={() => setMascotaNueva(true)}>
                 <Plus className="h-4 w-4" aria-hidden />
                 Agregar mascota
               </Button>

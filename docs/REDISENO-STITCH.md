@@ -145,3 +145,47 @@ Cada uno es una posible historia de usuario / feature de backend:
 - **Cédula profesional del veterinario** → dato del usuario staff.
 - **Microchip, cartilla de vacunación** → campos/documentos del paciente.
 - **Galería de fotos del paciente** → **[REAL]** backend R2 ya implementado (PR fotos).
+
+
+
+---
+
+## 5. Rediseño de la sección Clientes / Pacientes (CRUDs relacionados e independientes)
+
+### Motivación
+El modelo previo (tarjeta de cliente tipo acordeón que expande sus mascotas + modal de
+"registro rápido" que crea cliente y mascota juntos) mezclaba dos entidades y escondía a
+las mascotas dentro del cliente. Un veterinario necesita ver **todos los pacientes**
+directamente. Se separa en dos secciones relacionadas pero navegables por separado.
+
+### Nueva arquitectura de vistas
+- **Clientes** (dueños): lista → **detalle de cliente** (página propia, NO acordeón) con
+  sus datos, sus mascotas y el acceso al portal. CRUD de cliente en formulario propio.
+- **Pacientes** (mascotas): vista nueva que lista **todas** las mascotas de la veterinaria
+  con búsqueda. Cada una → Perfil de Paciente. CRUD de mascota en formulario propio con
+  **selector/buscador de cliente** (opción a): la mascota se puede crear desde aquí
+  eligiendo a su dueño.
+- **Bottom-nav:** se agrega "Pacientes" (junto a Clientes), alineado con Stitch.
+
+### Historias de usuario
+> Como **veterinario/recepcionista**, quiero ver una lista de todos los pacientes de la
+> clínica con búsqueda, para llegar rápido a un expediente sin pasar por el dueño.
+>
+> Como **staff**, quiero registrar una mascota eligiendo a su dueño desde un buscador,
+> para dar de alta pacientes de forma independiente.
+>
+> Como **staff**, quiero una página de detalle del cliente (no un acordeón) para ver y
+> editar sus datos, sus mascotas y su acceso al portal con más claridad.
+
+### Regla de relación
+- Una **mascota** pertenece a **un cliente** (1 cliente → N mascotas). El formulario de
+  mascota exige seleccionar el cliente dueño.
+
+### Pendiente de BACKEND (feature nueva)
+- **`GET /mascotas`** — listar todas las mascotas de la veterinaria (con búsqueda y
+  paginación). Hoy solo existe `GET /clientes/{id}/mascotas` (por cliente). El dominio ya
+  tiene `IMascotaRepository.ListarPorVeterinariaAsync`; falta **exponer el endpoint** en
+  `Program.cs` (tomando el `veterinariaId` del token, como los demás). Mientras no exista,
+  la vista Pacientes usa el hook con fallback (estado de error elegante).
+- Opcional: `GET /mascotas/{id}` para recuperar el paciente por id al recargar el perfil
+  (ya anotado en PENDIENTES-TECNICOS.md).

@@ -62,6 +62,10 @@
   por router state (al entrar desde Clientes). Al recargar (F5) se pierde el state y falta
   un endpoint para recuperar los datos del paciente por id. La galería y el expediente sí
   cargan por id.
+- **Listar mascotas de la veterinaria (`GET /mascotas`):** para la nueva vista Pacientes
+  (todas las mascotas con búsqueda/paginación). El dominio ya tiene
+  `IMascotaRepository.ListarPorVeterinariaAsync`; falta exponer el endpoint en Program.cs
+  tomando el veterinariaId del token. Mientras, la vista usa fallback.
 - **Nombre de la veterinaria en la sesión:** hoy el token/login solo trae `veterinariaId`,
   no el nombre. El header muestra la sucursal quemada ("Roma Norte"). Falta incluir el
   nombre de la veterinaria en `LoginResponse`/claims para mostrarlo real.

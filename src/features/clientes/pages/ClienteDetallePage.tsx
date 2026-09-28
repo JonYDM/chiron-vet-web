@@ -157,8 +157,12 @@ export function ClienteDetallePage() {
                     onClick={() => navigate(`/app/mascotas/${m.id}`, { state: { mascota: m } })}
                     className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
                   >
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-secondary text-primary-container">
-                      <PawPrint className="h-5 w-5" aria-hidden />
+                    <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg bg-secondary text-primary-container">
+                      {m.fotoPerfilUrl ? (
+                        <img src={m.fotoPerfilUrl} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <PawPrint className="h-5 w-5" aria-hidden />
+                      )}
                     </span>
                     <span className="min-w-0">
                       <span className="block truncate text-label-md font-semibold text-on-surface">

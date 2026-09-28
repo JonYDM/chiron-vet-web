@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { miExpediente, misMascotas, misRecordatorios } from "./api";
+import { miExpediente, misCompras, misMascotas, misRecordatorios } from "./api";
 
 /** Mis mascotas (dueño autenticado). */
 export function useMisMascotas() {
@@ -23,5 +23,13 @@ export function useMisRecordatorios() {
   return useQuery({
     queryKey: ["portal", "recordatorios"],
     queryFn: ({ signal }) => misRecordatorios(signal),
+  });
+}
+
+/** Mis compras/cobros (lo que pagué). */
+export function useMisCompras() {
+  return useQuery({
+    queryKey: ["portal", "compras"],
+    queryFn: ({ signal }) => misCompras(signal),
   });
 }

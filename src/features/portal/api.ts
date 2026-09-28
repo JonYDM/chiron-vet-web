@@ -1,5 +1,10 @@
 import { http } from "@/lib/http";
-import type { Mascota, RegistroMedico, RecordatorioDetectado } from "@/types/api";
+import type { Mascota, RegistroMedico, RecordatorioDetectado, VentaHistorial } from "@/types/api";
+
+/** Mis compras/cobros (lo que el dueño pagó: consultas, artículos). */
+export function misCompras(signal?: AbortSignal): Promise<VentaHistorial[]> {
+  return http.get<VentaHistorial[]>("/api/portal/mis-compras", signal);
+}
 
 /** Mis mascotas (del dueño autenticado; el clienteId sale del token). */
 export function misMascotas(signal?: AbortSignal): Promise<Mascota[]> {

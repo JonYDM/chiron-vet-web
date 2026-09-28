@@ -55,6 +55,9 @@ const MiExpedientePage = lazy(() =>
 const MisRecordatoriosPage = lazy(() =>
   import("@/features/portal").then((m) => ({ default: m.MisRecordatoriosPage })),
 );
+const MisComprasPage = lazy(() =>
+  import("@/features/portal").then((m) => ({ default: m.MisComprasPage })),
+);
 const RecordatoriosPage = lazy(() =>
   import("@/features/recordatorios").then((m) => ({ default: m.RecordatoriosPage })),
 );
@@ -149,6 +152,7 @@ const router = createBrowserRouter([
       { index: true, element: <MisMascotasPage /> },
       { path: "mascotas/:mascotaId", element: <MiExpedientePage /> },
       { path: "recordatorios", element: <MisRecordatoriosPage /> },
+      { path: "compras", element: <MisComprasPage /> },
     ],
   },
 

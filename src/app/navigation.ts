@@ -8,6 +8,7 @@ import {
   Building2,
   UserCog,
   BellRing,
+  Receipt,
 } from "lucide-react";
 import type { Accion } from "@/lib/permisos";
 
@@ -43,6 +44,7 @@ export const navStaff: NavItem[] = [
   { to: "/app/citas", label: "Citas", icon: Calendar, permiso: "gestionar_citas" },
   // Secundarios → menú "Más".
   { to: "/app/pos", label: "Ventas", icon: ShoppingCart, permiso: "usar_pos", secundario: true },
+  { to: "/app/ventas", label: "Historial de ventas", icon: Receipt, permiso: "ver_metricas", secundario: true },
   { to: "/app/recordatorios", label: "Recordatorios", icon: BellRing, permiso: null, secundario: true },
   { to: "/app/equipo", label: "Equipo", icon: UserCog, permiso: "gestionar_equipo", secundario: true },
 ];
@@ -51,6 +53,7 @@ export const navStaff: NavItem[] = [
 export const navPortal: NavItem[] = [
   { to: "/portal", label: "Mis mascotas", icon: PawPrint, permiso: null },
   { to: "/portal/recordatorios", label: "Recordatorios", icon: BellRing, permiso: null },
+  { to: "/portal/compras", label: "Mis pagos", icon: Receipt, permiso: null },
 ];
 
 /** Navegación del panel SuperAdmin (/admin/*). */

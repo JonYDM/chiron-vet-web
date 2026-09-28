@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from "react";
-import { Button, Input, Modal, Select } from "@/components/ui";
+import { Button, Input, Drawer, Select } from "@/components/ui";
 import { ApiError } from "@/lib/http";
 import { opcionesDeEnum } from "@/lib/opciones";
 import { origenClienteLabel } from "@/lib/enums";
+import { useToast } from "@/components/feedback/useToast";
 import type { Cliente } from "@/types/api";
 import { useEditarCliente } from "../hooks";
 
@@ -12,9 +13,10 @@ interface Props {
   cliente: Cliente;
 }
 
-/** Modal para editar los datos de un cliente. */
+/** Drawer para editar los datos de un cliente. */
 export function EditarClienteModal({ open, onClose, cliente }: Props) {
   const editar = useEditarCliente();
+  const toast = useToast();
   const [nombre, setNombre] = useState(cliente.nombre);
   const [telefono, setTelefono] = useState(cliente.telefono);
   const [origen, setOrigen] = useState<number>(cliente.origen);
@@ -30,6 +32,7 @@ export function EditarClienteModal({ open, onClose, cliente }: Props) {
         telefono: telefono.trim(),
         origen,
       });
+      toast.exito("Cliente actualizado");
       onClose();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "No se pudo guardar.");
@@ -37,7 +40,7 @@ export function EditarClienteModal({ open, onClose, cliente }: Props) {
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Editar cliente">
+    <Drawer open={open} onClose={onClose} title="Editar cliente" descripcion="Actualiza los datos del dueño.">
       <form onSubmit={enviar} className="space-y-4">
         <Input label="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
         <Input
@@ -54,7 +57,7 @@ export function EditarClienteModal({ open, onClose, cliente }: Props) {
           options={opcionesDeEnum(origenClienteLabel)}
         />
         {error && (
-          <p role="alert" className="rounded-xl bg-danger/10 px-4 py-3 text-sm text-danger">
+          <p role="alert" className="rounded-xl bg-error-container/60 px-4 py-3 text-body-sm font-medium text-on-error-container">
             {error}
           </p>
         )}
@@ -67,6 +70,6 @@ export function EditarClienteModal({ open, onClose, cliente }: Props) {
           </Button>
         </div>
       </form>
-    </Modal>
+    </Drawer>
   );
 }

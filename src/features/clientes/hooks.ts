@@ -124,23 +124,29 @@ export function useEditarCliente() {
   });
 }
 
-/** Agrega una mascota a un cliente e invalida sus mascotas. */
+/** Agrega una mascota a un cliente e invalida sus mascotas y la lista de pacientes. */
 export function useAgregarMascota() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ clienteId, datos }: { clienteId: string; datos: DatosMascota }) =>
       agregarMascota(clienteId, datos),
-    onSuccess: (_data, variables) =>
-      queryClient.invalidateQueries({ queryKey: ["mascotas", variables.clienteId] }),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["mascotas", variables.clienteId] });
+      queryClient.invalidateQueries({ queryKey: ["pacientes"] });
+      queryClient.invalidateQueries({ queryKey: ["clientes"] }); // conteo totalMascotas
+    },
   });
 }
 
-/** Edita una mascota e invalida las listas de mascotas. */
+/** Edita una mascota e invalida las listas de mascotas y de pacientes. */
 export function useEditarMascota() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ mascotaId, datos }: { mascotaId: string; datos: DatosMascota }) =>
       editarMascota(mascotaId, datos),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["mascotas"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["mascotas"] });
+      queryClient.invalidateQueries({ queryKey: ["pacientes"] });
+    },
   });
 }

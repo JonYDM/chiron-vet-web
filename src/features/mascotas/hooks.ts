@@ -1,7 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useVeterinariaId } from "@/features/auth/useVeterinariaId";
 import { comprimirImagen } from "@/lib/imagen";
-import { eliminarFoto, listarFotos, listarPacientes, subirFoto } from "./api";
+import { eliminarFoto, listarFotos, listarPacientes, obtenerMascota, subirFoto } from "./api";
+
+/** Obtiene una mascota completa por id (con fallback si el endpoint no existe). */
+export function useMascota(mascotaId: string) {
+  return useQuery({
+    queryKey: ["mascota", mascotaId],
+    queryFn: ({ signal }) => obtenerMascota(mascotaId, signal),
+    enabled: !!mascotaId,
+  });
+}
 
 /** Lista todas las mascotas de la veterinaria (vista Pacientes). Con fallback. */
 export function usePacientes(texto?: string) {

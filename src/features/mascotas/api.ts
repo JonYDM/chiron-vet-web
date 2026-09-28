@@ -70,3 +70,20 @@ export function subirFoto(
 export function eliminarFoto(mascotaId: string, fotoId: string): Promise<void> {
   return http.delete<void>(`/api/mascotas/${mascotaId}/fotos/${fotoId}`);
 }
+
+/**
+ * Obtiene una mascota completa por id (peso, esterilizado, padecimientos, etc.).
+ * [Requiere endpoint GET /mascotas/{id}] Si no existe aún (404/405), devuelve null
+ * para que la vista use el fallback (router state).
+ */
+export async function obtenerMascota(
+  mascotaId: string,
+  signal?: AbortSignal,
+): Promise<import("@/types/api").Mascota | null> {
+  try {
+    return await http.get<import("@/types/api").Mascota>(`/api/mascotas/${mascotaId}`, signal);
+  } catch (e) {
+    if (e instanceof ApiError && (e.status === 404 || e.status === 405)) return null;
+    throw e;
+  }
+}

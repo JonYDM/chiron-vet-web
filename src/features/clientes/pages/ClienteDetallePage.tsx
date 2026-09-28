@@ -76,14 +76,18 @@ export function ClienteDetallePage() {
           <div className="flex items-center gap-3">
             <Avatar nombre={cliente?.nombre ?? "?"} size="lg" />
             <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-headline-md font-bold text-on-surface">
+              <div className="flex items-start justify-between gap-2">
+                <h2 className="text-headline-md font-bold leading-tight text-on-surface">
                   {cliente?.nombre ?? "Cliente"}
                 </h2>
+                {/* Estado de acceso al portal, junto al nombre */}
+                {puedeAcceso && usuario && (
+                  <Badge tone="success">Portal ✓</Badge>
+                )}
                 {cliente && !cliente.activo && <Badge tone="danger">Inactivo</Badge>}
               </div>
               {cliente && (
-                <p className="flex items-center gap-1.5 text-body-sm text-on-surface-variant">
+                <p className="mt-1.5 flex items-center gap-1.5 text-body-sm text-on-surface-variant">
                   <Phone className="h-3.5 w-3.5" aria-hidden />
                   {cliente.telefono}
                 </p>
@@ -117,15 +121,12 @@ export function ClienteDetallePage() {
             {cargandoUsuario ? (
               <Spinner label="Verificando acceso…" />
             ) : usuario ? (
-              <div className="flex items-center gap-2">
-                <Badge tone="success">Con acceso al portal</Badge>
-                <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setResetAbierto(true)}>
-                  <KeyRound className="h-4 w-4" aria-hidden />
-                  Resetear PIN
-                </Button>
-              </div>
+              <Button variant="soft" fullWidth onClick={() => setResetAbierto(true)}>
+                <KeyRound className="h-4 w-4" aria-hidden />
+                Resetear PIN del portal
+              </Button>
             ) : (
-              <Button variant="secondary" size="sm" fullWidth onClick={() => setAccesoAbierto(true)}>
+              <Button variant="secondary" fullWidth onClick={() => setAccesoAbierto(true)}>
                 <KeyRound className="h-4 w-4" aria-hidden />
                 Dar acceso al portal
               </Button>
@@ -145,6 +146,9 @@ export function ClienteDetallePage() {
                 </span>
               )}
             </div>
+            <Button size="icon" variant="soft" onClick={() => setMascotaNueva(true)} aria-label="Agregar mascota">
+              <Plus className="h-5 w-5" aria-hidden />
+            </Button>
           </div>
 
           {isLoading ? (
@@ -185,15 +189,16 @@ export function ClienteDetallePage() {
               ))}
             </div>
           ) : (
-            <p className="py-4 text-center text-body-sm text-on-surface-variant">
-              Este cliente no tiene mascotas registradas.
-            </p>
+            <div className="flex flex-col items-center gap-3 py-4 text-center">
+              <p className="text-body-sm text-on-surface-variant">
+                Este cliente no tiene mascotas registradas.
+              </p>
+              <Button variant="soft" size="sm" onClick={() => setMascotaNueva(true)}>
+                <Plus className="h-4 w-4" aria-hidden />
+                Agregar mascota
+              </Button>
+            </div>
           )}
-
-          <Button variant="soft" size="sm" fullWidth className="mt-3" onClick={() => setMascotaNueva(true)}>
-            <Plus className="h-4 w-4" aria-hidden />
-            Agregar mascota
-          </Button>
         </section>
 
         {!cliente && (

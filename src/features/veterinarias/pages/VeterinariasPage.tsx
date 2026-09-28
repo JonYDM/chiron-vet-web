@@ -24,6 +24,12 @@ export function VeterinariasPage() {
   return (
     <PantallaConHeader
       titulo="Veterinarias"
+      subtitulo={
+        <p className="flex items-center gap-1 text-body-sm text-on-surface-variant">
+          <Building2 className="h-4 w-4 text-primary-container" aria-hidden />
+          {total === 0 ? "Clientes de Chiron" : `${total} veterinaria${total === 1 ? "" : "s"}`}
+        </p>
+      }
       accion={
         <Button size="icon" onClick={() => setModalCrear(true)} aria-label="Nueva veterinaria">
           <Plus className="h-5 w-5" aria-hidden />

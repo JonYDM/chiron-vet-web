@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CalendarDays, ChevronRight, Copy, PawPrint, Phone, Plus, Search } from "lucide-react";
+import { CalendarDays, ChevronRight, Copy, PawPrint, Phone, Plus, Search, Users } from "lucide-react";
 import { Badge, Button, Input, SkeletonFila } from "@/components/ui";
 import { EmptyState } from "@/components/molecules/EmptyState";
 import { Paginacion } from "@/components/molecules/Paginacion";
@@ -61,6 +61,12 @@ export function ClientesPage() {
   return (
     <PantallaConHeader
       titulo="Clientes"
+      subtitulo={
+        <p className="flex items-center gap-1 text-body-sm text-on-surface-variant">
+          <Users className="h-4 w-4 text-primary-container" aria-hidden />
+          {clientes.length === 0 ? "Directorio de la clínica" : `${clientes.length} en la lista`}
+        </p>
+      }
       accion={
         <Button size="icon" onClick={() => setModalAbierto(true)} aria-label="Nuevo cliente">
           <Plus className="h-5 w-5" aria-hidden />

@@ -27,6 +27,12 @@ export function PacientesPage() {
   return (
     <PantallaConHeader
       titulo="Pacientes"
+      subtitulo={
+        <p className="flex items-center gap-1 text-body-sm text-on-surface-variant">
+          <PawPrint className="h-4 w-4 text-primary-container" aria-hidden />
+          {pacientes.length === 0 ? "Mascotas de la clínica" : `${pacientes.length} paciente${pacientes.length === 1 ? "" : "s"}`}
+        </p>
+      }
       accion={
         <Button size="icon" onClick={() => setNuevaAbierta(true)} aria-label="Nueva mascota">
           <Plus className="h-5 w-5" aria-hidden />

@@ -1,26 +1,35 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { Minus, Plus, Receipt, Settings2, ShoppingCart, Trash2 } from "lucide-react";
-import { PageHeader } from "@/components/molecules/PageHeader";
+import {
+  Banknote,
+  CreditCard,
+  Minus,
+  Package,
+  Plus,
+  Receipt,
+  Search,
+  Settings2,
+  Smartphone,
+  Trash2,
+} from "lucide-react";
 import { EmptyState } from "@/components/molecules/EmptyState";
+import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
 import {
   Badge,
   Button,
-  Card,
-  CardContent,
+  Drawer,
   Input,
-  Modal,
   Select,
-  Skeleton,
+  SkeletonFila,
 } from "@/components/ui";
 import { useAuth } from "@/features/auth";
 import { useVeterinariaId } from "@/features/auth/useVeterinariaId";
 import { useClientes } from "@/features/clientes/hooks";
+import { useToast } from "@/components/feedback/useToast";
 import { ApiError } from "@/lib/http";
+import { cn } from "@/lib/cn";
 import { categoriaProductoLabel } from "@/lib/enums";
 import { formatCurrency } from "@/lib/format";
-import { RolUsuario, MetodoPago, type Producto } from "@/types/api";
-import { useToast } from "@/components/feedback/useToast";
+import { CategoriaProducto, MetodoPago, RolUsuario, type Producto } from "@/types/api";
 import { useCatalogo, useRegistrarVenta } from "../hooks";
 import { AgregarProductoModal } from "../components/AgregarProductoModal";
 import { EditarProductoModal } from "../components/EditarProductoModal";
@@ -30,7 +39,23 @@ interface LineaCarrito {
   cantidad: number;
 }
 
-/** Página del punto de venta (F3.5): catálogo + carrito de venta. */
+const CATEGORIAS: { valor: CategoriaProducto | null; label: string }[] = [
+  { valor: null, label: "Todos" },
+  { valor: CategoriaProducto.Alimento, label: "Alimento" },
+  { valor: CategoriaProducto.Medicina, label: "Medicina" },
+  { valor: CategoriaProducto.Accesorio, label: "Accesorio" },
+  { valor: CategoriaProducto.Higiene, label: "Higiene" },
+  { valor: CategoriaProducto.Otro, label: "Otro" },
+];
+
+/** Métodos de pago como recuadros (con ícono) para el cobro. */
+const METODOS: { valor: MetodoPago; label: string; icon: typeof Banknote }[] = [
+  { valor: MetodoPago.Efectivo, label: "Efectivo", icon: Banknote },
+  { valor: MetodoPago.Tarjeta, label: "Tarjeta", icon: CreditCard },
+  { valor: MetodoPago.Transferencia, label: "Transfer.", icon: Smartphone },
+];
+
+/** Punto de venta mobile-first: catálogo tocable + barra de carrito + cobro en Drawer. */
 export function PosPage() {
   const { sesion } = useAuth();
   const veterinariaId = useVeterinariaId();
@@ -39,11 +64,14 @@ export function PosPage() {
   const toast = useToast();
 
   const [carrito, setCarrito] = useState<Record<string, LineaCarrito>>({});
+  const [texto, setTexto] = useState("");
+  const [categoria, setCategoria] = useState<CategoriaProducto | null>(null);
   const [modalProducto, setModalProducto] = useState(false);
   const [editando, setEditando] = useState<Producto | null>(null);
-  const [clienteId, setClienteId] = useState<string>("");
+  const [cobroAbierto, setCobroAbierto] = useState(false);
+  const [clienteId, setClienteId] = useState("");
   const [metodoPago, setMetodoPago] = useState<MetodoPago>(MetodoPago.Efectivo);
-  const [montoRecibido, setMontoRecibido] = useState<string>("");
+  const [montoRecibido, setMontoRecibido] = useState("");
   const [recibo, setRecibo] = useState<{ total: number; cambio: number | null } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,10 +80,20 @@ export function PosPage() {
   const clientes = clientesPag?.items ?? [];
 
   const lineas = Object.values(carrito);
+  const totalArticulos = lineas.reduce((s, l) => s + l.cantidad, 0);
   const total = useMemo(
     () => lineas.reduce((s, l) => s + l.producto.precio * l.cantidad, 0),
     [lineas],
   );
+
+  const visibles = useMemo(() => {
+    const q = texto.trim().toLowerCase();
+    return (productos ?? []).filter((p) => {
+      if (categoria !== null && p.categoria !== categoria) return false;
+      if (q && !p.nombre.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }, [productos, categoria, texto]);
 
   function agregar(p: Producto) {
     setCarrito((prev) => {
@@ -79,13 +117,8 @@ export function PosPage() {
 
   async function cobrar() {
     setError(null);
-    // Validación de efectivo: si se indicó monto recibido, debe cubrir el total.
     const recibido = montoRecibido ? Number(montoRecibido) : null;
-    if (
-      metodoPago === MetodoPago.Efectivo &&
-      recibido != null &&
-      recibido < total
-    ) {
+    if (metodoPago === MetodoPago.Efectivo && recibido != null && recibido < total) {
       setError("El monto recibido no cubre el total.");
       return;
     }
@@ -93,10 +126,7 @@ export function PosPage() {
       const resp = await registrarVenta.mutateAsync({
         veterinariaId,
         clienteId: clienteId || null,
-        items: lineas.map((l) => ({
-          productoId: l.producto.id,
-          cantidad: l.cantidad,
-        })),
+        items: lineas.map((l) => ({ productoId: l.producto.id, cantidad: l.cantidad })),
         metodoPago,
         montoRecibido: metodoPago === MetodoPago.Efectivo ? recibido : null,
       });
@@ -105,279 +135,280 @@ export function PosPage() {
       setCarrito({});
       setClienteId("");
       setMontoRecibido("");
+      setCobroAbierto(false);
     } catch (err) {
-      const msg =
-        err instanceof ApiError ? err.message : "No se pudo registrar la venta.";
+      const msg = err instanceof ApiError ? err.message : "No se pudo registrar la venta.";
       setError(msg);
       toast.error(msg);
     }
   }
 
   return (
-    <div>
-      <PageHeader
-        titulo="Punto de venta"
-        descripcion="Selecciona productos y registra la venta"
-        accion={
-          esAdmin ? (
-            <div className="flex gap-2">
-              <Link to="/app/ventas">
-                <Button variant="ghost">
-                  <Receipt className="h-4 w-4" aria-hidden />
-                  Historial
-                </Button>
-              </Link>
-              <Button variant="secondary" onClick={() => setModalProducto(true)}>
-                <Plus className="h-4 w-4" aria-hidden />
-                Producto
-              </Button>
-            </div>
-          ) : undefined
-        }
-      />
+    <PantallaConHeader
+      titulo="Punto de venta"
+      subtitulo={
+        <p className="text-body-sm text-on-surface-variant">Cobro y catálogo</p>
+      }
+      accion={
+        <div className="flex items-center gap-2">
+          <img
+            src="/pet-store.png"
+            alt=""
+            aria-hidden
+            className="-my-3 h-16 w-16 shrink-0 object-contain drop-shadow-sm"
+          />
+          {esAdmin && (
+            <Button size="icon" onClick={() => setModalProducto(true)} aria-label="Nuevo producto">
+              <Plus className="h-5 w-5" aria-hidden />
+            </Button>
+          )}
+        </div>
+      }
+    >
+      <div className="flex flex-col gap-4 pb-20">
+        {/* Buscador */}
+        <div className="relative">
+          <Search
+            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-on-surface-variant"
+            aria-hidden
+          />
+          <Input
+            variant="soft"
+            aria-label="Buscar productos"
+            placeholder="Buscar producto"
+            value={texto}
+            onChange={(e) => setTexto(e.target.value)}
+            className="h-12 pl-12"
+          />
+        </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+        {/* Chips de categoría */}
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {CATEGORIAS.map((cat) => {
+            const activo = categoria === cat.valor;
+            return (
+              <button
+                key={cat.label}
+                onClick={() => setCategoria(cat.valor)}
+                className={cn(
+                  "shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-label-md font-semibold transition-colors",
+                  activo
+                    ? "bg-primary-container text-on-primary"
+                    : "bg-surface-container text-on-surface-variant hover:text-on-surface",
+                )}
+              >
+                {cat.label}
+              </button>
+            );
+          })}
+        </div>
+
         {/* Catálogo */}
-        <section>
-          {isLoading ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-32 rounded-2xl" />
-              ))}
-            </div>
-          ) : isError ? (
-            <Card>
-              <CardContent className="py-8 text-center text-sm text-danger">
-                No se pudo cargar el catálogo.
-              </CardContent>
-            </Card>
-          ) : productos && productos.length > 0 ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {productos.map((p) => {
-                const agotado = p.stock <= 0;
+        {isLoading ? (
+          <div className="grid grid-cols-2 gap-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonFila key={i} />
+            ))}
+          </div>
+        ) : isError ? (
+          <div className="rounded-2xl bg-surface-container-lowest p-8 text-center text-body-sm text-error-st shadow-soft">
+            No se pudo cargar el catálogo.
+          </div>
+        ) : visibles.length > 0 ? (
+          <div className="grid grid-cols-2 gap-3">
+            {visibles.map((p) => (
+              <ProductoCard
+                key={p.id}
+                producto={p}
+                enCarrito={carrito[p.id]?.cantidad ?? 0}
+                esAdmin={esAdmin}
+                onAgregar={() => agregar(p)}
+                onQuitar={() => quitar(p.id)}
+                onEditar={() => setEditando(p)}
+              />
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            titulo={texto || categoria !== null ? "Sin resultados" : "Catálogo vacío"}
+            descripcion={
+              texto || categoria !== null
+                ? "No hay productos que coincidan."
+                : esAdmin
+                  ? "Agrega tu primer producto para empezar a vender."
+                  : "Aún no hay productos en el catálogo."
+            }
+          />
+        )}
+      </div>
+
+      {/* Barra flotante del carrito (encima del bottom-nav) */}
+      {totalArticulos > 0 && (
+        <div
+          className="fixed inset-x-0 z-30 px-[5%]"
+          style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 5.5rem)" }}
+        >
+          <button
+            onClick={() => setCobroAbierto(true)}
+            className="mx-auto flex w-full max-w-2xl items-center justify-between gap-3 rounded-full bg-primary-container px-5 py-3.5 text-on-primary shadow-primary-glow transition-transform active:scale-[0.99]"
+          >
+            <span className="flex items-center gap-2">
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-white/20 text-label-md font-bold">
+                {totalArticulos}
+              </span>
+              <span className="text-label-lg font-bold">Ver carrito</span>
+            </span>
+            <span className="tabular text-label-lg font-bold">{formatCurrency(total)}</span>
+          </button>
+        </div>
+      )}
+
+      {/* Drawer de cobro (una sola vista) */}
+      <Drawer
+        open={cobroAbierto}
+        onClose={() => setCobroAbierto(false)}
+        title="Cobrar venta"
+        descripcion="Revisa los productos y registra el cobro."
+      >
+        <div className="flex flex-col gap-4">
+          <ul className="flex flex-col gap-2">
+            {lineas.map((l) => (
+              <li
+                key={l.producto.id}
+                className="flex items-center justify-between gap-2 rounded-xl bg-surface-container-low p-2.5"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-label-md font-semibold text-on-surface">{l.producto.nombre}</p>
+                  <p className="text-body-sm text-on-surface-variant">
+                    {formatCurrency(l.producto.precio)} c/u
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => quitar(l.producto.id)}
+                    aria-label="Quitar uno"
+                    className="grid h-8 w-8 place-items-center rounded-lg bg-surface-container text-on-surface-variant"
+                  >
+                    {l.cantidad <= 1 ? <Trash2 className="h-4 w-4" /> : <Minus className="h-4 w-4" />}
+                  </button>
+                  <span className="w-5 text-center text-label-md font-bold">{l.cantidad}</span>
+                  <button
+                    onClick={() => agregar(l.producto)}
+                    aria-label="Agregar uno"
+                    disabled={l.cantidad >= l.producto.stock}
+                    className="grid h-8 w-8 place-items-center rounded-lg bg-surface-container text-on-surface-variant disabled:opacity-40"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <Select
+            label="Cliente (opcional)"
+            value={clienteId}
+            onChange={(e) => setClienteId(e.target.value)}
+            options={[
+              { value: "", label: "Público en general" },
+              ...clientes.map((c) => ({ value: c.id, label: c.nombre })),
+            ]}
+          />
+
+          {/* Método de pago: 3 recuadros en una fila */}
+          <div>
+            <p className="mb-1.5 text-label-md font-semibold text-on-surface-variant">Método de pago</p>
+            <div className="grid grid-cols-3 gap-2">
+              {METODOS.map((m) => {
+                const activo = metodoPago === m.valor;
                 return (
-                  <Card key={p.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="font-semibold text-ink">{p.nombre}</p>
-                        <Badge tone={agotado ? "danger" : "neutral"}>
-                          {agotado ? "Agotado" : `Stock ${p.stock}`}
-                        </Badge>
-                      </div>
-                      <p className="mt-0.5 text-xs text-ink-soft">
-                        {categoriaProductoLabel[p.categoria]}
-                      </p>
-                      <div className="mt-3 flex items-center justify-between">
-                        <span className="font-bold text-ink">
-                          {formatCurrency(p.precio)}
-                        </span>
-                        <div className="flex gap-1.5">
-                          {esAdmin && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => setEditando(p)}
-                              aria-label={`Editar ${p.nombre}`}
-                            >
-                              <Settings2 className="h-4 w-4" aria-hidden />
-                            </Button>
-                          )}
-                          <Button
-                            size="sm"
-                            onClick={() => agregar(p)}
-                            disabled={agotado}
-                          >
-                            <Plus className="h-4 w-4" aria-hidden />
-                            Agregar
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <button
+                    key={m.valor}
+                    type="button"
+                    onClick={() => setMetodoPago(m.valor)}
+                    className={cn(
+                      "flex flex-col items-center gap-1.5 rounded-xl border p-3 transition-colors",
+                      activo
+                        ? "border-primary-container bg-primary-container/10 text-primary-container"
+                        : "border-outline-variant/40 bg-surface-container-lowest text-on-surface-variant",
+                    )}
+                  >
+                    <m.icon className="h-5 w-5" aria-hidden />
+                    <span className="text-label-sm font-bold">{m.label}</span>
+                  </button>
                 );
               })}
             </div>
-          ) : (
-            <EmptyState
-              titulo="Catálogo vacío"
-              descripcion={
-                esAdmin
-                  ? "Agrega tu primer producto para empezar a vender."
-                  : "Aún no hay productos en el catálogo."
-              }
-            />
-          )}
-        </section>
+          </div>
 
-        {/* Carrito */}
-        <aside>
-          <Card className="lg:sticky lg:top-6">
-            <CardContent className="p-4">
-              <h2 className="mb-3 flex items-center gap-2 font-bold text-ink">
-                <ShoppingCart className="h-5 w-5 text-primary" aria-hidden />
-                Venta actual
-              </h2>
-
-              {lineas.length === 0 ? (
-                <p className="py-6 text-center text-sm text-ink-soft">
-                  Agrega productos del catálogo.
-                </p>
-              ) : (
-                <ul className="space-y-2">
-                  {lineas.map((l) => (
-                    <li
-                      key={l.producto.id}
-                      className="flex items-center justify-between gap-2 rounded-xl bg-canvas p-2.5"
-                    >
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-ink">
-                          {l.producto.nombre}
-                        </p>
-                        <p className="text-xs text-ink-soft">
-                          {formatCurrency(l.producto.precio)} c/u
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => quitar(l.producto.id)}
-                          aria-label="Quitar uno"
-                          className="grid h-7 w-7 place-items-center rounded-lg bg-surface text-ink-soft hover:text-ink"
-                        >
-                          {l.cantidad <= 1 ? (
-                            <Trash2 className="h-4 w-4" aria-hidden />
-                          ) : (
-                            <Minus className="h-4 w-4" aria-hidden />
-                          )}
-                        </button>
-                        <span className="w-5 text-center text-sm font-semibold">
-                          {l.cantidad}
-                        </span>
-                        <button
-                          onClick={() => agregar(l.producto)}
-                          aria-label="Agregar uno"
-                          disabled={l.cantidad >= l.producto.stock}
-                          className="grid h-7 w-7 place-items-center rounded-lg bg-surface text-ink-soft hover:text-ink disabled:opacity-40"
-                        >
-                          <Plus className="h-4 w-4" aria-hidden />
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              <div className="mt-4">
-                <Select
-                  label="Cliente (opcional)"
-                  value={clienteId}
-                  onChange={(e) => setClienteId(e.target.value)}
-                  options={[
-                    { value: "", label: "Público en general" },
-                    ...(clientes ?? []).map((c) => ({ value: c.id, label: c.nombre })),
-                  ]}
-                />
-              </div>
-
-              <div className="mt-3">
-                <Select
-                  label="Método de pago"
-                  value={metodoPago}
-                  onChange={(e) => setMetodoPago(Number(e.target.value))}
-                  options={[
-                    { value: MetodoPago.Efectivo, label: "Efectivo" },
-                    { value: MetodoPago.Tarjeta, label: "Tarjeta" },
-                    { value: MetodoPago.Transferencia, label: "Transferencia" },
-                  ]}
-                />
-              </div>
-
-              {metodoPago === MetodoPago.Efectivo && (
-                <div className="mt-3">
-                  <Input
-                    label="Monto recibido (opcional)"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={montoRecibido}
-                    onChange={(e) => setMontoRecibido(e.target.value)}
-                  />
-                  {montoRecibido && Number(montoRecibido) >= total && (
-                    <p className="mt-1.5 text-sm text-ink-soft">
-                      Cambio:{" "}
-                      <span className="font-semibold text-ink">
-                        {formatCurrency(Number(montoRecibido) - total)}
-                      </span>
-                    </p>
-                  )}
+          {metodoPago === MetodoPago.Efectivo && (
+            <div>
+              <Input
+                label="Monto recibido (opcional)"
+                type="number"
+                min="0"
+                step="0.01"
+                value={montoRecibido}
+                onChange={(e) => setMontoRecibido(e.target.value)}
+              />
+              {montoRecibido && Number(montoRecibido) >= total && (
+                <div className="mt-2 flex items-center justify-between rounded-xl bg-secondary-fixed/60 px-4 py-2.5">
+                  <span className="text-label-md font-semibold text-on-secondary-fixed">Cambio a entregar</span>
+                  <span className="tabular text-headline-sm font-bold text-on-secondary-fixed">
+                    {formatCurrency(Number(montoRecibido) - total)}
+                  </span>
                 </div>
               )}
+            </div>
+          )}
 
-              <div className="mt-4 flex items-center justify-between border-t border-hairline pt-3">
-                <span className="text-ink-soft">Total</span>
-                <span className="text-xl font-bold text-ink">
-                  {formatCurrency(total)}
-                </span>
-              </div>
+          <div className="flex items-center justify-between border-t border-outline-variant/30 pt-3">
+            <span className="text-on-surface-variant">Total</span>
+            <span className="tabular text-headline-md font-bold text-on-surface">{formatCurrency(total)}</span>
+          </div>
 
-              {error && (
-                <p
-                  role="alert"
-                  className="mt-3 rounded-xl bg-danger/10 px-4 py-2.5 text-center text-sm text-danger"
-                >
-                  {error}
-                </p>
-              )}
+          {error && (
+            <p role="alert" className="rounded-xl bg-error-container/60 px-4 py-2.5 text-center text-body-sm font-medium text-on-error-container">
+              {error}
+            </p>
+          )}
 
-              <Button
-                fullWidth
-                size="lg"
-                className="mt-3"
-                onClick={cobrar}
-                loading={registrarVenta.isPending}
-                disabled={lineas.length === 0}
-              >
-                Cobrar
-              </Button>
-            </CardContent>
-          </Card>
-        </aside>
-      </div>
+          <Button
+            fullWidth
+            size="lg"
+            onClick={cobrar}
+            loading={registrarVenta.isPending}
+            disabled={lineas.length === 0}
+          >
+            Cobrar {formatCurrency(total)}
+          </Button>
+        </div>
+      </Drawer>
 
       {esAdmin && (
-        <AgregarProductoModal
-          open={modalProducto}
-          onClose={() => setModalProducto(false)}
-        />
+        <AgregarProductoModal open={modalProducto} onClose={() => setModalProducto(false)} />
       )}
       {esAdmin && editando && (
-        <EditarProductoModal
-          open={!!editando}
-          onClose={() => setEditando(null)}
-          producto={editando}
-        />
+        <EditarProductoModal open={!!editando} onClose={() => setEditando(null)} producto={editando} />
       )}
 
       {/* Recibo tras cobrar */}
-      <Modal
-        open={!!recibo}
-        onClose={() => setRecibo(null)}
-        title="Venta registrada ✓"
-      >
+      <Drawer open={!!recibo} onClose={() => setRecibo(null)} title="Venta registrada ✓">
         {recibo && (
-          <div className="space-y-4 text-center">
-            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-success/10 text-success">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <div className="grid h-14 w-14 place-items-center rounded-2xl bg-primary-container/15 text-primary-container">
               <Receipt className="h-7 w-7" aria-hidden />
             </div>
             <div>
-              <p className="text-sm text-ink-soft">Total cobrado</p>
-              <p className="text-2xl font-bold text-ink">
+              <p className="text-body-sm text-on-surface-variant">Total cobrado</p>
+              <p className="tabular text-headline-lg font-bold text-on-surface">
                 {formatCurrency(recibo.total)}
               </p>
             </div>
             {recibo.cambio != null && recibo.cambio > 0 && (
-              <div className="rounded-xl bg-accent/15 px-4 py-3">
-                <p className="text-sm text-accent-strong">Cambio a entregar</p>
-                <p className="text-xl font-bold text-accent-strong">
+              <div className="w-full rounded-xl bg-secondary-fixed/60 px-4 py-3">
+                <p className="text-body-sm text-on-secondary-fixed">Cambio a entregar</p>
+                <p className="tabular text-headline-sm font-bold text-on-secondary-fixed">
                   {formatCurrency(recibo.cambio)}
                 </p>
               </div>
@@ -387,7 +418,88 @@ export function PosPage() {
             </Button>
           </div>
         )}
-      </Modal>
+      </Drawer>
+    </PantallaConHeader>
+  );
+}
+
+/** Card de producto tocable: tap para agregar; control +/− si ya está en el carrito. */
+function ProductoCard({
+  producto,
+  enCarrito,
+  esAdmin,
+  onAgregar,
+  onQuitar,
+  onEditar,
+}: {
+  producto: Producto;
+  enCarrito: number;
+  esAdmin: boolean;
+  onAgregar: () => void;
+  onQuitar: () => void;
+  onEditar: () => void;
+}) {
+  const agotado = producto.stock <= 0;
+  return (
+    <div
+      className={cn(
+        "relative flex flex-col justify-between rounded-2xl border bg-surface-container-lowest p-3.5 shadow-soft transition-transform",
+        enCarrito > 0 ? "border-primary-container" : "border-outline-variant/40",
+      )}
+    >
+      <button
+        onClick={onAgregar}
+        disabled={agotado || enCarrito >= producto.stock}
+        className="flex flex-1 flex-col items-start text-left disabled:opacity-50"
+      >
+        <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary-fixed/40 text-tertiary">
+          <Package className="h-5 w-5" aria-hidden />
+        </div>
+        <p className="mt-2 line-clamp-2 text-label-lg font-bold text-on-surface">{producto.nombre}</p>
+        <p className="text-body-sm text-on-surface-variant">{categoriaProductoLabel[producto.categoria]}</p>
+        <p className="mt-1 tabular text-headline-sm font-bold text-primary-container">
+          {formatCurrency(producto.precio)}
+        </p>
+      </button>
+
+      <div className="mt-2.5">
+        {enCarrito > 0 ? (
+          // Control +/− para corregir la cantidad sin abrir el carrito.
+          <div className="flex items-center justify-between rounded-xl bg-primary-container/10 p-1">
+            <button
+              onClick={onQuitar}
+              aria-label={`Quitar uno de ${producto.nombre}`}
+              className="grid h-8 w-8 place-items-center rounded-lg bg-surface-container-lowest text-primary-container shadow-soft active:scale-95"
+            >
+              {enCarrito <= 1 ? <Trash2 className="h-4 w-4" /> : <Minus className="h-4 w-4" />}
+            </button>
+            <span className="tabular text-label-lg font-bold text-primary-container">{enCarrito}</span>
+            <button
+              onClick={onAgregar}
+              disabled={enCarrito >= producto.stock}
+              aria-label={`Agregar uno de ${producto.nombre}`}
+              className="grid h-8 w-8 place-items-center rounded-lg bg-surface-container-lowest text-primary-container shadow-soft active:scale-95 disabled:opacity-40"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <Badge tone={agotado ? "danger" : "neutral"}>
+              {agotado ? "Agotado" : `Stock ${producto.stock}`}
+            </Badge>
+            {esAdmin && (
+              <button
+                onClick={onEditar}
+                aria-label={`Editar ${producto.nombre}`}
+                className="grid h-8 w-8 place-items-center rounded-lg text-on-surface-variant hover:bg-surface-container"
+              >
+                <Settings2 className="h-4 w-4" aria-hidden />
+              </button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

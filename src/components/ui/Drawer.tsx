@@ -57,7 +57,7 @@ export function Drawer({ open, onClose, title, descripcion, children, className 
         <Vaul.Overlay className="fixed inset-0 z-50 bg-on-surface/40" />
         <Vaul.Content
           className={cn(
-            "fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[92vh] w-full max-w-md flex-col rounded-t-3xl bg-surface-container-lowest outline-none",
+            "fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[60vh] w-full max-w-md flex-col rounded-t-3xl bg-surface-container-lowest outline-none",
             className,
           )}
         >

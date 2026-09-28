@@ -151,6 +151,10 @@ export default {
           from: { opacity: "0", transform: "translateY(8px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        scaleIn: {
+          from: { opacity: "0", transform: "scale(0.6)" },
+          to: { opacity: "1", transform: "scale(1)" },
+        },
         shimmer: { "100%": { transform: "translateX(100%)" } },
         "accordion-down": {
           from: { height: "0" },

@@ -4,7 +4,6 @@ import { ChevronRight, PawPrint, Plus, Search, Stethoscope } from "lucide-react"
 import { Badge, Button, Input, SkeletonFila } from "@/components/ui";
 import { EmptyState } from "@/components/molecules/EmptyState";
 import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
-import { Reveal } from "@/lib/anim";
 import { especieLabel } from "@/lib/enums";
 import { useDebounce } from "@/lib/useDebounce";
 import { usePacientes } from "../hooks";
@@ -72,11 +71,11 @@ export function PacientesPage() {
             No se pudieron cargar los pacientes. Intenta de nuevo.
           </div>
         ) : pacientes.length > 0 ? (
-          <Reveal stagger className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3">
             {pacientes.map((m) => (
               <PacienteCard key={m.id} mascota={m} />
             ))}
-          </Reveal>
+          </div>
         ) : (
           <EmptyState
             titulo="Sin pacientes"

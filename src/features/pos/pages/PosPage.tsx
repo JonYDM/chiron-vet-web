@@ -13,7 +13,6 @@ import {
   Select,
   Skeleton,
 } from "@/components/ui";
-import { Reveal } from "@/lib/anim";
 import { useAuth } from "@/features/auth";
 import { useVeterinariaId } from "@/features/auth/useVeterinariaId";
 import { useClientes } from "@/features/clientes/hooks";
@@ -153,7 +152,7 @@ export function PosPage() {
               </CardContent>
             </Card>
           ) : productos && productos.length > 0 ? (
-            <Reveal stagger className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2">
               {productos.map((p) => {
                 const agotado = p.stock <= 0;
                 return (
@@ -197,7 +196,7 @@ export function PosPage() {
                   </Card>
                 );
               })}
-            </Reveal>
+            </div>
           ) : (
             <EmptyState
               titulo="Catálogo vacío"

@@ -3,7 +3,6 @@ import { KeyRound, Plus, Settings2, UserCog } from "lucide-react";
 import { PageHeader } from "@/components/molecules/PageHeader";
 import { EmptyState } from "@/components/molecules/EmptyState";
 import { Badge, Button, Card, CardContent, SkeletonFila } from "@/components/ui";
-import { Reveal } from "@/lib/anim";
 import { rolLabel } from "@/lib/enums";
 import { RolUsuario, type UsuarioDto } from "@/types/api";
 import { useStaff } from "../hooks";
@@ -50,7 +49,7 @@ export function StaffPage() {
           </CardContent>
         </Card>
       ) : staff.length > 0 ? (
-        <Reveal stagger className="space-y-3">
+        <div className="space-y-3">
           {staff.map((u) => (
             <Card key={u.id}>
               <CardContent className="flex items-center gap-3 p-4">
@@ -83,7 +82,7 @@ export function StaffPage() {
               </CardContent>
             </Card>
           ))}
-        </Reveal>
+        </div>
       ) : (
         <EmptyState
           titulo="Sin personal"

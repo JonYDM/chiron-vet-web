@@ -4,7 +4,6 @@ import { CalendarClock, FileText, Plus, Syringe } from "lucide-react";
 import { PageHeader } from "@/components/molecules/PageHeader";
 import { EmptyState } from "@/components/molecules/EmptyState";
 import { Badge, Button, Card, CardContent, SkeletonFila } from "@/components/ui";
-import { Reveal } from "@/lib/anim";
 import { usePermisos } from "@/lib/usePermisos";
 import { tipoRegistroLabel } from "@/lib/enums";
 import { formatDate } from "@/lib/format";
@@ -50,7 +49,7 @@ export function ExpedientePage() {
           </CardContent>
         </Card>
       ) : registros && registros.length > 0 ? (
-        <Reveal stagger className="space-y-3">
+        <div className="space-y-3">
           {registros.map((r) => {
             const esVacuna =
               r.tipo === TipoRegistroMedico.Vacuna ||
@@ -107,7 +106,7 @@ export function ExpedientePage() {
               </div>
             );
           })}
-        </Reveal>
+        </div>
       ) : (
         <EmptyState
           titulo="Expediente vacío"

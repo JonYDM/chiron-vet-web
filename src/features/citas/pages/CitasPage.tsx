@@ -3,7 +3,6 @@ import { CalendarDays, Check, Plus, X, UserX } from "lucide-react";
 import { PageHeader } from "@/components/molecules/PageHeader";
 import { EmptyState } from "@/components/molecules/EmptyState";
 import { Badge, Button, Card, CardContent, SkeletonFila } from "@/components/ui";
-import { Reveal } from "@/lib/anim";
 import { estadoCitaLabel, estadoCitaTone } from "@/lib/enums";
 import { formatDateTime } from "@/lib/format";
 import { EstadoCita } from "@/types/api";
@@ -42,7 +41,7 @@ export function CitasPage() {
           </CardContent>
         </Card>
       ) : citas && citas.length > 0 ? (
-        <Reveal stagger className="space-y-3">
+        <div className="space-y-3">
           {citas.map((c) => (
             <div key={c.id}>
               <Card>
@@ -95,7 +94,7 @@ export function CitasPage() {
               </Card>
             </div>
           ))}
-        </Reveal>
+        </div>
       ) : (
         <EmptyState
           titulo="Sin citas próximas"

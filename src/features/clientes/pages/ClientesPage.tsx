@@ -5,7 +5,6 @@ import { Badge, Button, Input, SkeletonFila } from "@/components/ui";
 import { EmptyState } from "@/components/molecules/EmptyState";
 import { Paginacion } from "@/components/molecules/Paginacion";
 import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
-import { Reveal } from "@/lib/anim";
 import { cn } from "@/lib/cn";
 import { formatDate } from "@/lib/format";
 import { useToast } from "@/components/feedback/useToast";
@@ -120,11 +119,11 @@ export function ClientesPage() {
           </div>
         ) : clientes.length > 0 ? (
           <>
-            <Reveal stagger className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3">
               {clientes.map((c) => (
                 <ClienteFila key={c.id} cliente={c} />
               ))}
-            </Reveal>
+            </div>
             {data && (
               <Paginacion
                 pagina={data.pagina}

@@ -3,7 +3,6 @@ import { Building2, Plus, Power, Shield, UserCog } from "lucide-react";
 import { PageHeader } from "@/components/molecules/PageHeader";
 import { EmptyState } from "@/components/molecules/EmptyState";
 import { Badge, Button, Card, CardContent, SkeletonFila } from "@/components/ui";
-import { Reveal } from "@/lib/anim";
 import { formatDate } from "@/lib/format";
 import type { Veterinaria } from "@/types/api";
 import {
@@ -49,7 +48,7 @@ export function VeterinariasPage() {
           </CardContent>
         </Card>
       ) : veterinarias && veterinarias.length > 0 ? (
-        <Reveal stagger className="space-y-3">
+        <div className="space-y-3">
           {veterinarias.map((v) => (
             <Card key={v.id}>
               <CardContent className="flex flex-wrap items-center gap-3 p-4">
@@ -111,7 +110,7 @@ export function VeterinariasPage() {
               </CardContent>
             </Card>
           ))}
-        </Reveal>
+        </div>
       ) : (
         <EmptyState
           titulo="Sin veterinarias"

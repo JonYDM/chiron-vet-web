@@ -3,7 +3,6 @@ import { Download } from "lucide-react";
 import { PageHeader } from "@/components/molecules/PageHeader";
 import { EmptyState } from "@/components/molecules/EmptyState";
 import { Button, Card, CardContent, Input, SkeletonFila } from "@/components/ui";
-import { Reveal } from "@/lib/anim";
 import { descargarCsv } from "@/lib/csv";
 import { formatCurrency, formatDateTime } from "@/lib/format";
 import { metodoPagoLabel } from "@/lib/enums";
@@ -98,7 +97,7 @@ export function HistorialVentasPage() {
           </CardContent>
         </Card>
       ) : ventas && ventas.length > 0 ? (
-        <Reveal stagger className="space-y-3">
+        <div className="space-y-3">
           {ventas.map((v) => (
             <div key={v.id}>
               <Card>
@@ -125,7 +124,7 @@ export function HistorialVentasPage() {
               </Card>
             </div>
           ))}
-        </Reveal>
+        </div>
       ) : (
         <EmptyState
           titulo="Sin ventas"

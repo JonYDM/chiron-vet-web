@@ -2,7 +2,6 @@ import { CalendarClock, Syringe } from "lucide-react";
 import { PageHeader } from "@/components/molecules/PageHeader";
 import { EmptyState } from "@/components/molecules/EmptyState";
 import { Badge, Card, CardContent, SkeletonFila } from "@/components/ui";
-import { Reveal } from "@/lib/anim";
 import { tipoRecordatorioLabel } from "@/lib/enums";
 import { formatDate } from "@/lib/format";
 import { TipoRecordatorio } from "@/types/api";
@@ -32,7 +31,7 @@ export function MisRecordatoriosPage() {
           </CardContent>
         </Card>
       ) : recordatorios && recordatorios.length > 0 ? (
-        <Reveal stagger className="space-y-3">
+        <div className="space-y-3">
           {recordatorios.map((r, i) => {
             const esVacuna = r.tipo === TipoRecordatorio.ProximaAplicacion;
             return (
@@ -60,7 +59,7 @@ export function MisRecordatoriosPage() {
               </div>
             );
           })}
-        </Reveal>
+        </div>
       ) : (
         <EmptyState
           titulo="Todo al día 🎉"

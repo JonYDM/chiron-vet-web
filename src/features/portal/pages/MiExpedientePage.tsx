@@ -3,7 +3,6 @@ import { ArrowLeft, CalendarClock, FileText, Syringe } from "lucide-react";
 import { PageHeader } from "@/components/molecules/PageHeader";
 import { EmptyState } from "@/components/molecules/EmptyState";
 import { Badge, Card, CardContent, SkeletonFila } from "@/components/ui";
-import { Reveal } from "@/lib/anim";
 import { tipoRegistroLabel } from "@/lib/enums";
 import { formatDate } from "@/lib/format";
 import { TipoRegistroMedico } from "@/types/api";
@@ -42,7 +41,7 @@ export function MiExpedientePage() {
           </CardContent>
         </Card>
       ) : registros && registros.length > 0 ? (
-        <Reveal stagger className="space-y-3">
+        <div className="space-y-3">
           {registros.map((r) => {
             const esVacuna =
               r.tipo === TipoRegistroMedico.Vacuna ||
@@ -78,7 +77,7 @@ export function MiExpedientePage() {
               </div>
             );
           })}
-        </Reveal>
+        </div>
       ) : (
         <EmptyState
           titulo="Sin historial"

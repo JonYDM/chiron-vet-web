@@ -340,3 +340,64 @@ expediente. Hospitalización/cirugía = módulo aparte en los grandes.
   **`TipoCita`/motivo**. Migración + DTO + endpoints.
 - Enlace **Cita → RegistroMedico** al atender (crear consulta desde la cita).
 - (Futuro) Campos SOAP en `RegistroMedico`; módulo de hospitalización.
+
+
+---
+
+## 8. ÉPICA — Notificaciones in-app + Campañas (planeada, NO construida aún)
+
+### Objetivo
+Que el rol **Dueño de mascota** reciba mensajes de la clínica dentro del portal (buzón +
+badge de campanita), y que el **staff** pueda mandar **campañas** (promociones, avisos,
+prevención) a sus clientes. Motiva el uso del portal del dueño (además de ver sus citas,
+mascotas e historial).
+
+### Decisiones de producto (acordadas con el usuario)
+- **Canal:** SOLO **in-app** por ahora (buzón dentro del portal + badge de no-leídas).
+- **Push real (PWA cerrada):** FASE FUTURA. Requiere Web Push API + service worker +
+  suscripción + claves VAPID + envío desde el backend .NET; en iOS solo si la PWA está
+  "instalada". NO entra ahora (se documenta como HU futura para no prometer a medias).
+- **Tipos de campaña:** `Publicidad / Informativo / Prevención / Promoción (oferta)`.
+  Solo "Promoción" lleva **producto** asociado.
+- **Producto de la oferta:** se elige del **catálogo del POS** existente.
+- **Envío:** a **TODOS los dueños** de la veterinaria (sin segmentar). Segmentación = futuro.
+
+### Modelo de datos (propuesto)
+- **`Notificacion`** (la "tubería", una por destinatario): Id, VeterinariaId, Destinatario
+  (clienteId/usuarioId), Titulo, Cuerpo, Tipo, Leida (bool), FechaCreacion, CampañaId?
+  (opcional, si vino de una campaña).
+- **`Campaña`**: Id, VeterinariaId, Tipo (enum Publicidad/Informativo/Prevención/Promoción),
+  Titulo, Descripcion, ProductoId? (solo Promoción), FechaEnvio, TotalEnviadas.
+
+### Fases de construcción (orden acordado)
+1. **Fase 1 — Notificaciones in-app (la tubería):**
+   - Backend: entidad `Notificacion` + migración + `GET /api/notificaciones` (del token) +
+     `POST /api/notificaciones/{id}/leida` + contador de no-leídas.
+   - Frontend: bandeja en el portal del dueño + conectar el **badge de la campanita** del
+     header (hoy [MOCK]) a no-leídas reales.
+   - Solo con esto ya se pueden entregar los recordatorios como notificación real.
+2. **Fase 2 — Campañas (encima de la tubería):**
+   - Backend: entidad `Campaña` + endpoint crear campaña (genera N notificaciones, una por
+     dueño) + selector de producto del catálogo POS.
+   - Frontend (staff): formulario de crear campaña (Drawer+wizard): tipo → título →
+     descripción → (si Promoción) producto. Lista de campañas enviadas.
+3. **Fase 3 — Futuro:** segmentación (por especie, por inactividad, etc.) y **push real**.
+
+### Historias de usuario
+> **HU-N1** — Como **dueño**, quiero ver una bandeja de notificaciones en mi portal con un
+> badge de no-leídas, para enterarme de los avisos de la clínica.
+>
+> **HU-N2** — Como **dueño**, quiero marcar una notificación como leída (y que el badge se
+> actualice), para llevar el control de lo que ya vi.
+>
+> **HU-C1** — Como **staff**, quiero crear una campaña (tipo, título, descripción) y
+> enviarla a todos mis clientes, para comunicar avisos/promos/prevención.
+>
+> **HU-C2** — Como **staff**, quiero que si la campaña es de tipo Promoción pueda asociar un
+> **producto del catálogo** (la oferta), para que el dueño sepa qué está en oferta.
+>
+> **HU-C3 (futuro)** — Como **staff**, quiero **segmentar** a quién envío (perros, gatos,
+> clientes inactivos), para campañas más relevantes.
+>
+> **HU-N3 (futuro)** — Como **dueño**, quiero recibir **push** aunque tenga la app cerrada
+> (PWA instalada), para no perderme avisos importantes. Requiere Web Push + VAPID + SW.

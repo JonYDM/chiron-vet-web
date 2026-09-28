@@ -269,3 +269,50 @@ El dashboard muestra mock, pero varias cosas YA existen en el backend y solo fal
 1. Rediseñar dashboard con más aire (tipografía, menos subtítulos, ocultar mock puro).
 2. Conectar lo real (métricas, agenda, resumen ventas, recordatorios).
 3. Planear PRs de backend para los módulos nuevos (triage, inventario, notificaciones).
+
+
+---
+
+## 7. Modelo Citas vs. Consultas (validado contra la industria)
+
+### Referencia de la industria (software veterinario EE.UU.)
+Líderes: ezyVet, Cornerstone (IDEXX), Avimark, Provet Cloud, Vetspire, Digitail, Shepherd.
+Todos separan 3 conceptos:
+- **Cita (Appointment):** espacio en la **agenda**. Logística: fecha/hora, motivo, quién
+  atiende, estado. NO tiene contenido clínico todavía.
+- **Consulta (Visit/Consultation):** el **encuentro clínico** real. Contenido: motivo,
+  exploración, diagnóstico, tratamiento, notas (formato SOAP). Una cita **deriva** en
+  consulta cuando el paciente llega y es atendido.
+- **Expediente (Medical Record):** el **historial** = suma de todas las consultas/vacunas/
+  procedimientos en el tiempo.
+
+Flujo: `Cita (agenda) → paciente llega → Consulta (clínica) → queda en el Expediente`.
+Una cita puede no volverse consulta (no-show/cancelada); una consulta siempre queda en el
+expediente. Hospitalización/cirugía = módulo aparte en los grandes.
+
+### Modelo acordado para Chiron (aprobado por el usuario)
+- **Cita = agenda.** Enums claros:
+  - **Estado:** `Programada / Confirmada / En sala / Atendida / No asistió / Cancelada`.
+  - **Tipo/motivo:** `Consulta general / Vacunación / Desparasitación / Control / Estética /
+    Urgencia / Cirugía` (plantilla con enum, NO texto libre).
+  - Campos: fecha/hora, mascota, motivo (enum), veterinario, notas.
+- **Consulta = el `RegistroMedico`** que ya existe. Al marcar una cita como **Atendida**,
+  se ofrece **crear el registro médico (consulta)** que queda en el expediente → une los
+  dos conceptos como en la industria.
+- **SOAP:** las consultas usarán formato **SOAP** (Subjetivo, Objetivo, Análisis, Plan)
+  como los líderes (aprobado). Se puede introducir gradualmente.
+- **Hospitalización / internamiento / cirugía:** módulo FUTURO (tipo hospital: jaulas,
+  tratamientos programados, monitoreo). FUERA del MVP.
+
+### Rediseño de la vista Citas (plan)
+- **Lista agrupada por día** (Hoy / mañana / fechas), NO texto plano — cards Stitch con
+  estados de color (reusar el patrón del timeline de agenda del dashboard).
+- **Alta/edición de cita** en Drawer + wizard: fecha/hora → mascota → motivo (enum) →
+  veterinario. Con la animación de guardado y toast.
+- **Acción "Atender"** en una cita → crea la consulta (RegistroMedico) en el expediente.
+
+### Pendiente de BACKEND (citas/consultas)
+- Ampliar `EstadoCita` (agregar Confirmada / En sala si no están) y agregar enum
+  **`TipoCita`/motivo**. Migración + DTO + endpoints.
+- Enlace **Cita → RegistroMedico** al atender (crear consulta desde la cita).
+- (Futuro) Campos SOAP en `RegistroMedico`; módulo de hospitalización.

@@ -22,6 +22,32 @@ const currencyFmt = new Intl.NumberFormat("es-MX", {
   currency: "MXN",
 });
 
+// Fecha "larga" legible: "Lunes, 28 de octubre". Como es PWA, se calcula con la
+// fecha LOCAL del dispositivo (funciona offline, respeta la zona horaria del usuario).
+const dateLongFmt = new Intl.DateTimeFormat("es-MX", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+});
+
+/** Fecha larga de HOY con la primera letra en mayúscula: "Lunes, 28 de octubre". */
+export function fechaHoyLarga(): string {
+  const t = dateLongFmt.format(new Date()); // "lunes, 28 de octubre"
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+// Fecha corta para espacios reducidos (header colapsado): "Lun 28 oct".
+const dateShortFmt = new Intl.DateTimeFormat("es-MX", {
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+});
+
+/** Fecha corta de HOY: "Lun 28 oct" (local, offline-friendly para PWA). */
+export function fechaHoyCorta(): string {
+  return dateShortFmt.format(new Date()).replace(/\./g, "");
+}
+
 /** Formatea una fecha ISO (o Date) como "27 sept 2026". */
 export function formatDate(value: string | Date | null | undefined): string {
   if (!value) return "—";

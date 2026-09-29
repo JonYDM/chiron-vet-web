@@ -72,6 +72,19 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Separa las librerías grandes en chunks propios para mejor caché:
+        // al cambiar el código de la app, estos no se re-descargan.
+        manualChunks: {
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "query-vendor": ["@tanstack/react-query"],
+          "ui-vendor": ["vaul", "react-hot-toast"],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     proxy: {

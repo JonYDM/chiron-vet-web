@@ -93,6 +93,12 @@
     height: 100%;
   }
 
+  /* Reserva el espacio de la scrollbar siempre → evita el salto/reacomodo de ancho
+     (header, contenido) cuando la barra aparece o desaparece al scrollear. */
+  html {
+    scrollbar-gutter: stable;
+  }
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
     text-rendering: optimizeLegibility;

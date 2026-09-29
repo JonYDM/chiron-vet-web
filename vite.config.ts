@@ -17,7 +17,7 @@ export default defineConfig({
         name: "Patwi — Gestión veterinaria",
         short_name: "Patwi",
         description: "Patwi: gestión simple para tu veterinaria. 🐾",
-        theme_color: "#0D6E6E",
+        theme_color: "#FFFFFF",
         background_color: "#FFFFFF",
         display: "standalone",
         orientation: "portrait",

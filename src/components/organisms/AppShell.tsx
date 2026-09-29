@@ -1,9 +1,9 @@
 import { type ReactNode, useState } from "react";
-import { NavLink } from "react-router-dom";import { Bell, Check, ChevronDown, KeyRound, LogOut, MapPin, MoreHorizontal, PawPrint } from "lucide-react";
+import { NavLink } from "react-router-dom";import { Check, ChevronDown, KeyRound, LogOut, MapPin, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useAuth } from "@/features/auth";
 import { rolLabel } from "@/lib/enums";
-import { fechaHoyCorta } from "@/lib/format";
+import { saludoPorHora } from "@/lib/saludo";
 import { RolUsuario } from "@/types/api";
 import { type NavItem } from "@/app/navigation";
 import { usePermisos } from "@/lib/usePermisos";
@@ -65,49 +65,24 @@ function AppShellInterno({ nav, children }: { nav: NavItem[]; children: ReactNod
   const primarios = items.filter((i) => !i.secundario);
   const secundarios = items.filter((i) => i.secundario);
   const [pinAbierto, setPinAbierto] = useState(false);
-  const { titulo, subtitulo, accion, tituloSuave, colapsado } = useHeaderTitulo();
+  const { titulo, subtitulo, accion } = useHeaderTitulo();
 
   return (
-    <div className="min-h-screen bg-surface">
-      {/* HEADER de dos alturas, fijo, integrado con el contenido */}
-      <header className="fixed inset-x-0 top-0 z-40 bg-surface/80 backdrop-blur-xl">
+    <div className="min-h-dvh bg-surface">
+      {/* HEADER simple, claro, continuo con la barra de estado (sube hasta el notch). */}
+      <header
+        className="fixed inset-x-0 top-0 z-40 bg-surface"
+        style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+      >
         <div className="mx-auto w-[90%] max-w-2xl">
-          {/* Fila-barra: marca/sucursal + título compacto (al colapsar) + acciones */}
-          <div className="relative flex h-16 items-center justify-between gap-3">
+          <div className="flex h-14 items-center justify-between gap-3">
+            {/* Izquierda: marca (Patwi + Wipo) o selector de sucursal */}
             <div className="flex min-w-0 items-center gap-2.5">
-              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand text-white shadow-primary-glow">
-                <PawPrint className="h-5 w-5" aria-hidden />
-              </div>
-              {/* Marca/sucursal — se desvanece al colapsar */}
-              <div
-                className={cn(
-                  "transition-all duration-300",
-                  colapsado ? "pointer-events-none absolute -translate-y-1 opacity-0" : "opacity-100",
-                )}
-              >
-                {sesion && <ContextoHeader rol={sesion.rol} />}
-              </div>
-              {/* Título compacto + fecha — aparece al colapsar, en el lugar de la marca */}
-              {titulo && (
-                <div
-                  className={cn(
-                    "min-w-0 leading-tight transition-all duration-300",
-                    colapsado ? "translate-y-0 opacity-100" : "pointer-events-none absolute translate-y-1 opacity-0",
-                  )}
-                >
-                  <span className="block truncate text-headline-sm font-bold text-on-surface">
-                    {titulo}
-                  </span>
-                  <span className="block truncate text-[11px] font-medium text-on-surface-variant">
-                    {fechaHoyCorta()}
-                  </span>
-                </div>
-              )}
+              {sesion && <ContextoHeader rol={sesion.rol} />}
             </div>
 
+            {/* Derecha: perfil */}
             <div className="flex shrink-0 items-center gap-1">
-              <EstadoSincronizado />
-              <NotificacionesMock />
               {sesion && (
                 <PerfilMenu
                   nombre={sesion.nombre}
@@ -118,57 +93,36 @@ function AppShellInterno({ nav, children }: { nav: NavItem[]; children: ReactNod
               )}
             </div>
           </div>
-
-          {/* Fila-título: título GRANDE + subtítulo/acción — colapsa al scrollear */}
-          <div
-            className={cn(
-              "grid overflow-hidden transition-all duration-300 ease-out",
-              colapsado ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr] opacity-100",
-            )}
-          >
-            <div className="min-h-0">
-              <div className="flex items-start justify-between gap-3 pb-3 pt-1">
-                <div className="min-w-0">
-                  {subtitulo && <div className="mb-1">{subtitulo}</div>}
-                  <h1
-                    className={cn(
-                      "tracking-tight text-on-surface",
-                      tituloSuave
-                        ? "text-headline-sm font-semibold text-on-surface-variant"
-                        : "text-headline-lg-mobile font-bold",
-                    )}
-                  >
-                    {titulo}
-                  </h1>
-                </div>
-                {accion && <div className="shrink-0">{accion}</div>}
-              </div>
-            </div>
-          </div>
         </div>
       </header>
 
-      {/* MAIN scrolleable. El padding-top se ajusta según el header (expandido/colapsado). */}
+      {/* MAIN scrolleable. El padding-top deja espacio al header + safe-area del notch. */}
       <main
-        className={cn(
-          "mx-auto w-[90%] max-w-2xl pb-28 transition-[padding] duration-300 ease-out",
-          colapsado ? "pt-20" : "pt-36",
-        )}
+        className="mx-auto w-[90%] max-w-2xl pb-28"
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 4.5rem)" }}
       >
+        {/* Encabezado de la vista dentro del contenido (título grande + subtítulo + acción) */}
+        {(subtitulo || accion || titulo) && (
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              {subtitulo && <div className="mb-1">{subtitulo}</div>}
+              <h1 className="text-headline-lg-mobile font-bold tracking-tight text-on-surface">
+                {titulo}
+              </h1>
+            </div>
+            {accion && <div className="shrink-0">{accion}</div>}
+          </div>
+        )}
         {children}
       </main>
 
-      {/* BOTTOM-NAV flotante (isla con blur + safe-area) */}
-      <nav
-        aria-label="Navegación principal"
-        className="fixed inset-x-0 bottom-0 z-40"
-        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
-      >
+      {/* BOTTOM-NAV docked (edge-to-edge, pegado al borde, top-rounded, tinte translúcido) */}
+      <nav aria-label="Navegación principal" className="fixed inset-x-0 bottom-0 z-40">
         <div
-          className="mx-auto mb-3 flex w-[90%] max-w-sm items-center justify-around gap-1 rounded-full border border-primary-container/20 bg-surface-container-lowest/85 px-1.5 py-1 backdrop-blur-xl"
+          className="flex items-center justify-around gap-1 rounded-t-3xl border-t border-primary-container/15 bg-surface-nav px-2 pt-2 backdrop-blur-xl"
           style={{
-            boxShadow:
-              "inset 0 1px 2px rgba(13,110,110,0.18), inset 0 -1px 3px rgba(13,110,110,0.10), 0 10px 24px -6px rgba(8,76,76,0.22)",
+            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.5rem)",
+            boxShadow: "0 -8px 24px -12px rgba(8,76,76,0.20)",
           }}
         >
           {primarios.map((item) => {
@@ -228,18 +182,57 @@ function AppShellInterno({ nav, children }: { nav: NavItem[]; children: ReactNod
 }
 
 /**
- * Contexto del header por rol:
- *  - Administrador (multi-sucursal [MOCK]) → selector de sucursal.
- *  - Otros roles → marca "Patwi" + nombre del módulo.
+ * Avatar de Wipo como botón que abre un popover con Wipo saludando (estilo login).
+ * Es independiente del selector de sucursal: solo la carita de Wipo.
+ */
+function WipoPopover() {
+  const [abierto, setAbierto] = useState(false);
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setAbierto((v) => !v)}
+        aria-label="Wipo"
+        aria-expanded={abierto}
+        className="rounded-full transition-transform active:scale-95"
+      >
+        <Avatar nombre="Wipo" src="/profile-wipo.webp" size="sm" />
+      </button>
+
+      {abierto && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setAbierto(false)} />
+          <div className="absolute left-0 top-full z-50 mt-2 w-52 rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-3 text-center shadow-lift">
+            <img src="/wipo.webp" alt="Wipo" className="mx-auto h-14 w-14 object-contain" />
+            <p className="mt-1 font-marca text-base font-extrabold text-primary-container">
+              ¡{saludoPorHora()}!
+            </p>
+            <p className="mt-0.5 text-body-sm leading-snug text-on-surface-variant">
+              Soy Wipo, ¡qué gusto verte!
+            </p>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Contenido izquierdo del header: Wipo (con popover propio) + marca "Patwi".
+ * El Administrador ve además el selector de sucursal [MOCK].
  */
 function ContextoHeader({ rol }: { rol: RolUsuario }) {
   if (rol === RolUsuario.Administrador) {
-    return <SelectorSucursal />;
+    return (
+      <div className="flex min-w-0 items-center gap-2">
+        <WipoPopover />
+        <SelectorSucursal />
+      </div>
+    );
   }
   return (
-    <div className="min-w-0 leading-tight">
-      <p className="truncate font-marca text-headline-sm font-extrabold text-on-surface">Patwi</p>
-      <p className="truncate text-[11px] font-medium text-on-surface-variant">Roma Norte</p>
+    <div className="flex min-w-0 items-center gap-2">
+      <WipoPopover />
+      <span className="truncate font-marca text-headline-sm font-extrabold text-on-surface">Patwi</span>
     </div>
   );
 }
@@ -254,7 +247,7 @@ function SelectorSucursal() {
       <button
         onClick={() => setAbierto((v) => !v)}
         aria-expanded={abierto}
-        className="flex min-w-0 items-center gap-1.5 rounded-lg px-1.5 py-1 text-left transition-colors hover:bg-surface-container"
+        className="flex min-w-0 items-center gap-2 rounded-lg px-1.5 py-1 text-left transition-colors hover:bg-surface-container"
       >
         <span className="min-w-0 leading-tight">
           <span className="block truncate font-marca text-headline-sm font-extrabold text-on-surface">Patwi</span>
@@ -298,31 +291,6 @@ function SelectorSucursal() {
         </>
       )}
     </div>
-  );
-}
-
-/** [MOCK] Estado en línea / sincronizado (visual). */
-function EstadoSincronizado() {
-  return (
-    <span className="mr-1 hidden items-center gap-1.5 rounded-full bg-primary-container/10 px-2.5 py-1 text-[11px] font-semibold text-primary-container sm:inline-flex">
-      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary-container" />
-      Sincronizado
-    </span>
-  );
-}
-
-/** [MOCK] Notificaciones con badge. */
-function NotificacionesMock() {
-  return (
-    <button
-      aria-label="Notificaciones"
-      className="relative grid h-10 w-10 place-items-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
-    >
-      <Bell className="h-5 w-5" aria-hidden />
-      <span className="absolute right-1.5 top-1.5 grid h-4 min-w-[16px] place-items-center rounded-full bg-st-secondary px-1 text-[9px] font-bold text-on-secondary">
-        3
-      </span>
-    </button>
   );
 }
 

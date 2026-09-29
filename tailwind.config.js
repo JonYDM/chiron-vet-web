@@ -97,6 +97,8 @@ export default {
         "error-st": "#ba1a1a",
         "error-container": "#ffdad6",
         "on-error-container": "#93000a",
+        // Navegación inferior (docked): fondo tinteado translúcido (teal muy suave) + blur.
+        "surface-nav": "rgba(240, 250, 250, 0.85)",
       },
       fontFamily: {
         sans: ["Plus Jakarta Sans", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],

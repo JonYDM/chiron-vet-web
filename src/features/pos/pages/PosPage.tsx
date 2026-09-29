@@ -468,7 +468,7 @@ export function PosPage() {
             size="lg"
             onClick={cobrar}
             loading={registrarVenta.isPending}
-            disabled={lineas.length === 0}
+            disabled={lineas.length === 0 && cargosElegidos.length === 0}
           >
             Cobrar {formatCurrency(total)}
           </Button>

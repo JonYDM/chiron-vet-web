@@ -71,7 +71,6 @@ export function PerfilPacientePage() {
                 ref={inputPerfilRef}
                 type="file"
                 accept="image/*"
-                capture="environment"
                 className="hidden"
                 onChange={onFotoPerfil}
               />

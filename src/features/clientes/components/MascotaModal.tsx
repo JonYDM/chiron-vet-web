@@ -200,7 +200,6 @@ export function MascotaModal({ open, onClose, clienteId, mascota, abrirEnFoto }:
             ref={inputFotoRef}
             type="file"
             accept="image/*"
-            capture="environment"
             className="hidden"
             onChange={elegirFoto}
           />

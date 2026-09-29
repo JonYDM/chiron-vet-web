@@ -64,12 +64,11 @@ export function GaleriaFotos({ mascotaId, puedeEditar }: { mascotaId: string; pu
       </div>
       <p className="mb-3 text-body-sm text-on-surface-variant">Expediente visual comparativo</p>
 
-      {/* Input oculto: en móvil abre la cámara (capture). */}
+      {/* Input oculto: sin 'capture' → el móvil deja elegir cámara O galería. */}
       <input
         ref={inputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         className="hidden"
         onChange={onArchivo}
       />

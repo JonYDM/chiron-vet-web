@@ -94,21 +94,39 @@ export function HistorialVentasPage() {
           </span>
         </label>
 
-        {/* Resumen del período (bento tintado con relieve) */}
+        {/* Resumen del período (bento con color, estilo acciones rápidas) */}
         {resumen && (
           <div className="grid grid-cols-2 gap-3">
-            <div className="col-span-2 flex items-center justify-between rounded-2xl bg-tertiary-fixed/50 p-4 shadow-inset-up">
-              <span className="flex items-center gap-1.5 text-label-md font-bold text-on-surface">
-                <Store className="h-[18px] w-[18px] text-tertiary" aria-hidden />
+            <div className="col-span-2 flex items-center justify-between rounded-2xl bg-primary-container p-4 text-on-primary shadow-soft">
+              <span className="flex items-center gap-1.5 text-label-md font-bold">
+                <Store className="h-[18px] w-[18px]" aria-hidden />
                 Total del mes
               </span>
-              <span className="tabular text-headline-md font-bold text-tertiary">
+              <span className="tabular text-headline-md font-bold">
                 {formatCurrency(resumen.total)}
               </span>
             </div>
-            <ResumenChip icon={Banknote} label="Efectivo" valor={resumen.efectivo} />
-            <ResumenChip icon={CreditCard} label="Tarjeta" valor={resumen.tarjeta} />
-            <ResumenChip icon={Smartphone} label="Transferencia" valor={resumen.transferencia} />
+            <ResumenChip
+              icon={Banknote}
+              label="Efectivo"
+              valor={resumen.efectivo}
+              className="bg-tertiary-fixed text-on-tertiary-fixed-variant"
+              iconWrap="bg-tertiary/15 text-tertiary"
+            />
+            <ResumenChip
+              icon={CreditCard}
+              label="Tarjeta"
+              valor={resumen.tarjeta}
+              className="bg-secondary-fixed text-on-secondary-fixed"
+              iconWrap="bg-st-secondary/15 text-st-secondary"
+            />
+            <ResumenChip
+              icon={Smartphone}
+              label="Transferencia"
+              valor={resumen.transferencia}
+              className="bg-primary-fixed/50 text-on-tertiary-fixed-variant"
+              iconWrap="bg-tertiary/15 text-tertiary"
+            />
             <div className="flex flex-col justify-center rounded-2xl bg-surface-container p-3.5">
               <span className="text-body-sm text-on-surface-variant">N.º de ventas</span>
               <span className="tabular text-metric font-bold leading-none text-on-surface">
@@ -218,18 +236,24 @@ function ResumenChip({
   icon: Icon,
   label,
   valor,
+  className,
+  iconWrap,
 }: {
   icon: typeof Banknote;
   label: string;
   valor: number;
+  className: string;
+  iconWrap: string;
 }) {
   return (
-    <div className="flex flex-col gap-1 rounded-2xl bg-surface-container p-3.5">
-      <Icon className="h-5 w-5 text-primary-container" aria-hidden />
-      <span className="tabular mt-1 text-label-lg font-bold leading-none text-on-surface">
+    <div className={`flex flex-col gap-1 rounded-2xl p-3.5 shadow-soft ${className}`}>
+      <span className={`grid h-8 w-8 place-items-center rounded-lg ${iconWrap}`}>
+        <Icon className="h-5 w-5" aria-hidden />
+      </span>
+      <span className="tabular mt-1 text-label-lg font-bold leading-none">
         {formatCurrency(valor)}
       </span>
-      <span className="text-body-sm text-on-surface-variant">{label}</span>
+      <span className="text-body-sm opacity-80">{label}</span>
     </div>
   );
 }

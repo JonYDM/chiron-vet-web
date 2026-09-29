@@ -415,3 +415,87 @@ mascotas e historial).
 >
 > **HU-N3 (futuro)** — Como **dueño**, quiero recibir **push** aunque tenga la app cerrada
 > (PWA instalada), para no perderme avisos importantes. Requiere Web Push + VAPID + SW.
+
+
+---
+
+## 8. Bitácora — Branding, pulido de UX y optimización (sesión reciente)
+
+### Identidad / marca (DEFINITIVO)
+- **Producto: Patwi** (se lee "PAT-wee"; evoca "pata"; fácil en español/inglés). Antes se
+  barajó Chiron → likni → ikni (dominio `ikni.mx` ocupado) → **Patwi**.
+- **Mascota: Wipo** (perrito verde, estilo flat de la lámina de referencia).
+- **Dominio:** pendiente registrar (patwi/patwivet). Sitio actual: `chiron-web.netlify.app`.
+- **Fuente de marca:** **Nunito** (`@fontsource/nunito`, solo peso 800 latino) → clase
+  `font-marca` en tailwind, usada en el wordmark "Patwi" (login + header).
+- Rebranding aplicado en toda la UI (header, login, superadmin, sucursales mock). NO se
+  tocó `STORAGE_KEY = "chiron.sesion"` (cambiarla desloguea a todos).
+
+### Assets (things.co) — [LEGAL pendiente]
+- Íconos 3D de **things.co**: `vet`, `pet-store`, `no-load`, `empty`, `wipo`, `profile-wipo`.
+  **Licencia comercial de pago PENDIENTE** (pagar antes de producción/cobrar).
+- **Optimizados a WebP** con `scripts/optimizar-imagenes.mjs` (sharp): ~7 MB → ~74 KB.
+  Íconos PWA (192/512/maskable/apple-touch) generados desde Wipo con
+  `scripts/generar-iconos-pwa.mjs`. Los PNG grandes se eliminaron; solo quedan .webp + PWA.
+
+### Login (rediseño)
+- Centrado vertical con **`min-h-dvh`** (se re-centra al abrir el teclado móvil, no lo tapa).
+- Fondo blanco, Wipo protagonista + wordmark "Patwi" (Nunito), saludo "¡Buenas noches!"
+  con signos, subtexto corto (sin repetir el nombre). `enterKeyHint="go"`.
+- Validaciones: teléfono solo dígitos máx 10; peso decimal válido.
+
+### Shell (header + nav)
+- **Header simple** (se QUITÓ el collapsing de doble altura), fondo **claro sólido**
+  (sin backdrop-blur → causaba vibración/shimmer al scrollear). Sube hasta el notch con
+  `safe-area-inset-top`. Sin ícono de notificaciones. El título de la vista va en el
+  CONTENIDO (PantallaConHeader sigue registrando titulo/subtitulo/accion).
+- **Avatar de Wipo** en el header = botón con **popover** que saluda ("¡Buenas noches! Soy
+  Wipo, ¡qué gusto verte!") — compacto, sin nombre (evita nombres largos).
+- **Bottom-nav docked edge-to-edge**: pegado abajo, ancho completo, esquinas superiores
+  redondeadas (`rounded-t-3xl`), tinte translúcido + blur (token **`surface-nav`**),
+  respeta safe-area inferior. (El nav SÍ conserva blur; el header NO.)
+- `scrollbar-gutter: stable` en html → evita el reacomodo de ancho al aparecer scrollbar.
+
+### Coherencia de vistas (design system) — módulos alineados
+- **Historial de ventas, Recordatorios, Equipo, Pacientes** rehechos con el patrón común:
+  `PantallaConHeader` + subtítulo, cards Stitch, bento coherente con el dashboard.
+- **Equipo:** patrón de Clientes (searchbar + lista) + 2 cards de filtro por rol (neutras,
+  toggle, filtro en cliente sobre el payload — sin endpoint, solo 2 roles).
+- **Pacientes:** cards con badge de especie a color + jerarquía.
+- **Clientes:** el estado (Activo/Inactivo) ya NO se muestra en la preview, solo en el detalle.
+
+### PREFERENCIAS DE DISEÑO (del usuario) — IMPORTANTE seguir
+- **Color con jerarquía, NO abusar del terracota:** teal = principal/marca; terracota
+  (`secondary`/`st-secondary`) = acento puntual; **neutro** (`surface-container`) para
+  datos informativos. No llenar de color por llenar.
+- **Métricas/bento con color** estilo "acciones rápidas del dashboard" cuando aporta;
+  pero los **filtros** (cards de rol) en **neutro** con activo destacado en teal.
+- **Emojis:** mínimos/no invasivos (se quitaron varios). Sin "AI slop": cards con carácter
+  (jerarquía, badge, avatar), no planas.
+- **Móvil real:** cuidar teclado (dvh), safe-areas (notch/gestos), evitar shimmer del blur.
+
+### Seguridad / errores
+- **404 (PaginaError con Wipo)** en perfil de paciente y detalle de cliente con id
+  inexistente. Backend YA valida multi-tenant en `GET /mascotas/{id}` (no expone datos de
+  otra veterinaria). El ID en la URL es normal/seguro; el riesgo (IDOR) está cubierto.
+- **Subida de fotos:** se quitó `capture="environment"` → en iPhone/Android ahora deja
+  elegir cámara O galería O archivos.
+
+### Rendimiento / build
+- Lazy loading de rutas (ya existía) + **vendor dividido** (`manualChunks`: react/query/ui)
+  para mejor caché. Imágenes WebP. Fuente mínima. PWA con SW.
+
+### Deploy
+- **Netlify** (front, rama `main` autodeploy) + **Railway** (backend). CORS por variable
+  `Cors__Origenes` en Railway. `VITE_API_URL` en Netlify. `netlify.toml` + `_redirects` (SPA).
+
+### PENDIENTES (features de negocio, ya no diseño)
+1. **Fase 2 — Cobro de consultas** (vet genera Cargo → caja cobra en POS → historial +
+   "Mis pagos" del dueño). Plan: monto libre desde AgregarRegistroModal → "Cobros
+   pendientes" en el POS. Ver §7/notas. El de MÁS valor.
+2. **Panel SuperAdmin ampliado** (Veterinaria: dirección/plan/renovación; Admin: CURP/
+   teléfono/usuario autogenerado) + separar módulos + UX.
+3. **Notificaciones in-app + Campañas** (épica).
+4. **Wipo en Lottie** (animación; requiere Claude/MCP o herramienta — pendiente de acceso).
+5. **Endpoint `GET /clientes/{id}`** para que el detalle de cliente cargue por id al recargar.
+6. **Licencia things.co** antes de producción.

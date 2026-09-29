@@ -7,7 +7,6 @@ import {
   Minus,
   Package,
   Plus,
-  Receipt,
   Search,
   Settings2,
   Smartphone,
@@ -135,6 +134,12 @@ export function PosPage() {
     });
   }
 
+  /** Cierra el drawer de cobro y limpia la vista de éxito. */
+  function cerrarCobro() {
+    setCobroAbierto(false);
+    setRecibo(null);
+  }
+
   async function cobrar() {
     setError(null);
     const recibido = montoRecibido ? Number(montoRecibido) : null;
@@ -151,13 +156,12 @@ export function PosPage() {
         montoRecibido: metodoPago === MetodoPago.Efectivo ? recibido : null,
         cargoIds: cargosElegidos.map((c) => c.id),
       });
-      toast.exito(`Venta registrada por ${formatCurrency(resp.total)} 🎉`);
+      // Éxito: el mismo drawer cambia a la vista animada (estilo Nubank), sin toast.
       setRecibo({ total: resp.total, cambio: resp.cambio });
       setCarrito({});
       setCargosSel({});
       setClienteId("");
       setMontoRecibido("");
-      setCobroAbierto(false);
     } catch (err) {
       const msg = err instanceof ApiError ? err.message : "No se pudo registrar la venta.";
       setError(msg);
@@ -330,13 +334,16 @@ export function PosPage() {
         </div>
       )}
 
-      {/* Drawer de cobro (una sola vista) */}
+      {/* Drawer de cobro: formulario → al cobrar, vista de éxito animada (estilo Nubank) */}
       <Drawer
         open={cobroAbierto}
-        onClose={() => setCobroAbierto(false)}
-        title="Cobrar venta"
-        descripcion="Revisa los productos y registra el cobro."
+        onClose={cerrarCobro}
+        title={recibo ? "" : "Cobrar venta"}
+        descripcion={recibo ? undefined : "Revisa los productos y registra el cobro."}
       >
+        {recibo ? (
+          <CobroExitoso total={recibo.total} cambio={recibo.cambio} onListo={cerrarCobro} />
+        ) : (
         <div className="flex flex-col gap-4">
           <ul className="flex flex-col gap-2">
             {lineas.map((l) => (
@@ -473,6 +480,7 @@ export function PosPage() {
             Cobrar {formatCurrency(total)}
           </Button>
         </div>
+        )}
       </Drawer>
 
       {esAdmin && (
@@ -482,33 +490,6 @@ export function PosPage() {
         <EditarProductoModal open={!!editando} onClose={() => setEditando(null)} producto={editando} />
       )}
 
-      {/* Recibo tras cobrar */}
-      <Drawer open={!!recibo} onClose={() => setRecibo(null)} title="Venta registrada ✓">
-        {recibo && (
-          <div className="flex flex-col items-center gap-4 text-center">
-            <div className="grid h-14 w-14 place-items-center rounded-2xl bg-primary-container/15 text-primary-container">
-              <Receipt className="h-7 w-7" aria-hidden />
-            </div>
-            <div>
-              <p className="text-body-sm text-on-surface-variant">Total cobrado</p>
-              <p className="tabular text-headline-lg font-bold text-on-surface">
-                {formatCurrency(recibo.total)}
-              </p>
-            </div>
-            {recibo.cambio != null && recibo.cambio > 0 && (
-              <div className="w-full rounded-xl bg-secondary-fixed/60 px-4 py-3">
-                <p className="text-body-sm text-on-secondary-fixed">Cambio a entregar</p>
-                <p className="tabular text-headline-sm font-bold text-on-secondary-fixed">
-                  {formatCurrency(recibo.cambio)}
-                </p>
-              </div>
-            )}
-            <Button fullWidth onClick={() => setRecibo(null)}>
-              Listo
-            </Button>
-          </div>
-        )}
-      </Drawer>
     </PantallaConHeader>
   );
 }
@@ -589,6 +570,72 @@ function ProductoCard({
             )}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Confirmación de cobro animada (estilo Nubank), renderizada DENTRO del drawer de cobro.
+ * Secuencia CSS: el círculo se dibuja → el check se traza → pop → aparecen los datos.
+ */
+function CobroExitoso({
+  total,
+  cambio,
+  onListo,
+}: {
+  total: number;
+  cambio: number | null;
+  onListo: () => void;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-5 py-4 text-center" role="status" aria-live="polite">
+      {/* Check animado */}
+      <div className="relative grid h-24 w-24 place-items-center">
+        <span className="cobro-halo absolute inset-0 rounded-full bg-primary-container/15" aria-hidden />
+        <svg viewBox="0 0 56 56" className="cobro-pop relative h-24 w-24" aria-hidden>
+          <circle
+            cx="28"
+            cy="28"
+            r="26"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            className="cobro-circulo text-primary-container"
+          />
+          <path
+            d="M17 29 l7 7 l15 -16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="cobro-check text-primary-container"
+          />
+        </svg>
+      </div>
+
+      {/* Datos (aparecen después del check) */}
+      <div className="cobro-datos flex w-full flex-col items-center gap-4">
+        <div>
+          <p className="text-headline-sm font-bold text-on-surface">¡Cobro realizado!</p>
+          <p className="mt-1 text-body-sm text-on-surface-variant">Total cobrado</p>
+          <p className="tabular text-headline-lg font-bold text-on-surface">{formatCurrency(total)}</p>
+        </div>
+
+        {cambio != null && cambio > 0 && (
+          <div className="flex w-full items-center justify-between rounded-xl bg-secondary-fixed/60 px-4 py-3">
+            <span className="text-label-md font-semibold text-on-secondary-fixed">Cambio a entregar</span>
+            <span className="tabular text-headline-sm font-bold text-on-secondary-fixed">
+              {formatCurrency(cambio)}
+            </span>
+          </div>
+        )}
+
+        <Button fullWidth size="lg" onClick={onListo}>
+          Listo
+        </Button>
       </div>
     </div>
   );

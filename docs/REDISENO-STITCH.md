@@ -499,3 +499,48 @@ mascotas e historial).
 4. **Wipo en Lottie** (animación; requiere Claude/MCP o herramienta — pendiente de acceso).
 5. **Endpoint `GET /clientes/{id}`** para que el detalle de cliente cargue por id al recargar.
 6. **Licencia things.co** antes de producción.
+
+
+
+---
+
+## 9. Módulo de Cobro de Consultas (HECHO — front en main, backend en PR)
+
+### Decisión de negocio
+- **Monto libre** (no catálogo de precios): el vet escribe el importe al registrar la
+  consulta. El catálogo por veterinaria queda como mejora futura (menos fricción de alta).
+- **Separación de responsabilidades** (patrón de la industria): el vet GENERA el cargo; la
+  CAJA (recepción/admin) lo COBRA. El vet no toca dinero.
+
+### Modelo (backend — rama `feature/cobro-consultas`)
+- **Entidad `Cargo`** (cuenta por cobrar): veterinariaId, mascotaId, clienteId, concepto,
+  monto, estado (Pendiente/Cobrado/Cancelado), registroMedicoId?, ventaId?, fechaCreacion.
+- **`VentaCargo`** (owned de Venta): cargoId, concepto, monto. La Venta guarda sus cargos
+  cobrados de forma EXPLÍCITA (NO como LineaVenta con ProductoId vacío — se rehízo para
+  evitar ese atajo). `Venta.Total = productos + cargos`; expone `TotalProductos` y
+  `TotalConsultas` para métricas.
+- Casos de uso: `GenerarCargo` (clienteId derivado de la mascota), `ListarCargosPendientes`
+  (con nombre mascota/dueño). `RegistrarVenta` acepta `CargoIds` → crea VentaCargo y marca
+  los cargos Cobrado ligados a la venta.
+- Endpoints: `POST /api/cargos` (Admin/Veterinario), `GET /api/cargos/pendientes`
+  (Admin/Recepcionista). `ResumenVentas` y `VentaDto` incluyen el desglose consultas/productos.
+- **Migración EF `Cargos`** (tablas Cargos + VentaCargo con FK a Ventas). PENDIENTE: mergear
+  el PR + deploy Railway.
+
+### Frontend (en main)
+- **Feature `features/cobros`** (api + hooks: useGenerarCargo, useCargosPendientes).
+- **Consulta:** campo "Costo del servicio" en `AgregarRegistroModal` → al guardar, si hay
+  costo, genera el cargo (ligado al registro).
+- **POS:** sección "Cobros pendientes" (cargos seleccionables) que suman al total y se envían
+  como `cargoIds` al cobrar. Historial y "Mis pagos" muestran los cargos (🩺) además de
+  productos. Historial: desglose **Productos vs Consultas** en el resumen (métrica de negocio).
+
+### Flujo end-to-end
+`Vet registra consulta + costo → Cargo Pendiente → Caja lo ve en el POS y cobra →
+VentaCargo + Cargo Cobrado → aparece en Historial + "Mis pagos" del dueño + métricas.`
+
+### Pendiente / mejora futura
+- **Métricas de consultas en el DASHBOARD** (ya hay base: ResumenVentas con
+  TotalConsultas/TotalProductos). Falta mostrarlo en el panel del Admin.
+- **Catálogo de servicios** por veterinaria (evolución del monto libre).
+- Cancelar cargos pendientes desde la UI (la entidad ya soporta `Cancelar()`).

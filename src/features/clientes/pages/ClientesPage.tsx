@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CalendarDays, ChevronRight, Copy, PawPrint, Phone, Plus, Search, Users } from "lucide-react";
-import { Badge, Button, Input, SkeletonFila } from "@/components/ui";
+import { Button, Input, SkeletonFila } from "@/components/ui";
 import { EmptyState } from "@/components/molecules/EmptyState";
 import { Paginacion } from "@/components/molecules/Paginacion";
 import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
@@ -192,12 +192,7 @@ function ClienteFila({ cliente }: { cliente: Cliente }) {
           {iniciales}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="truncate text-headline-sm font-bold text-on-surface">{cliente.nombre}</span>
-            <Badge tone={cliente.activo ? "success" : "danger"}>
-              {cliente.activo ? "Activo" : "Inactivo"}
-            </Badge>
-          </div>
+          <span className="block truncate text-headline-sm font-bold text-on-surface">{cliente.nombre}</span>
           <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-body-sm text-on-surface-variant">
             {cliente.totalMascotas != null && (
               <span className="inline-flex items-center gap-1">

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, PawPrint } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button, Input } from "@/components/ui";
 import { PinInput } from "@/components/molecules/PinInput";
 import { Reveal } from "@/lib/anim";
@@ -87,57 +87,42 @@ export function LoginPage() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-surface">
-      {/* Difuminados teal para dar profundidad (que no se sienta tan blanco). */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-80 opacity-[0.14]"
-        style={{
-          background:
-            "radial-gradient(75% 100% at 50% 0%, hsl(var(--primary)) 0%, transparent 72%)",
-        }}
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute -bottom-10 -left-16 h-72 w-72 rounded-full opacity-[0.10] blur-3xl"
-        style={{ background: "hsl(var(--primary))" }}
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute -right-20 top-32 h-64 w-64 rounded-full opacity-[0.08] blur-3xl"
-        style={{ background: "hsl(var(--accent))" }}
-        aria-hidden
-      />
+    <main className="relative min-h-screen overflow-hidden bg-white">
 
-      <div className="relative mx-auto flex min-h-screen w-full max-w-sm flex-col px-6 pb-10 pt-16">
+      <div className="relative mx-auto flex min-h-screen w-full max-w-sm flex-col px-6 pb-8">
         {paso === "identificador" ? (
-          <Reveal key="id" className="flex flex-1 flex-col">
-            {/* Marca */}
-            <div className="grid h-14 w-14 place-items-center rounded-2xl bg-brand text-white shadow-primary-glow">
-              <PawPrint className="h-7 w-7" aria-hidden />
+          <Reveal key="id" className="flex flex-1 flex-col pt-6">
+            {/* Marca centrada: Wipo protagonista + wordmark Patwi debajo */}
+            <div className="flex flex-col items-center text-center">
+              <img src="/wipo.png" alt="Wipo" className="h-28 w-28 object-contain" />
+              <span className="mt-1 font-marca text-4xl font-extrabold tracking-tight text-primary-container">
+                Patwi
+              </span>
             </div>
 
-            {/* Encabezado grande, asimétrico */}
-            <div className="mt-8">
-              <h1 className="text-display font-bold leading-tight tracking-tight text-on-surface">
-                {saludoPorHora()} 👋
+            {/* Saludo cálido, centrado */}
+            <div className="mt-8 text-center">
+              <h1 className="text-h1 font-bold tracking-tight text-on-surface">
+                ¡{saludoPorHora()}!
               </h1>
-              <p className="mt-2 text-body-lg text-on-surface-variant">
-                Ingresa tu usuario o teléfono para entrar a Chiron.
+              <p className="mt-1.5 text-body-lg text-on-surface-variant">
+                Ingresa para continuar
               </p>
             </div>
 
-            {/* Formulario */}
+            {/* Formulario: campo + botón agrupados */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 siguiente();
               }}
-              className="mt-10 flex flex-1 flex-col"
+              className="mt-8 flex flex-col gap-3"
             >
               <Input
                 variant="soft"
                 aria-label="Usuario o teléfono"
                 autoComplete="username"
+                enterKeyHint="go"
                 placeholder="Usuario o teléfono"
                 value={identificador}
                 onChange={(e) => {
@@ -145,48 +130,46 @@ export function LoginPage() {
                   if (errorId) setErrorId(null);
                 }}
                 error={errorId ?? undefined}
+                className="h-14 text-center"
                 autoFocus
               />
-
-              {/* Botón grande, anclado abajo (mobile-first) */}
-              <div className="mt-auto pt-8">
-                <Button
-                  type="submit"
-                  fullWidth
-                  size="lg"
-                  loading={verificando}
-                  disabled={identificador.trim().length === 0}
-                  className="h-14 text-base"
-                >
-                  Continuar
-                  <ArrowRight className="h-5 w-5" aria-hidden />
-                </Button>
-              </div>
+              <Button
+                type="submit"
+                fullWidth
+                size="lg"
+                loading={verificando}
+                disabled={identificador.trim().length === 0}
+                className="h-14 text-base"
+              >
+                Continuar
+                <ArrowRight className="h-5 w-5" aria-hidden />
+              </Button>
             </form>
           </Reveal>
         ) : (
-          <Reveal key="pin" className="flex flex-1 flex-col">
+          <Reveal key="pin" className="flex flex-1 flex-col pt-16">
             <button
               onClick={volver}
-              className="flex w-fit items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-label-md font-medium text-on-surface-variant transition-colors hover:text-on-surface"
+              className="absolute left-6 top-6 flex w-fit items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-label-md font-medium text-on-surface-variant transition-colors hover:text-on-surface"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden />
               {identificador}
             </button>
 
-            {/* Saludo grande con nombre real (si el backend lo dio) */}
-            <div className="mt-8">
-              <h1 className="text-display font-bold leading-tight tracking-tight text-on-surface">
-                {nombreReal ? `¡Qué gusto verte, ${nombreReal.split(" ")[0]}!` : "Tu PIN"}
+            {/* Wipo + saludo con nombre real, centrado */}
+            <div className="flex flex-col items-center text-center">
+              <img src="/wipo.png" alt="Wipo" className="h-24 w-24 object-contain" />
+              <h1 className="mt-3 text-h1 font-bold tracking-tight text-on-surface">
+                {nombreReal ? `¡Hola, ${nombreReal.split(" ")[0]}!` : "Tu PIN"}
               </h1>
-              <p className="mt-2 text-body-lg text-on-surface-variant">
+              <p className="mt-1.5 text-body-lg text-on-surface-variant">
                 {nombreReal
-                  ? "Ingresa tu PIN para entrar."
-                  : `Ingresa tu PIN de ${PIN_LENGTH} dígitos para continuar.`}
+                  ? "Ingresa tu PIN para entrar"
+                  : `Ingresa tu PIN de ${PIN_LENGTH} dígitos`}
               </p>
             </div>
 
-            <div className="mt-10 space-y-5">
+            <div className="mt-8 space-y-5">
               <PinInput
                 value={pin}
                 onChange={(next) => {
@@ -209,7 +192,7 @@ export function LoginPage() {
               )}
             </div>
 
-            <div className="mt-auto pt-8">
+            <div className="mt-6">
               <Button
                 fullWidth
                 size="lg"

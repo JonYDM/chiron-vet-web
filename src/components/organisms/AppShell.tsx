@@ -230,7 +230,7 @@ function AppShellInterno({ nav, children }: { nav: NavItem[]; children: ReactNod
 /**
  * Contexto del header por rol:
  *  - Administrador (multi-sucursal [MOCK]) → selector de sucursal.
- *  - Otros roles → marca "Chiron" + nombre del módulo.
+ *  - Otros roles → marca "Patwi" + nombre del módulo.
  */
 function ContextoHeader({ rol }: { rol: RolUsuario }) {
   if (rol === RolUsuario.Administrador) {
@@ -238,7 +238,7 @@ function ContextoHeader({ rol }: { rol: RolUsuario }) {
   }
   return (
     <div className="min-w-0 leading-tight">
-      <p className="truncate text-headline-sm font-bold text-on-surface">Chiron</p>
+      <p className="truncate font-marca text-headline-sm font-extrabold text-on-surface">Patwi</p>
       <p className="truncate text-[11px] font-medium text-on-surface-variant">Roma Norte</p>
     </div>
   );
@@ -257,7 +257,7 @@ function SelectorSucursal() {
         className="flex min-w-0 items-center gap-1.5 rounded-lg px-1.5 py-1 text-left transition-colors hover:bg-surface-container"
       >
         <span className="min-w-0 leading-tight">
-          <span className="block truncate text-headline-sm font-bold text-on-surface">Chiron</span>
+          <span className="block truncate font-marca text-headline-sm font-extrabold text-on-surface">Patwi</span>
           <span className="flex items-center gap-1 text-[11px] font-medium text-on-surface-variant">
             <span className="truncate">{activa.zona}</span>
             <ChevronDown

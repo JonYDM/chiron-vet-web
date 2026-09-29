@@ -111,6 +111,31 @@
 
 
 - **Panel SuperAdmin — ampliar modelos (Veterinaria + Administrador):**
+  - **DECISIONES FINALES (acordadas con el usuario):**
+    - **Renovación:** se CALCULA sola (FechaAlta/última renovación + 1 mes o 1 año según el
+      Plan) y el SuperAdmin puede AJUSTARLA a mano (pagos irregulares, prórrogas).
+    - **CURP:** OPCIONAL. Si se captura, se valida el formato (18 caracteres, patrón CURP).
+      No se usa para el usuario.
+    - **Usuario autogenerado:** `nombre.apellidopaterno` normalizado (minúsculas, sin
+      acentos, ñ→n, solo el primer nombre). Si ya existe → + inicial del materno
+      (`mariana.hernandezg`) → + número (`mariana.hernandez2`). Se muestra al final del wizard.
+    - El Admin se captura con Nombre / Apellido paterno / Apellido materno (opcional) por separado.
+  - **Historias de usuario:**
+    > **HU-SA1** — Como **SuperAdmin**, quiero registrar una veterinaria con nombre, teléfono,
+    > dirección y plan (mensual/anual), para tener el control de mis clientes y su cobro.
+    >
+    > **HU-SA2** — Como **SuperAdmin**, quiero ver cuándo renueva cada veterinaria y cuáles
+    > están por vencer o vencidas, para saber a quién cobrarle.
+    >
+    > **HU-SA3** — Como **SuperAdmin**, quiero renovar una veterinaria (extender según su
+    > plan) o ajustar la fecha a mano, para registrar pagos y prórrogas.
+    >
+    > **HU-SA4** — Como **SuperAdmin**, quiero crear el administrador de una veterinaria con
+    > nombre, apellidos, teléfono y CURP opcional, y que el usuario de acceso se genere solo,
+    > para no inventar usuarios a mano ni duplicarlos.
+  - **Fases:** (1) Backend Veterinaria ampliada → (2) Frontend Veterinaria (wizard + renovación)
+    → (3) Backend Admin ampliado (apellidos, teléfono, CURP, usuario autogenerado) →
+    (4) Frontend Admin (wizard) + panel separado por módulos.
   - **Veterinaria** (hoy: Nombre, Telefono, Activa, FechaAlta). Agregar:
     - `Direccion` (texto).
     - `Plan` (enum: Mensual / Anual) — para el modelo de cobro/renovación.

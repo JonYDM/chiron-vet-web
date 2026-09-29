@@ -6,6 +6,8 @@ import { opcionesDeEnum } from "@/lib/opciones";
 import { tipoRegistroLabel } from "@/lib/enums";
 import { TipoRegistroMedico, type AgregarRegistroMedicoRequest } from "@/types/api";
 import { SelectorVeterinario } from "@/features/citas/components/SelectorVeterinario";
+import { useGenerarCargo } from "@/features/cobros/hooks";
+import { useToast } from "@/components/feedback/useToast";
 import { useAgregarRegistro } from "../hooks";
 
 interface Props {
@@ -31,7 +33,10 @@ export function AgregarRegistroModal({ open, onClose, mascotaId }: Props) {
   const [temperatura, setTemperatura] = useState("");
   const [notas, setNotas] = useState("");
   const [atendidoPorId, setAtendidoPorId] = useState("");
+  const [costo, setCosto] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const generarCargo = useGenerarCargo();
+  const toast = useToast();
 
   const requiereProxima =
     tipo === TipoRegistroMedico.Vacuna ||
@@ -45,6 +50,7 @@ export function AgregarRegistroModal({ open, onClose, mascotaId }: Props) {
     setPeso("");
     setTemperatura("");
     setNotas("");
+    setCosto("");
   }
 
   async function enviar(e: FormEvent) {
@@ -65,7 +71,25 @@ export function AgregarRegistroModal({ open, onClose, mascotaId }: Props) {
       atendidoPorId: atendidoPorId || null,
     };
     try {
-      await agregar.mutateAsync(body);
+      const registroId = await agregar.mutateAsync(body);
+      // Si el vet indicó un costo, genera el cargo (cuenta por cobrar) para la caja.
+      const monto = costo ? Number(costo) : 0;
+      if (monto > 0) {
+        try {
+          await generarCargo.mutateAsync({
+            mascotaId,
+            concepto: descripcion.trim() || tipoRegistroLabel[tipo],
+            monto,
+            registroMedicoId: typeof registroId === "string" ? registroId : null,
+          });
+          toast.exito("Registro guardado y cargo enviado a caja 💳");
+        } catch {
+          // El registro sí se guardó; solo falló el cargo.
+          toast.error("Registro guardado, pero no se pudo enviar el cargo a caja.");
+        }
+      } else {
+        toast.exito("Registro guardado");
+      }
       limpiar();
       onClose();
     } catch (err) {
@@ -108,6 +132,21 @@ export function AgregarRegistroModal({ open, onClose, mascotaId }: Props) {
             hint="Genera un recordatorio automático"
           />
         )}
+
+        {/* Cobro: costo del servicio → genera un cargo pendiente para la caja */}
+        <div className="rounded-xl border border-outline-variant/40 bg-surface-container-low p-3">
+          <Input
+            label="Costo del servicio (opcional)"
+            inputMode="decimal"
+            value={costo}
+            onChange={(e) => {
+              const limpio = e.target.value.replace(/[^\d.]/g, "");
+              if (/^\d{0,6}(\.\d{0,2})?$/.test(limpio) || limpio === "") setCosto(limpio);
+            }}
+            placeholder="0.00"
+            hint="Si lo indicas, se envía como cargo pendiente a la caja para cobrarlo."
+          />
+        </div>
 
         {/* Detalle clínico (opcional) */}
         <div className="rounded-xl bg-canvas p-3">

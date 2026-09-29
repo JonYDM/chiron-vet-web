@@ -60,6 +60,14 @@ export function MisComprasPage() {
                     </span>
                   </div>
                 ))}
+                {v.cargos.map((c) => (
+                  <div key={c.cargoId} className="flex items-center justify-between gap-2 text-body-md">
+                    <span className="min-w-0 truncate text-tertiary">🩺 {c.concepto}</span>
+                    <span className="tabular shrink-0 text-on-surface-variant">
+                      {formatCurrency(c.monto)}
+                    </span>
+                  </div>
+                ))}
               </div>
 
               {v.cambio != null && v.cambio > 0 && (

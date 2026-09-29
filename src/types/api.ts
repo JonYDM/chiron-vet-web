@@ -206,6 +206,12 @@ export interface LineaVentaHistorial {
 }
 
 /** Venta del historial (con sus líneas). */
+export interface VentaCargoHistorial {
+  cargoId: string;
+  concepto: string;
+  monto: number;
+}
+
 export interface VentaHistorial {
   id: string;
   clienteId: string | null;
@@ -215,6 +221,7 @@ export interface VentaHistorial {
   montoRecibido: number | null;
   cambio: number | null;
   lineas: LineaVentaHistorial[];
+  cargos: VentaCargoHistorial[];
 }
 
 /** Resumen de ventas de un período. */
@@ -224,6 +231,8 @@ export interface ResumenVentas {
   efectivo: number;
   tarjeta: number;
   transferencia: number;
+  totalProductos: number;
+  totalConsultas: number;
 }
 
 /** Métricas del dashboard. */
@@ -331,6 +340,8 @@ export interface RegistrarVentaRequest {
   items: ItemVenta[];
   metodoPago: MetodoPago;
   montoRecibido?: number | null;
+  /** Cargos pendientes (cuentas por cobrar) a cobrar en esta venta. */
+  cargoIds?: string[];
 }
 
 export interface VentaResponse {

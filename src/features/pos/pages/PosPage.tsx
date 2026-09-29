@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import {
   Banknote,
+  Check,
+  ClipboardList,
   CreditCard,
   Minus,
   Package,
@@ -31,6 +33,8 @@ import { categoriaProductoLabel } from "@/lib/enums";
 import { formatCurrency } from "@/lib/format";
 import { CategoriaProducto, MetodoPago, RolUsuario, type Producto } from "@/types/api";
 import { useCatalogo, useRegistrarVenta } from "../hooks";
+import { useCargosPendientes } from "@/features/cobros/hooks";
+import type { CargoPendiente } from "@/features/cobros/api";
 import { AgregarProductoModal } from "../components/AgregarProductoModal";
 import { EditarProductoModal } from "../components/EditarProductoModal";
 
@@ -79,12 +83,28 @@ export function PosPage() {
   const { data: clientesPag } = useClientes({ tamano: 100 });
   const clientes = clientesPag?.items ?? [];
 
+  // Cargos pendientes (cuentas por cobrar de consultas) + selección para cobrar.
+  const { data: cargosPendientes } = useCargosPendientes();
+  const [cargosSel, setCargosSel] = useState<Record<string, CargoPendiente>>({});
+  const cargosElegidos = Object.values(cargosSel);
+
   const lineas = Object.values(carrito);
-  const totalArticulos = lineas.reduce((s, l) => s + l.cantidad, 0);
+  const totalArticulos = lineas.reduce((s, l) => s + l.cantidad, 0) + cargosElegidos.length;
   const total = useMemo(
-    () => lineas.reduce((s, l) => s + l.producto.precio * l.cantidad, 0),
-    [lineas],
+    () =>
+      lineas.reduce((s, l) => s + l.producto.precio * l.cantidad, 0) +
+      cargosElegidos.reduce((s, c) => s + c.monto, 0),
+    [lineas, cargosElegidos],
   );
+
+  function toggleCargo(c: CargoPendiente) {
+    setCargosSel((prev) => {
+      const copia = { ...prev };
+      if (copia[c.id]) delete copia[c.id];
+      else copia[c.id] = c;
+      return copia;
+    });
+  }
 
   const visibles = useMemo(() => {
     const q = texto.trim().toLowerCase();
@@ -129,10 +149,12 @@ export function PosPage() {
         items: lineas.map((l) => ({ productoId: l.producto.id, cantidad: l.cantidad })),
         metodoPago,
         montoRecibido: metodoPago === MetodoPago.Efectivo ? recibido : null,
+        cargoIds: cargosElegidos.map((c) => c.id),
       });
       toast.exito(`Venta registrada por ${formatCurrency(resp.total)} 🎉`);
       setRecibo({ total: resp.total, cambio: resp.cambio });
       setCarrito({});
+      setCargosSel({});
       setClienteId("");
       setMontoRecibido("");
       setCobroAbierto(false);
@@ -181,6 +203,51 @@ export function PosPage() {
             className="h-12 pl-12"
           />
         </div>
+
+        {/* Cobros pendientes (cargos de consultas generados por el veterinario) */}
+        {cargosPendientes && cargosPendientes.length > 0 && (
+          <section className="flex flex-col gap-2">
+            <h2 className="flex items-center gap-1.5 text-label-lg font-bold text-on-surface">
+              <ClipboardList className="h-4 w-4 text-primary-container" aria-hidden />
+              Cobros pendientes
+            </h2>
+            <div className="flex flex-col gap-2">
+              {cargosPendientes.map((c) => {
+                const sel = !!cargosSel[c.id];
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => toggleCargo(c)}
+                    className={
+                      "flex items-center gap-3 rounded-2xl border p-3 text-left transition-colors " +
+                      (sel
+                        ? "border-primary-container bg-primary-container/10"
+                        : "border-outline-variant/40 bg-surface-container-lowest")
+                    }
+                  >
+                    <span
+                      className={
+                        "grid h-9 w-9 shrink-0 place-items-center rounded-lg " +
+                        (sel ? "bg-primary-container text-on-primary" : "bg-primary-fixed/40 text-tertiary")
+                      }
+                    >
+                      {sel ? <Check className="h-5 w-5" /> : <ClipboardList className="h-5 w-5" />}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-label-md font-bold text-on-surface">{c.concepto}</span>
+                      <span className="block truncate text-body-sm text-on-surface-variant">
+                        {c.mascotaNombre} · {c.clienteNombre}
+                      </span>
+                    </span>
+                    <span className="tabular shrink-0 text-label-lg font-bold text-primary-container">
+                      {formatCurrency(c.monto)}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Chips de categoría */}
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -299,6 +366,29 @@ export function PosPage() {
                     className="grid h-8 w-8 place-items-center rounded-lg bg-surface-container text-on-surface-variant disabled:opacity-40"
                   >
                     <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+              </li>
+            ))}
+            {cargosElegidos.map((c) => (
+              <li
+                key={c.id}
+                className="flex items-center justify-between gap-2 rounded-xl bg-primary-fixed/30 p-2.5"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-label-md font-semibold text-on-surface">{c.concepto}</p>
+                  <p className="truncate text-body-sm text-on-surface-variant">
+                    {c.mascotaNombre} · consulta
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="tabular text-label-md font-bold text-on-surface">{formatCurrency(c.monto)}</span>
+                  <button
+                    onClick={() => toggleCargo(c)}
+                    aria-label="Quitar cargo"
+                    className="grid h-8 w-8 place-items-center rounded-lg bg-surface-container text-on-surface-variant"
+                  >
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </li>

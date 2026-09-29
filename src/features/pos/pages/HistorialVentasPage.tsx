@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Banknote, CalendarDays, CreditCard, Download, Receipt, Smartphone, Store } from "lucide-react";
+import { Banknote, CalendarDays, CreditCard, Download, Package, Receipt, Smartphone, Stethoscope, Store } from "lucide-react";
 import { EmptyState } from "@/components/molecules/EmptyState";
 import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
 import { Button, SkeletonFila } from "@/components/ui";
@@ -127,11 +127,32 @@ export function HistorialVentasPage() {
               className="bg-primary-fixed/50 text-on-tertiary-fixed-variant"
               iconWrap="bg-tertiary/15 text-tertiary"
             />
-            <div className="flex flex-col justify-center rounded-2xl bg-surface-container p-3.5">
-              <span className="text-body-sm text-on-surface-variant">N.º de ventas</span>
-              <span className="tabular text-metric font-bold leading-none text-on-surface">
-                {resumen.numeroVentas}
-              </span>
+            {/* Desglose por tipo: productos vs consultas (para conocer el negocio) */}
+            <div className="col-span-2 flex items-center gap-3 rounded-2xl bg-surface-container p-3.5">
+              <div className="flex-1">
+                <span className="flex items-center gap-1 text-body-sm text-on-surface-variant">
+                  <Package className="h-3.5 w-3.5" aria-hidden /> Productos
+                </span>
+                <span className="tabular text-label-lg font-bold text-on-surface">
+                  {formatCurrency(resumen.totalProductos)}
+                </span>
+              </div>
+              <div className="h-8 w-px bg-outline-variant/40" />
+              <div className="flex-1">
+                <span className="flex items-center gap-1 text-body-sm text-on-surface-variant">
+                  <Stethoscope className="h-3.5 w-3.5" aria-hidden /> Consultas
+                </span>
+                <span className="tabular text-label-lg font-bold text-tertiary">
+                  {formatCurrency(resumen.totalConsultas)}
+                </span>
+              </div>
+              <div className="h-8 w-px bg-outline-variant/40" />
+              <div className="flex-1">
+                <span className="text-body-sm text-on-surface-variant">N.º ventas</span>
+                <span className="tabular text-label-lg font-bold text-on-surface">
+                  {resumen.numeroVentas}
+                </span>
+              </div>
             </div>
           </div>
         )}
@@ -209,6 +230,16 @@ export function HistorialVentasPage() {
                         </span>
                         <span className="tabular shrink-0 text-on-surface-variant">
                           {formatCurrency(l.subtotal)}
+                        </span>
+                      </li>
+                    ))}
+                    {v.cargos.map((c) => (
+                      <li key={c.cargoId} className="flex justify-between gap-2 text-body-md">
+                        <span className="min-w-0 truncate text-tertiary">
+                          🩺 {c.concepto}
+                        </span>
+                        <span className="tabular shrink-0 text-on-surface-variant">
+                          {formatCurrency(c.monto)}
                         </span>
                       </li>
                     ))}

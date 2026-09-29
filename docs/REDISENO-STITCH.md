@@ -544,3 +544,38 @@ VentaCargo + Cargo Cobrado → aparece en Historial + "Mis pagos" del dueño + m
   TotalConsultas/TotalProductos). Falta mostrarlo en el panel del Admin.
 - **Catálogo de servicios** por veterinaria (evolución del monto libre).
 - Cancelar cargos pendientes desde la UI (la entidad ya soporta `Cancelar()`).
+
+
+
+---
+
+## 10. Panel SuperAdmin separado por módulos (HU-SA1..SA3 + métricas)
+
+### Estructura (3 vistas, nav propio)
+- **`/admin` — Inicio (dashboard):** saludo por hora + fecha; acciones rápidas (Nueva
+  veterinaria, Administradores); bento "Estado de la plataforma" (activas/total,
+  administradores activos, por vencer 7 días, vencidas) + planes mensual/anual y altas del
+  mes; alerta de veterinarias activas **sin administrador**; lista **"Por cobrar"** (top 5
+  renovaciones próximas/vencidas) con botón Renovar.
+- **`/admin/veterinarias`:** searchbar + chips (Todas / Por vencer / Vencidas / Inactivas),
+  lista ordenada por vencimiento; cada card muestra admin asignado (o "Sin administrador"),
+  plan, badge de suscripción, Renovar, ajustar fecha, Admin y activar/desactivar.
+- **`/admin/administradores`:** searchbar (nombre, usuario o veterinaria), cards con la
+  veterinaria de cada admin, Resetear PIN / Gestionar. El "+" pide primero la veterinaria
+  (primero las que no tienen admin) y abre el alta.
+- El SuperAdmin ahora aterriza en `/admin` (antes `/admin/veterinarias`). "Inicio" va al
+  centro del bottom-nav, igual que en el staff. Se eliminó `AdministradoresSection`.
+
+### Backend (rama `feature/superadmin-panel`, sin migración)
+- `GET /api/admin/metricas` (solo SuperAdmin) → `MetricasSuperAdmin`: todo calculado en
+  servidor (conteos de suscripción, planes, altas del mes, admins activos, veterinarias sin
+  admin y top 5 de renovaciones).
+- `UsuarioDto` expone `VeterinariaId` (para saber de qué clínica es cada admin).
+- Front invalida `["veterinarias"]` + `["metricas-superadmin"]` en cada mutación de
+  veterinarias, y `["usuarios","administradores"]` al crear un admin.
+
+### Pendiente
+- **Fase 3/4 del Admin:** apellidos separados, teléfono, CURP opcional y usuario
+  autogenerado `nombre.apellidopaterno` (HU-SA4) + wizard de alta del admin.
+- `docs/DESIGN-SYSTEM.md` está desactualizado (todavía describe la paleta índigo, Inter y
+  anime.js). La referencia real es el `DESIGN.md` de Stitch + los tokens de `tailwind.config.js`.

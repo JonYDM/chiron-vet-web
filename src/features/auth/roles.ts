@@ -4,7 +4,7 @@ import { RolUsuario } from "@/types/api";
 export function rutaInicialPorRol(rol: RolUsuario): string {
   switch (rol) {
     case RolUsuario.SuperAdmin:
-      return "/admin/veterinarias";
+      return "/admin";
     case RolUsuario.DuenoMascota:
       return "/portal";
     case RolUsuario.Administrador:

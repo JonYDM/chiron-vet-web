@@ -126,7 +126,7 @@ function AppShellInterno({ nav, children }: { nav: NavItem[]; children: ReactNod
           }}
         >
           {primarios.map((item) => {
-            const esInicio = item.to === "/app";
+            const esInicio = item.to === "/app" || item.to === "/admin";
             return (
               <NavLink
                 key={item.to}

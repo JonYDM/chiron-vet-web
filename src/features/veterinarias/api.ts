@@ -2,6 +2,7 @@ import { http } from "@/lib/http";
 import type {
   CrearAdminRequest,
   CrearVeterinariaRequest,
+  MetricasSuperAdmin,
   PlanSuscripcion,
   Veterinaria,
 } from "@/types/api";
@@ -9,6 +10,11 @@ import type {
 /** Lista todas las veterinarias (tenants). */
 export function listarVeterinarias(signal?: AbortSignal): Promise<Veterinaria[]> {
   return http.get<Veterinaria[]>("/api/admin/veterinarias", signal);
+}
+
+/** Métricas globales de la plataforma para el SuperAdmin. */
+export function obtenerMetricasSuperAdmin(signal?: AbortSignal): Promise<MetricasSuperAdmin> {
+  return http.get<MetricasSuperAdmin>("/api/admin/metricas", signal);
 }
 
 /** Crea una veterinaria. Devuelve datos básicos { id, nombre, activa }. */

@@ -375,4 +375,31 @@ export interface UsuarioDto {
   rol: RolUsuario;
   activo: boolean;
   clienteId: string | null;
+  /** Veterinaria a la que pertenece (opcional si el backend aún no lo envía). */
+  veterinariaId?: string;
+}
+
+/** Renovación próxima o vencida (dashboard SuperAdmin). */
+export interface RenovacionProxima {
+  id: string;
+  nombre: string;
+  plan: PlanSuscripcion;
+  fechaRenovacion: string;
+  diasRestantes: number;
+  activa: boolean;
+}
+
+/** Panorama general de la plataforma (GET /api/admin/metricas). */
+export interface MetricasSuperAdmin {
+  totalVeterinarias: number;
+  veterinariasActivas: number;
+  veterinariasInactivas: number;
+  porVencer: number;
+  vencidas: number;
+  planMensual: number;
+  planAnual: number;
+  altasMes: number;
+  administradoresActivos: number;
+  veterinariasSinAdmin: number;
+  proximasRenovaciones: RenovacionProxima[];
 }

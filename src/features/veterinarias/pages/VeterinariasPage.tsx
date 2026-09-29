@@ -1,20 +1,21 @@
 import { useMemo, useState } from "react";
 import {
-  AlertTriangle,
   Building2,
   CalendarClock,
-  CheckCircle2,
   MapPin,
   Pencil,
   Plus,
   Power,
   RefreshCw,
+  Search,
   UserCog,
 } from "lucide-react";
 import { Badge, Button, Drawer, Input, SkeletonFila } from "@/components/ui";
 import { EmptyState } from "@/components/molecules/EmptyState";
 import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
 import { useToast } from "@/components/feedback/useToast";
+import { useDebounce } from "@/lib/useDebounce";
+import { useAdministradores } from "@/features/usuarios/hooks";
 import type { Veterinaria } from "@/types/api";
 import {
   useAjustarRenovacion,
@@ -25,9 +26,17 @@ import {
 import { diasParaRenovar, estadoSuscripcion, planLabel, textoSuscripcion } from "../suscripcion";
 import { CrearVeterinariaModal } from "../components/CrearVeterinariaModal";
 import { CrearAdminModal } from "../components/CrearAdminModal";
-import { AdministradoresSection } from "../components/AdministradoresSection";
 
-/** Panel SuperAdmin: suscripciones y gestión de veterinarias (clientes de Patwi). */
+type Filtro = "todas" | "porVencer" | "vencidas" | "inactivas";
+
+const FILTROS: { valor: Filtro; label: string }[] = [
+  { valor: "todas", label: "Todas" },
+  { valor: "porVencer", label: "Por vencer" },
+  { valor: "vencidas", label: "Vencidas" },
+  { valor: "inactivas", label: "Inactivas" },
+];
+
+/** Vista de Veterinarias (SuperAdmin): búsqueda, filtros de suscripción y gestión. */
 export function VeterinariasPage() {
   const { data: veterinarias, isLoading, isError } = useVeterinarias();
   const cambiarEstado = useCambiarEstadoVeterinaria();
@@ -36,9 +45,20 @@ export function VeterinariasPage() {
   const [modalCrear, setModalCrear] = useState(false);
   const [adminDe, setAdminDe] = useState<Veterinaria | null>(null);
   const [ajustarDe, setAjustarDe] = useState<Veterinaria | null>(null);
+  const [texto, setTexto] = useState("");
+  const [filtro, setFiltro] = useState<Filtro>("todas");
+  const textoBuscado = useDebounce(texto);
+  const { data: admins } = useAdministradores();
+
+  // Admin activo de cada veterinaria (para mostrarlo en su card).
+  const adminPorVet = useMemo(() => {
+    const mapa = new Map<string, string>();
+    for (const a of admins ?? []) if (a.activo && a.veterinariaId) mapa.set(a.veterinariaId, a.nombre);
+    return mapa;
+  }, [admins]);
 
   // Orden: primero las que requieren cobro (vencidas, luego por vencer), después el resto.
-  const lista = useMemo(
+  const ordenadas = useMemo(
     () =>
       [...(veterinarias ?? [])].sort((a, b) => {
         const da = diasParaRenovar(a.fechaRenovacion);
@@ -49,10 +69,19 @@ export function VeterinariasPage() {
     [veterinarias],
   );
 
-  const total = lista.length;
-  const activas = lista.filter((v) => v.activa).length;
-  const porVencer = lista.filter((v) => estadoSuscripcion(v.fechaRenovacion) === "porVencer").length;
-  const vencidas = lista.filter((v) => estadoSuscripcion(v.fechaRenovacion) === "vencida").length;
+  const lista = useMemo(() => {
+    const q = textoBuscado.trim().toLowerCase();
+    return ordenadas.filter((v) => {
+      const estado = estadoSuscripcion(v.fechaRenovacion);
+      if (filtro === "porVencer" && estado !== "porVencer") return false;
+      if (filtro === "vencidas" && estado !== "vencida") return false;
+      if (filtro === "inactivas" && v.activa) return false;
+      if (!q) return true;
+      return v.nombre.toLowerCase().includes(q) || v.telefono.includes(q);
+    });
+  }, [ordenadas, filtro, textoBuscado]);
+
+  const total = ordenadas.length;
 
   function onRenovar(v: Veterinaria) {
     renovar.mutate(v.id, {
@@ -76,36 +105,43 @@ export function VeterinariasPage() {
         </Button>
       }
     >
-      <div className="flex flex-col gap-5">
-        {/* Métricas de suscripción (a quién cobrar) */}
-        <div className="grid grid-cols-3 gap-3">
-          <Metrica
-            icon={CheckCircle2}
-            label="Activas"
-            valor={activas}
-            className="bg-primary-container text-on-primary"
-            iconWrap="bg-white/20"
+      <div className="flex flex-col gap-4">
+        {/* Buscador */}
+        <div className="relative">
+          <Search
+            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-on-surface-variant"
+            aria-hidden
           />
-          <Metrica
-            icon={CalendarClock}
-            label="Por vencer"
-            valor={porVencer}
-            className="bg-secondary-fixed text-on-secondary-fixed"
-            iconWrap="bg-st-secondary/15 text-st-secondary"
+          <Input
+            variant="soft"
+            aria-label="Buscar veterinarias"
+            placeholder="Buscar por nombre o teléfono"
+            value={texto}
+            onChange={(e) => setTexto(e.target.value)}
+            className="h-12 pl-12"
           />
-          <Metrica
-            icon={AlertTriangle}
-            label="Vencidas"
-            valor={vencidas}
-            className="bg-error-container text-on-error-container"
-            iconWrap="bg-error-st/10 text-error-st"
-          />
+        </div>
+
+        {/* Chips de filtro por estado de suscripción */}
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {FILTROS.map((f) => (
+            <button
+              key={f.valor}
+              onClick={() => setFiltro(f.valor)}
+              className={
+                "shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-label-md font-semibold transition-colors " +
+                (filtro === f.valor
+                  ? "bg-primary-container text-on-primary"
+                  : "bg-surface-container text-on-surface-variant hover:text-on-surface")
+              }
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
 
         {/* Lista */}
         <section className="flex flex-col gap-3">
-          <h2 className="text-headline-sm font-bold text-on-surface">Clientes de Patwi</h2>
-
           {isLoading ? (
             <div className="flex flex-col gap-3">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -116,7 +152,7 @@ export function VeterinariasPage() {
             <div className="rounded-2xl bg-surface-container-lowest p-8 text-center text-body-sm text-error-st shadow-soft">
               No se pudieron cargar las veterinarias.
             </div>
-          ) : total > 0 ? (
+          ) : lista.length > 0 ? (
             <div className="flex flex-col gap-3">
               {lista.map((v) => {
                 const estado = estadoSuscripcion(v.fechaRenovacion);
@@ -137,6 +173,14 @@ export function VeterinariasPage() {
                           {!v.activa && <Badge tone="danger">Inactiva</Badge>}
                         </div>
                         <p className="text-body-sm text-on-surface-variant">{v.telefono}</p>
+                        <p className="mt-0.5 flex items-center gap-1 truncate text-body-sm">
+                          <UserCog className="h-3.5 w-3.5 shrink-0 text-on-surface-variant" aria-hidden />
+                          {adminPorVet.get(v.id) ? (
+                            <span className="truncate text-on-surface-variant">{adminPorVet.get(v.id)}</span>
+                          ) : (
+                            <span className="font-semibold text-[#B45309]">Sin administrador</span>
+                          )}
+                        </p>
                         {v.direccion && (
                           <p className="mt-0.5 flex items-center gap-1 truncate text-body-sm text-on-surface-variant">
                             <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -196,11 +240,16 @@ export function VeterinariasPage() {
               })}
             </div>
           ) : (
-            <EmptyState titulo="Sin veterinarias" descripcion="Da de alta la primera veterinaria cliente." />
+            <EmptyState
+              titulo={total === 0 ? "Sin veterinarias" : "Sin resultados"}
+              descripcion={
+                total === 0
+                  ? "Da de alta la primera veterinaria cliente."
+                  : "No hay veterinarias que coincidan con el filtro."
+              }
+            />
           )}
         </section>
-
-        <AdministradoresSection />
       </div>
 
       <CrearVeterinariaModal open={modalCrear} onClose={() => setModalCrear(false)} />
@@ -255,26 +304,4 @@ function AjustarRenovacionDrawer({ veterinaria, onClose }: { veterinaria: Veteri
   );
 }
 
-function Metrica({
-  icon: Icon,
-  label,
-  valor,
-  className,
-  iconWrap,
-}: {
-  icon: typeof Building2;
-  label: string;
-  valor: number;
-  className: string;
-  iconWrap: string;
-}) {
-  return (
-    <div className={`flex flex-col gap-1 rounded-2xl p-3.5 shadow-soft ${className}`}>
-      <span className={`grid h-8 w-8 place-items-center rounded-lg ${iconWrap}`}>
-        <Icon className="h-5 w-5" aria-hidden />
-      </span>
-      <span className="tabular mt-1 text-metric font-bold leading-none">{valor}</span>
-      <span className="text-body-sm opacity-80">{label}</span>
-    </div>
-  );
-}
+

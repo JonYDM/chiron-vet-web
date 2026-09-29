@@ -56,12 +56,19 @@ export const navPortal: NavItem[] = [
   { to: "/portal/compras", label: "Mis pagos", icon: Receipt, permiso: null },
 ];
 
-/** Navegación del panel SuperAdmin (/admin/*). */
+/** Navegación del panel SuperAdmin (/admin/*): dashboard, veterinarias y administradores. */
 export const navAdmin: NavItem[] = [
   {
     to: "/admin/veterinarias",
     label: "Veterinarias",
     icon: Building2,
+    permiso: "gestionar_veterinarias",
+  },
+  { to: "/admin", label: "Inicio", icon: Home, permiso: "gestionar_veterinarias" },
+  {
+    to: "/admin/administradores",
+    label: "Admins",
+    icon: UserCog,
     permiso: "gestionar_veterinarias",
   },
 ];

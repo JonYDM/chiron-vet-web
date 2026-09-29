@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { KeyRound, Plus, Search, Settings2 } from "lucide-react";
+import { ConciergeBell, KeyRound, Plus, Search, Settings2, Stethoscope } from "lucide-react";
 import { EmptyState } from "@/components/molecules/EmptyState";
 import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
 import { Avatar, Badge, Button, Input, SkeletonFila } from "@/components/ui";
@@ -18,20 +18,33 @@ export function StaffPage() {
   const [resetUsuario, setResetUsuario] = useState<UsuarioDto | null>(null);
   const [gestionUsuario, setGestionUsuario] = useState<UsuarioDto | null>(null);
   const [texto, setTexto] = useState("");
+  const [rolFiltro, setRolFiltro] = useState<RolUsuario | null>(null);
   const textoBuscado = useDebounce(texto);
 
   // Solo staff operativo (Veterinario/Recepcionista). Los dueños se gestionan
   // desde la ficha del cliente.
+  const base = useMemo(
+    () =>
+      (usuarios ?? []).filter(
+        (u) => u.rol === RolUsuario.Veterinario || u.rol === RolUsuario.Recepcionista,
+      ),
+    [usuarios],
+  );
+  const veterinarios = base.filter((u) => u.rol === RolUsuario.Veterinario).length;
+  const recepcionistas = base.filter((u) => u.rol === RolUsuario.Recepcionista).length;
+
   const staff = useMemo(() => {
-    const base = (usuarios ?? []).filter(
-      (u) => u.rol === RolUsuario.Veterinario || u.rol === RolUsuario.Recepcionista,
-    );
     const q = textoBuscado.trim().toLowerCase();
-    if (!q) return base;
-    return base.filter(
-      (u) => u.nombre.toLowerCase().includes(q) || u.nombreUsuario.toLowerCase().includes(q),
-    );
-  }, [usuarios, textoBuscado]);
+    return base.filter((u) => {
+      if (rolFiltro !== null && u.rol !== rolFiltro) return false;
+      if (!q) return true;
+      return u.nombre.toLowerCase().includes(q) || u.nombreUsuario.toLowerCase().includes(q);
+    });
+  }, [base, rolFiltro, textoBuscado]);
+
+  function toggleRol(rol: RolUsuario) {
+    setRolFiltro((actual) => (actual === rol ? null : rol));
+  }
 
   return (
     <PantallaConHeader
@@ -59,6 +72,24 @@ export function StaffPage() {
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
             className="h-12 pl-12"
+          />
+        </div>
+
+        {/* Filtro por rol: 2 cards estilo acciones rápidas (toggle) */}
+        <div className="grid grid-cols-2 gap-2">
+          <CardRol
+            icon={Stethoscope}
+            label="Veterinarios"
+            conteo={veterinarios}
+            activo={rolFiltro === RolUsuario.Veterinario}
+            onClick={() => toggleRol(RolUsuario.Veterinario)}
+          />
+          <CardRol
+            icon={ConciergeBell}
+            label="Recepción"
+            conteo={recepcionistas}
+            activo={rolFiltro === RolUsuario.Recepcionista}
+            onClick={() => toggleRol(RolUsuario.Recepcionista)}
           />
         </div>
 
@@ -135,5 +166,49 @@ export function StaffPage() {
         />
       )}
     </PantallaConHeader>
+  );
+}
+
+
+/** Card de filtro por rol (neutra). Toggle: activa/desactiva el filtro. */
+function CardRol({
+  icon: Icon,
+  label,
+  conteo,
+  activo,
+  onClick,
+}: {
+  icon: typeof Stethoscope;
+  label: string;
+  conteo: number;
+  activo: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      aria-pressed={activo}
+      className={
+        "flex items-center gap-2.5 rounded-2xl border p-3 text-left transition-all active:scale-[0.98] " +
+        (activo
+          ? "border-primary-container bg-primary-container/10"
+          : "border-outline-variant/40 bg-surface-container")
+      }
+    >
+      <span
+        className={
+          "grid h-9 w-9 shrink-0 place-items-center rounded-lg " +
+          (activo ? "bg-primary-container/15 text-primary-container" : "bg-surface-container-lowest text-on-surface-variant")
+        }
+      >
+        <Icon className="h-5 w-5" aria-hidden />
+      </span>
+      <span className="min-w-0">
+        <span className={"block truncate text-label-md font-bold leading-tight " + (activo ? "text-primary-container" : "text-on-surface")}>
+          {label}
+        </span>
+        <span className="tabular text-body-sm text-on-surface-variant">{conteo}</span>
+      </span>
+    </button>
   );
 }

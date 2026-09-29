@@ -49,7 +49,7 @@ export function StaffDashboard() {
       titulo="Panel Operativo"
       accion={
         <img
-          src="/vet.png"
+          src="/vet.webp"
           alt={rolLabel[sesion?.rol ?? RolUsuario.Administrador]}
           className="-my-3 mr-3 h-16 w-16 shrink-0 object-contain drop-shadow-sm"
         />

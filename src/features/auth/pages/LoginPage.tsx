@@ -94,7 +94,7 @@ export function LoginPage() {
           <Reveal key="id" className="flex flex-1 flex-col pt-6">
             {/* Marca centrada: Wipo protagonista + wordmark Patwi debajo */}
             <div className="flex flex-col items-center text-center">
-              <img src="/wipo.png" alt="Wipo" className="h-28 w-28 object-contain" />
+              <img src="/wipo.webp" alt="Wipo" className="h-28 w-28 object-contain" />
               <span className="mt-1 font-marca text-4xl font-extrabold tracking-tight text-primary-container">
                 Patwi
               </span>
@@ -158,7 +158,7 @@ export function LoginPage() {
 
             {/* Wipo + saludo con nombre real, centrado */}
             <div className="flex flex-col items-center text-center">
-              <img src="/wipo.png" alt="Wipo" className="h-24 w-24 object-contain" />
+              <img src="/wipo.webp" alt="Wipo" className="h-24 w-24 object-contain" />
               <h1 className="mt-3 text-h1 font-bold tracking-tight text-on-surface">
                 {nombreReal ? `¡Hola, ${nombreReal.split(" ")[0]}!` : "Tu PIN"}
               </h1>

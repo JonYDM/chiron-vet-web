@@ -85,9 +85,10 @@
     páginas de error 404/403). Su **uso comercial requiere licencia de pago**.
   - Estado: NO pagado aún (todavía sin cliente). **Compromiso: pagar la licencia ANTES de
     salir a producción / cobrar al primer cliente.** No olvidar: es un tema legal.
-  - Nota técnica: `vet.png` pesa ~1.6 MB (muy grande para un ícono). **Optimizar** ambos
-    antes de prod (redimensionar a ~96–256px y convertir a WebP) para no penalizar la carga
-    de la PWA.
+  - Nota técnica: [HECHO] los íconos se convirtieron a WebP redimensionado
+    (`scripts/optimizar-imagenes.mjs` con sharp). Bajaron de ~7 MB (PNG) a ~74 KB (WebP).
+    Los .png grandes se eliminaron de public/; se conservan solo .webp y los PNG de
+    PWA/favicon. Re-ejecutar el script si se cambian los assets.
 
 
 - **Recordatorios del STAFF (el "gancho" — FRONTEND HECHO, backend PENDIENTE de merge):**

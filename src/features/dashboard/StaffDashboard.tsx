@@ -12,6 +12,7 @@ import {
 import { useAuth } from "@/features/auth";
 import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
 import { formatCurrency, fechaHoyLarga } from "@/lib/format";
+import { saludoPorHora } from "@/lib/saludo";
 import { usePermisos } from "@/lib/usePermisos";
 import { useMetricas, useResumenCajaHoy } from "./hooks";
 import { useRecordatorios } from "@/features/recordatorios";
@@ -46,7 +47,7 @@ export function StaffDashboard() {
 
   return (
     <PantallaConHeader
-      titulo="Panel Operativo"
+      titulo={`${saludoPorHora()}…`}
       accion={
         <img
           src="/vet.webp"
@@ -61,10 +62,10 @@ export function StaffDashboard() {
         </p>
       }
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
 
       {/* Acciones rápidas (4-grid) */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2.5">
         <AccionRapida
           to={p("gestionar_citas") ? "/app/citas" : "/app"}
           icon={Stethoscope}
@@ -102,14 +103,14 @@ export function StaffDashboard() {
       </div>
 
       {/* Métricas de hoy */}
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2.5">
         <div className="flex items-center justify-between">
           <span className="text-label-sm font-bold uppercase tracking-wider text-outline">
             Métricas de Hoy
           </span>
           <span className="text-label-sm font-semibold text-primary-container">Corte en vivo</span>
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2.5">
           {/* Citas del día (REAL) */}
           <div className="flex flex-col justify-between rounded-2xl bg-primary-fixed/40 p-3.5 shadow-inset-up">
             <div className="flex items-center justify-between text-tertiary">
@@ -155,10 +156,29 @@ export function StaffDashboard() {
                 </span>
               </div>
               {puedeVerNegocio && (
-                <div className="mt-3 grid grid-cols-3 gap-2 rounded-xl bg-surface-container-lowest/70 p-2 text-center">
-                  <CajaDesglose label="Efectivo" valor={formatCurrency(caja?.efectivo ?? 0)} />
-                  <CajaDesglose label="Tarjeta" valor={formatCurrency(caja?.tarjeta ?? 0)} />
-                  <CajaDesglose label="Transferencia" valor={formatCurrency(caja?.transferencia ?? 0)} resaltado />
+                <div className="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-surface-container-lowest/70 p-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-tertiary/10 text-tertiary">
+                      <Stethoscope className="h-4 w-4" aria-hidden />
+                    </span>
+                    <div className="min-w-0">
+                      <div className="text-[10px] uppercase text-on-surface-variant">Consultas</div>
+                      <div className="tabular text-label-md font-bold text-tertiary">
+                        {formatCurrency(caja?.totalConsultas ?? 0)}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-surface-container text-on-surface-variant">
+                      <Store className="h-4 w-4" aria-hidden />
+                    </span>
+                    <div className="min-w-0">
+                      <div className="text-[10px] uppercase text-on-surface-variant">Productos</div>
+                      <div className="tabular text-label-md font-bold text-on-surface">
+                        {formatCurrency(caja?.totalProductos ?? 0)}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -254,18 +274,6 @@ function AccionRapida({
   );
 }
 
-function CajaDesglose({ label, valor, resaltado }: { label: string; valor: string; resaltado?: boolean }) {
-  return (
-    <div>
-      <div className="text-[10px] uppercase text-on-surface-variant">{label}</div>
-      <div
-        className={`tabular text-label-md font-bold ${resaltado ? "text-primary-container" : "text-on-surface"}`}
-      >
-        {valor}
-      </div>
-    </div>
-  );
-}
 
 /** Devuelve true si la fecha ISO cae en el día de hoy. */
 function esHoy(iso: string): boolean {

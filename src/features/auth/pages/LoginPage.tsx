@@ -87,11 +87,11 @@ export function LoginPage() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-white">
+    <main className="relative min-h-dvh overflow-y-auto bg-white">
 
-      <div className="relative mx-auto flex min-h-screen w-full max-w-sm flex-col px-6 pb-8">
+      <div className="relative mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center px-6 py-10">
         {paso === "identificador" ? (
-          <Reveal key="id" className="flex flex-1 flex-col pt-6">
+          <Reveal key="id" className="flex flex-col">
             {/* Marca centrada: Wipo protagonista + wordmark Patwi debajo */}
             <div className="flex flex-col items-center text-center">
               <img src="/wipo.webp" alt="Wipo" className="h-28 w-28 object-contain" />
@@ -147,7 +147,7 @@ export function LoginPage() {
             </form>
           </Reveal>
         ) : (
-          <Reveal key="pin" className="flex flex-1 flex-col pt-16">
+          <Reveal key="pin" className="flex flex-col">
             <button
               onClick={volver}
               className="absolute left-6 top-6 flex w-fit items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-label-md font-medium text-on-surface-variant transition-colors hover:text-on-surface"

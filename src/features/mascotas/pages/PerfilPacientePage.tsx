@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Avatar, Badge, Button } from "@/components/ui";
 import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
+import { PaginaError } from "@/components/organisms/PaginaError";
 import { especieLabel, sexoLabel, tipoRegistroLabel } from "@/lib/enums";
 import { edadEnAnios, formatDate } from "@/lib/format";
 import { usePermisos } from "@/lib/usePermisos";
@@ -32,7 +33,7 @@ export function PerfilPacientePage() {
   const { mascotaId = "" } = useParams();
   const location = useLocation();
   const mascotaState = (location.state as { mascota?: Mascota } | null)?.mascota ?? null;
-  const { data: mascotaApi } = useMascota(mascotaId);
+  const { data: mascotaApi, isLoading: cargandoMascota } = useMascota(mascotaId);
   // Prioriza los datos completos del backend; si no hay (endpoint ausente), usa el state.
   const mascota = mascotaApi ?? mascotaState;
   const p = usePermisos();
@@ -58,6 +59,19 @@ export function PerfilPacientePage() {
   const { data: registros } = useExpediente(mascotaId);
   const proxima = registros?.find((r) => r.fechaProximaAplicacion)?.fechaProximaAplicacion;
   const edad = mascota ? edadEnAnios(mascota.fechaNacimiento) : null;
+
+  // Si terminó de cargar y no hay mascota (id inexistente o de otra veterinaria), 404.
+  if (!cargandoMascota && !mascota) {
+    return (
+      <PaginaError
+        codigo="404"
+        titulo="Paciente no encontrado"
+        descripcion="Este paciente no existe o no pertenece a tu veterinaria."
+        irA="/app/pacientes"
+        irATexto="Ver pacientes"
+      />
+    );
+  }
 
   return (
     <PantallaConHeader titulo="Acerca de..." volverA={-1} tituloSuave>

@@ -3,7 +3,7 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { KeyRound, PawPrint, Pencil, Phone, Plus, Power } from "lucide-react";
 import { Avatar, Badge, Button, Spinner } from "@/components/ui";
 import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
-import { EmptyState } from "@/components/molecules/EmptyState";
+import { PaginaError } from "@/components/organisms/PaginaError";
 import { especieLabel } from "@/lib/enums";
 import { usePermisos } from "@/lib/usePermisos";
 import { useConfirm } from "@/components/feedback/ConfirmProvider";
@@ -62,6 +62,20 @@ export function ClienteDetallePage() {
     } catch {
       toast.error("No se pudo cambiar el estado.");
     }
+  }
+
+  // Sin cliente (URL directa o id inexistente). No hay endpoint GET /clientes/{id}
+  // para cargarlo por id, así que se muestra 404 (debe entrarse desde la lista).
+  if (!cliente) {
+    return (
+      <PaginaError
+        codigo="404"
+        titulo="Cliente no encontrado"
+        descripcion="Este cliente no existe o no pertenece a tu veterinaria."
+        irA="/app/clientes"
+        irATexto="Ver clientes"
+      />
+    );
   }
 
   return (
@@ -200,13 +214,6 @@ export function ClienteDetallePage() {
             </div>
           )}
         </section>
-
-        {!cliente && (
-          <EmptyState
-            titulo="Abre el cliente desde la lista"
-            descripcion="Recarga desde la lista de clientes para ver todos los datos."
-          />
-        )}
       </div>
 
       {/* Modales */}

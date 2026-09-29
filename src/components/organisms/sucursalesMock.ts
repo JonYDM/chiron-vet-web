@@ -12,7 +12,7 @@ export interface SucursalMock {
 }
 
 export const SUCURSALES_MOCK: SucursalMock[] = [
-  { id: "mock-1", nombre: "Chiron", zona: "Roma Norte" },
-  { id: "mock-2", nombre: "Chiron", zona: "Condesa" },
-  { id: "mock-3", nombre: "Chiron", zona: "Del Valle" },
+  { id: "mock-1", nombre: "Patwi", zona: "Roma Norte" },
+  { id: "mock-2", nombre: "Patwi", zona: "Condesa" },
+  { id: "mock-3", nombre: "Patwi", zona: "Del Valle" },
 ];

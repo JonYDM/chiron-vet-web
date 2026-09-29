@@ -10,7 +10,7 @@ import { CrearVeterinariaModal } from "../components/CrearVeterinariaModal";
 import { CrearAdminModal } from "../components/CrearAdminModal";
 import { AdministradoresSection } from "../components/AdministradoresSection";
 
-/** Panel SuperAdmin: métricas + gestión de veterinarias (clientes de Chiron). */
+/** Panel SuperAdmin: métricas + gestión de veterinarias (clientes de Patwi). */
 export function VeterinariasPage() {
   const { data: veterinarias, isLoading, isError } = useVeterinarias();
   const cambiarEstado = useCambiarEstadoVeterinaria();
@@ -27,7 +27,7 @@ export function VeterinariasPage() {
       subtitulo={
         <p className="flex items-center gap-1 text-body-sm text-on-surface-variant">
           <Building2 className="h-4 w-4 text-primary-container" aria-hidden />
-          {total === 0 ? "Clientes de Chiron" : `${total} veterinaria${total === 1 ? "" : "s"}`}
+          {total === 0 ? "Clientes de Patwi" : `${total} veterinaria${total === 1 ? "" : "s"}`}
         </p>
       }
       accion={
@@ -46,7 +46,7 @@ export function VeterinariasPage() {
 
         {/* Lista de veterinarias */}
         <section className="flex flex-col gap-3">
-          <h2 className="text-headline-sm font-bold text-on-surface">Clientes de Chiron</h2>
+          <h2 className="text-headline-sm font-bold text-on-surface">Clientes de Patwi</h2>
 
           {isLoading ? (
             <div className="flex flex-col gap-3">

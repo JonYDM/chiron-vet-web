@@ -100,6 +100,7 @@ export default {
       },
       fontFamily: {
         sans: ["Plus Jakarta Sans", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
+        marca: ["Nunito", "Plus Jakarta Sans", "system-ui", "sans-serif"],
       },
       fontSize: {
         display: ["2.25rem", { lineHeight: "2.75rem", letterSpacing: "-0.02em", fontWeight: "700" }],
@@ -159,6 +160,16 @@ export default {
           to: { opacity: "1", transform: "scale(1)" },
         },
         shimmer: { "100%": { transform: "translateX(100%)" } },
+        "wipo-float": {
+          "0%, 100%": { transform: "translateY(0) rotate(-1deg)" },
+          "50%": { transform: "translateY(-6px) rotate(1deg)" },
+        },
+        "wipo-hop": {
+          "0%, 100%": { transform: "translateY(0) scale(1)" },
+          "30%": { transform: "translateY(-14px) scale(1.05)" },
+          "55%": { transform: "translateY(0) scale(0.97)" },
+          "70%": { transform: "translateY(-5px) scale(1.02)" },
+        },
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -166,6 +177,8 @@ export default {
       },
       animation: {
         "fade-in-up": "fade-in-up 280ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "wipo-float": "wipo-float 3.5s ease-in-out infinite",
+        "wipo-hop": "wipo-hop 600ms ease-out",
       },
     },
   },

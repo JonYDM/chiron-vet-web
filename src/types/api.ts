@@ -121,13 +121,23 @@ export interface JwtClaims {
 
 // ─────────────────────────── Entidades ──────────────────────────────────────
 
+/** Plan de suscripción de la veterinaria (coincide con el enum del backend). */
+export enum PlanSuscripcion {
+  Mensual = 1,
+  Anual = 2,
+}
+
 export interface Veterinaria {
   id: string;
   nombre: string;
   telefono: string;
+  direccion?: string | null;
   activa: boolean;
   fechaAlta: string;
   adminOperativo: boolean;
+  plan: PlanSuscripcion;
+  /** Fecha de vencimiento/renovación (YYYY-MM-DD). */
+  fechaRenovacion: string;
 }
 
 export interface Cliente {
@@ -259,6 +269,8 @@ export interface RecordatorioDetectado {
 export interface CrearVeterinariaRequest {
   nombre: string;
   telefono: string;
+  direccion?: string | null;
+  plan?: PlanSuscripcion;
 }
 
 export interface CrearAdminRequest {

@@ -2,6 +2,7 @@ import { http } from "@/lib/http";
 import type {
   CrearAdminRequest,
   CrearVeterinariaRequest,
+  PlanSuscripcion,
   Veterinaria,
 } from "@/types/api";
 
@@ -25,6 +26,24 @@ export function activarVeterinaria(id: string): Promise<unknown> {
 /** Desactiva una veterinaria (impago). */
 export function desactivarVeterinaria(id: string): Promise<unknown> {
   return http.post(`/api/admin/veterinarias/${id}/desactivar`);
+}
+
+/** Edita los datos generales de una veterinaria. */
+export function editarVeterinaria(
+  id: string,
+  body: { nombre: string; telefono: string; direccion?: string | null; plan: PlanSuscripcion },
+): Promise<unknown> {
+  return http.put(`/api/admin/veterinarias/${id}`, body);
+}
+
+/** Renueva la suscripción (extiende un periodo según el plan y reactiva). */
+export function renovarVeterinaria(id: string): Promise<{ fechaRenovacion: string }> {
+  return http.post(`/api/admin/veterinarias/${id}/renovar`);
+}
+
+/** Ajuste manual de la fecha de renovación (YYYY-MM-DD). */
+export function ajustarRenovacion(id: string, fecha: string): Promise<unknown> {
+  return http.post(`/api/admin/veterinarias/${id}/renovacion`, { fecha });
 }
 
 /** Crea el usuario Administrador de una veterinaria. */

@@ -354,16 +354,29 @@
 | Staff (vet/recep) | Alta | igual que admin + rol (+ sucursal en la fase de operación) | Usuario escrito a mano | Reusar el wizard de HU-SA4 (usuario autogenerado, apellidos, teléfono) |
 | Staff | Gestionar | mismos campos que admin | solo nombre | El mismo componente de detalle/edición |
 
-Backend necesario para los drawers:
-- `Usuario.EditarDatosPersonales(nombre, paterno, materno?, tel, curp?)`.
-- `PUT /api/admin/administradores/{id}` y `PUT /api/usuarios/{id}/datos` (admin de la
-  vet, solo su tenant).
-- `GET .../{id}` de detalle con CURP **enmascarada** (`HEGM******…`). La CURP completa
-  solo se ve al editarla.
-- `CrearUsuarioStaff` pasa al generador `nombre.apellidopaterno` (se reusa
-  `GeneradorNombreUsuario`).
+Backend necesario para los drawers — **HECHO (fase 1, rama `feature/drawers-alineados`)**:
+- `Usuario.EditarDatosPersonales(nombres, paterno, materno?, tel, curp?)` recompone
+  `Nombre`. `ObtenerNombres()` deriva los nombres de pila (quita los apellidos del final).
+- Endpoints **unificados** para ambos roles (en lugar de rutas separadas por rol). La regla
+  de quién gestiona a quién es la de `GestionarUsuario.Autorizar`: el SuperAdmin gestiona
+  admins; el Admin, su staff.
+  - `GET /api/usuarios/{id}` → `UsuarioDetalleDto`, con la CURP **enmascarada**
+    (`HEGM••••••••••••01`). La CURP completa nunca sale de la API.
+  - `PUT /api/usuarios/{id}/datos` `{ nombres, apellidoPaterno, apellidoMaterno?, telefono, curp? }`.
+    Para la CURP: `null` = conservar, `""` = quitar, valor = reemplazar. El usuario de login no
+    cambia al editar.
+- `AltaStaff` (antes `CrearAdministrador`) da de alta admin y staff con el generador
+  `nombre.apellidopaterno`. **Cambio de contrato:** `POST /api/usuarios/staff` ya no recibe
+  `nombreUsuario`; recibe `nombre, apellidoPaterno, apellidoMaterno?, telefono, curp?, pin, rol`
+  y devuelve `{ id, nombreUsuario, nombreCompleto }`.
+- Front:
+  - `AltaStaffDrawer` compartido: [rol] → nombre → contacto → PIN → usuario generado.
+  - `DetalleUsuarioDrawer` (reemplaza a `GestionarUsuarioModal`): usuario copiable,
+    teléfono, CURP enmascarada, veterinaria, editar en 2 pasos, resetear PIN y
+    desactivar (warning). Avisa cuando a un usuario antiguo le faltan apellidos o teléfono.
+  - `EditarVeterinariaDrawer` (ícono ⚙ en la card) con `SelectorPlan` compartido con el alta.
 - **Limpieza:** `configurarAdminOperativo` (front) y el endpoint `admin-operativo`
-  ya no se usan. Decidir si se exponen en el detalle de la veterinaria o se eliminan.
+  ya no se usan. Falta decidir si se exponen en el detalle de la veterinaria o se eliminan.
 
 ### Panel `/admin` — bloque "Ingresos"
 - Va arriba del "Estado de la plataforma":

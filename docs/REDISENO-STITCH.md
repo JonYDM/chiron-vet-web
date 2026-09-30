@@ -591,3 +591,17 @@ VentaCargo + Cargo Cobrado → aparece en Historial + "Mis pagos" del dueño + m
     **usuario generado** con botón Copiar, para entregárselo al admin.
 - La card de Administradores muestra `@usuario · teléfono` si lo tiene.
 - Detalle del modelo y reglas del usuario autogenerado: `PENDIENTES-TECNICOS.md`.
+
+### Fase 1: drawers alineados con entidad y DTO
+- **Regla:** cada drawer de alta o edición captura exactamente los campos de su DTO, con los
+  mismos componentes en alta y en edición (`CamposNombre`, `CamposContacto`, `SelectorPlan`).
+  Las reglas de validación viven en `features/usuarios/datosPersonales.ts`, espejo del backend.
+- **Alta de staff = alta de admin:** mismo `AltaStaffDrawer`; el staff agrega un primer paso
+  de rol con cards (Veterinario / Recepción). Ya nadie escribe el usuario a mano.
+- **"Gestionar" pasa a ser "Detalle del usuario":** muestra todos los datos reales, no solo
+  el nombre. "Editar datos" abre el mismo formulario del alta en modo `libre`. Desactivar
+  usa warning (ámbar) y Activar usa outline teal.
+- **Card de veterinaria:** ícono ⚙ (ghost) arriba a la derecha → `EditarVeterinariaDrawer`.
+  El lápiz de la fila del plan sigue siendo solo para ajustar la fecha de renovación.
+- **Despliegue:** el backend (`feature/drawers-alineados`) va primero, porque cambia el
+  contrato de `POST /api/usuarios/staff`.

@@ -417,6 +417,36 @@ Backend necesario para los drawers — **HECHO (fase 1, rama `feature/drawers-al
     Matriz; mientras no la toquen, cambiar el plan pone el precio base.
   - Dashboard: "Por cobrar" renueva por sucursal y muestra "Veterinaria · Sucursal" y la renta.
 
+### Fase 3 — HECHO (rama `feature/cobros-suscripcion`, migración `PagosSuscripcion`)
+- **Backend:**
+  - Entidad `PagoSuscripcion`: sucursal, monto, fecha de pago, plan, periodo que cubre,
+    nota y anulado.
+  - `Sucursal.Renovar` ahora devuelve el periodo que cubre.
+  - `GestionSucursales.RenovarAsync` renueva **y registra el pago**. El monto por default es
+    el precio de la sucursal y la fecha por default es hoy; no acepta fechas futuras. Si el
+    pago es inválido, la fecha de renovación no se mueve.
+  - Los endpoints viejos de renovar la Matriz también registran el pago.
+  - Endpoints:
+    - `POST /api/admin/sucursales/{id}/renovar` con body opcional `{ monto?, fechaPago?, nota? }`.
+    - `GET /api/admin/pagos?desde&hasta`.
+    - `POST /api/admin/pagos/{id}/anular`. Un pago anulado no se borra y no revierte la fecha.
+  - Métricas: `ganadoMes`, `ganadoMesAnterior`, `ganadoHistorico`, `pagosMes`,
+    `ingresoMensualEsperado` (renta de las activas; las anuales se cuentan como precio / 12)
+    y `montoPorCobrar` (renta de las sucursales vencidas o que vencen en 7 días).
+  - Los meses se calculan en **UTC**. Un pago registrado de noche en México puede caer en
+    el día siguiente; pendiente de mover a hora de México si llega a importar.
+  - **Honestidad:** las renovaciones anteriores no se registraron, así que el histórico
+    empieza en cero.
+- **Front:**
+  - `RenovarDrawer`: todo botón "Renovar" o "Cobrar" abre este drawer, con monto precargado
+    y editable solo para ese pago, fecha, nota y "Quedará cubierta hasta…" calculado con la
+    misma regla del backend.
+  - Dashboard `/admin`: bloque **Ingresos** arriba.
+    - Card teal "Ganado este mes" con la variación contra el mes anterior, que lleva a Cobros.
+    - "Esperado al mes" y "Por cobrar", ambos en monto.
+  - `/admin/cobros`: selector de mes (patrón del Historial de ventas), total cobrado,
+    buscador y lista de cobros. Anular pide confirmación en línea con el botón danger.
+
 ### Panel `/admin` — bloque "Ingresos"
 - Va arriba del "Estado de la plataforma":
   - Card grande teal con **Ganado este mes** y variación contra el mes anterior

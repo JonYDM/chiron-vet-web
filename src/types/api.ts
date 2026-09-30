@@ -284,18 +284,48 @@ export interface CrearAdminRequest {
   pin: string;
 }
 
-/** Respuesta del alta: usuario generado (nombre.apellidopaterno) para entregarlo al admin. */
-export interface AdministradorCreado {
+/** Respuesta del alta de staff/admin: usuario generado (nombre.apellidopaterno) para entregarlo. */
+export interface UsuarioCreado {
   id: string;
   nombreUsuario: string;
   nombreCompleto: string;
 }
 
+/** Alta de staff (Vet/Recep) con datos personales; el usuario lo genera el backend. */
 export interface CrearStaffRequest {
-  nombreUsuario: string;
   nombre: string;
+  apellidoPaterno: string;
+  apellidoMaterno?: string | null;
+  telefono: string;
+  curp?: string | null;
   pin: string;
   rol: RolUsuario.Veterinario | RolUsuario.Recepcionista;
+}
+
+/** Detalle de un usuario para el drawer de gestión (CURP enmascarada). */
+export interface UsuarioDetalle {
+  id: string;
+  nombreUsuario: string;
+  /** Nombre completo para mostrar. */
+  nombre: string;
+  /** Solo nombre(s) de pila (para editar). */
+  nombres: string;
+  apellidoPaterno: string | null;
+  apellidoMaterno: string | null;
+  telefono: string | null;
+  curpEnmascarada: string | null;
+  rol: RolUsuario;
+  activo: boolean;
+  veterinariaId: string;
+}
+
+/** Edición de datos personales. curp: null = conservar, "" = quitar, valor = reemplazar. */
+export interface EditarDatosUsuarioRequest {
+  nombres: string;
+  apellidoPaterno: string;
+  apellidoMaterno?: string | null;
+  telefono: string;
+  curp?: string | null;
 }
 
 export interface CrearDuenoRequest {

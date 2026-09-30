@@ -2,13 +2,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   cambiarMiPin,
   crearStaff,
+  editarDatosUsuario,
   gestionarUsuario,
   listarAdministradores,
   listarStaff,
+  obtenerDetalleUsuario,
   obtenerUsuarioDeCliente,
   resetearPin,
 } from "./api";
-import type { CrearStaffRequest } from "@/types/api";
+import type { CrearStaffRequest, EditarDatosUsuarioRequest } from "@/types/api";
 
 /** Lista el staff de la veterinaria actual. */
 export function useStaff() {
@@ -79,6 +81,25 @@ export function useGestionarUsuario() {
       nuevoNombre?: string | null;
       accion?: 1 | 2 | null;
     }) => gestionarUsuario(usuarioId, { nuevoNombre, accion }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["usuarios"] }),
+  });
+}
+
+/** Detalle de un usuario (drawer de gestión). */
+export function useDetalleUsuario(id: string | null) {
+  return useQuery({
+    queryKey: ["usuarios", "detalle", id],
+    queryFn: ({ signal }) => obtenerDetalleUsuario(id as string, signal),
+    enabled: !!id,
+  });
+}
+
+/** Edita datos personales; invalida listas y detalle (todo cuelga de ["usuarios"]). */
+export function useEditarDatosUsuario() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: EditarDatosUsuarioRequest }) =>
+      editarDatosUsuario(id, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["usuarios"] }),
   });
 }

@@ -1,14 +1,30 @@
 import { http } from "@/lib/http";
-import type { CrearStaffRequest, UsuarioDto } from "@/types/api";
+import type {
+  CrearStaffRequest,
+  EditarDatosUsuarioRequest,
+  UsuarioCreado,
+  UsuarioDetalle,
+  UsuarioDto,
+} from "@/types/api";
 
 /** Lista el staff (y dueños) de la veterinaria del Administrador autenticado. */
 export function listarStaff(signal?: AbortSignal): Promise<UsuarioDto[]> {
   return http.get<UsuarioDto[]>("/api/usuarios/staff", signal);
 }
 
-/** Crea un usuario de staff (Veterinario o Recepcionista) en la veterinaria del admin. */
-export function crearStaff(body: CrearStaffRequest): Promise<string> {
-  return http.post<string>("/api/usuarios/staff", body);
+/** Crea un Veterinario o Recepcionista; devuelve el usuario generado. */
+export function crearStaff(body: CrearStaffRequest): Promise<UsuarioCreado> {
+  return http.post<UsuarioCreado>("/api/usuarios/staff", body);
+}
+
+/** Detalle de un usuario (CURP enmascarada). */
+export function obtenerDetalleUsuario(id: string, signal?: AbortSignal): Promise<UsuarioDetalle> {
+  return http.get<UsuarioDetalle>(`/api/usuarios/${id}`, signal);
+}
+
+/** Edita los datos personales de un usuario; devuelve el detalle actualizado. */
+export function editarDatosUsuario(id: string, body: EditarDatosUsuarioRequest): Promise<UsuarioDetalle> {
+  return http.put<UsuarioDetalle>(`/api/usuarios/${id}/datos`, body);
 }
 
 /** Lista los Administradores (para el SuperAdmin). */

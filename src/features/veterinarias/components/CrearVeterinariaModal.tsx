@@ -4,7 +4,9 @@ import { ApiError } from "@/lib/http";
 import { useToast } from "@/components/feedback/useToast";
 import { PlanSuscripcion } from "@/types/api";
 import { useCrearVeterinaria } from "../hooks";
+import { montoValido, PRECIO_BASE } from "../suscripcion";
 import { SelectorPlan } from "./SelectorPlan";
+import { CampoPrecio } from "./CampoPrecio";
 
 interface Props {
   open: boolean;
@@ -19,13 +21,24 @@ export function CrearVeterinariaModal({ open, onClose }: Props) {
   const [telefono, setTelefono] = useState("");
   const [direccion, setDireccion] = useState("");
   const [plan, setPlan] = useState<PlanSuscripcion>(PlanSuscripcion.Mensual);
+  const [precio, setPrecio] = useState(String(PRECIO_BASE[PlanSuscripcion.Mensual]));
+  const [precioTocado, setPrecioTocado] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const monto = montoValido(precio);
+
+  // Mientras no toquen la renta, cambiar el plan pone el precio base de ese plan.
+  function cambiarPlan(p: PlanSuscripcion) {
+    setPlan(p);
+    if (!precioTocado) setPrecio(String(PRECIO_BASE[p]));
+  }
 
   function limpiar() {
     setNombre("");
     setTelefono("");
     setDireccion("");
     setPlan(PlanSuscripcion.Mensual);
+    setPrecio(String(PRECIO_BASE[PlanSuscripcion.Mensual]));
+    setPrecioTocado(false);
     setError(null);
   }
 
@@ -37,6 +50,7 @@ export function CrearVeterinariaModal({ open, onClose }: Props) {
         telefono: telefono.trim(),
         direccion: direccion.trim() || null,
         plan,
+        precio: monto,
       });
       toast.exito("Veterinaria creada");
       limpiar();
@@ -87,9 +101,21 @@ export function CrearVeterinariaModal({ open, onClose }: Props) {
             ),
           },
           {
+            valido: monto !== null,
             contenido: (
               <div className="space-y-4">
-                <SelectorPlan plan={plan} onChange={setPlan} />
+                <SelectorPlan plan={plan} onChange={cambiarPlan} />
+                <CampoPrecio
+                  plan={plan}
+                  valor={precio}
+                  onChange={(v) => {
+                    setPrecio(v);
+                    setPrecioTocado(true);
+                  }}
+                />
+                <p className="text-body-sm text-on-surface-variant">
+                  Es la renta de la Matriz. Si abre más sucursales, cada una paga la suya.
+                </p>
                 {error && (
                   <p role="alert" className="rounded-xl bg-error-container/60 px-4 py-3 text-body-sm font-medium text-on-error-container">
                     {error}

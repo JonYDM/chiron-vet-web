@@ -3,3 +3,5 @@ export { ResumenSuperAdminPage } from "./pages/ResumenSuperAdminPage";
 export { AdministradoresPage } from "./pages/AdministradoresPage";
 
 export { VeterinariaDetallePage } from "./pages/VeterinariaDetallePage";
+
+export { CobrosPage } from "./pages/CobrosPage";

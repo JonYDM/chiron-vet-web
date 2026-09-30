@@ -7,33 +7,29 @@ import {
   CalendarClock,
   CheckCircle2,
   ChevronRight,
+  HandCoins,
   Plus,
   RefreshCw,
+  TrendingDown,
+  TrendingUp,
   UserCog,
   UserX,
+  Wallet,
 } from "lucide-react";
 import { Badge, Button, SkeletonFila } from "@/components/ui";
 import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
-import { useToast } from "@/components/feedback/useToast";
-import { fechaHoyLarga } from "@/lib/format";
+import { fechaHoyLarga, formatCurrency } from "@/lib/format";
 import { saludoPorHora } from "@/lib/saludo";
-import { useMetricasSuperAdmin, useRenovarSucursal } from "../hooks";
+import { useMetricasSuperAdmin } from "../hooks";
 import { planLabel, textoPrecio, textoSuscripcion } from "../suscripcion";
 import { CrearVeterinariaModal } from "../components/CrearVeterinariaModal";
+import { RenovarDrawer, type SucursalACobrar } from "../components/RenovarDrawer";
 
-/** Dashboard del SuperAdmin: panorama general de la plataforma (suscripciones y cobro). */
+/** Dashboard del SuperAdmin: panorama general de la plataforma (ingresos, suscripciones y cobro). */
 export function ResumenSuperAdminPage() {
   const { data: m, isLoading, isError } = useMetricasSuperAdmin();
-  const renovar = useRenovarSucursal();
-  const toast = useToast();
   const [modalCrear, setModalCrear] = useState(false);
-
-  function onRenovar(sucursalId: string, nombre: string) {
-    renovar.mutate(sucursalId, {
-      onSuccess: (r) => toast.exito(`${nombre}: ${textoSuscripcion(r.fechaRenovacion)}`),
-      onError: () => toast.error("No se pudo renovar."),
-    });
-  }
+  const [cobrarA, setCobrarA] = useState<{ sucursal: SucursalACobrar; veterinariaNombre: string } | null>(null);
 
   return (
     <PantallaConHeader
@@ -86,6 +82,46 @@ export function ResumenSuperAdminPage() {
           </div>
         ) : (
           <>
+            {/* Ingresos (HU-SU4) */}
+            <div className="flex flex-col gap-2.5">
+              <span className="text-label-sm font-bold uppercase tracking-wider text-outline">Ingresos</span>
+              <div className="grid grid-cols-2 gap-2.5">
+                <Link
+                  to="/admin/cobros"
+                  className="col-span-2 flex flex-col gap-2 rounded-2xl bg-primary-container p-4 text-on-primary shadow-soft transition-transform active:scale-[0.99]"
+                >
+                  <span className="flex items-center justify-between text-label-md font-bold">
+                    <span className="flex items-center gap-1.5">
+                      <Wallet className="h-[18px] w-[18px]" aria-hidden />
+                      Ganado este mes
+                    </span>
+                    <span className="flex items-center gap-0.5 text-label-sm font-semibold opacity-90">
+                      Ver cobros
+                      <ChevronRight className="h-4 w-4" aria-hidden />
+                    </span>
+                  </span>
+                  <span className="tabular text-headline-lg font-bold leading-none">{formatCurrency(m.ganadoMes)}</span>
+                  <Variacion actual={m.ganadoMes} anterior={m.ganadoMesAnterior} cobros={m.pagosMes} />
+                </Link>
+                <Metrica
+                  icon={TrendingUp}
+                  label="Esperado al mes"
+                  valor={formatCurrency(m.ingresoMensualEsperado)}
+                  nota={`${m.sucursalesActivas} sucursal${m.sucursalesActivas === 1 ? "" : "es"} activa${m.sucursalesActivas === 1 ? "" : "s"}`}
+                  className="bg-tertiary-fixed/50"
+                  colorIcono="text-tertiary"
+                />
+                <Metrica
+                  icon={HandCoins}
+                  label="Por cobrar"
+                  valor={formatCurrency(m.montoPorCobrar)}
+                  nota={`${m.porVencer + m.vencidas} por vencer o vencidas`}
+                  className="bg-secondary-fixed/60"
+                  colorIcono="text-st-secondary"
+                />
+              </div>
+            </div>
+
             {/* Estado de la plataforma */}
             <div className="flex flex-col gap-2.5">
               <span className="text-label-sm font-bold uppercase tracking-wider text-outline">
@@ -211,12 +247,23 @@ export function ResumenSuperAdminPage() {
                         </div>
                         <Button
                           size="sm"
-                          loading={renovar.isPending && renovar.variables === r.sucursalId}
-                          onClick={() => onRenovar(r.sucursalId, etiqueta)}
-                          aria-label={`Renovar ${etiqueta}`}
+                          onClick={() =>
+                            setCobrarA({
+                              veterinariaNombre: r.nombre,
+                              sucursal: {
+                                id: r.sucursalId,
+                                nombre: r.sucursalNombre,
+                                precio: r.precio,
+                                plan: r.plan,
+                                fechaRenovacion: r.fechaRenovacion,
+                                esMatriz: r.esMatriz,
+                              },
+                            })
+                          }
+                          aria-label={`Cobrar a ${etiqueta}`}
                         >
                           <RefreshCw className="h-4 w-4" aria-hidden />
-                          Renovar
+                          Cobrar
                         </Button>
                       </div>
                     );
@@ -229,6 +276,13 @@ export function ResumenSuperAdminPage() {
       </div>
 
       <CrearVeterinariaModal open={modalCrear} onClose={() => setModalCrear(false)} />
+      {cobrarA && (
+        <RenovarDrawer
+          sucursal={cobrarA.sucursal}
+          veterinariaNombre={cobrarA.veterinariaNombre}
+          onClose={() => setCobrarA(null)}
+        />
+      )}
     </PantallaConHeader>
   );
 }
@@ -243,11 +297,12 @@ function Metrica({
 }: {
   icon: typeof Building2;
   label: string;
-  valor: number;
+  valor: number | string;
   nota: string;
   className: string;
   colorIcono: string;
 }) {
+  const esTexto = typeof valor === "string";
   return (
     <div className={`flex flex-col justify-between rounded-2xl p-3.5 shadow-inset-up ${className}`}>
       <div className={`flex items-center justify-between ${colorIcono}`}>
@@ -255,9 +310,33 @@ function Metrica({
         <Icon className="h-[18px] w-[18px]" aria-hidden />
       </div>
       <div className="mt-2">
-        <div className="tabular text-metric-display font-bold leading-none text-on-surface">{valor}</div>
+        <div
+          className={
+            "tabular font-bold leading-none text-on-surface " + (esTexto ? "text-headline-sm" : "text-metric-display")
+          }
+        >
+          {valor}
+        </div>
         <div className="mt-1 text-body-sm leading-tight text-on-surface-variant">{nota}</div>
       </div>
     </div>
+  );
+}
+
+/** Variación contra el mes anterior (o, si no hay referencia, cuántos cobros van). */
+function Variacion({ actual, anterior, cobros }: { actual: number; anterior: number; cobros: number }) {
+  const textoCobros = `${cobros} cobro${cobros === 1 ? "" : "s"} registrado${cobros === 1 ? "" : "s"}`;
+  if (anterior <= 0) return <span className="text-body-sm opacity-85">{textoCobros}</span>;
+  const pct = Math.round(((actual - anterior) / anterior) * 100);
+  const Flecha = pct >= 0 ? TrendingUp : TrendingDown;
+  return (
+    <span className="flex items-center gap-1.5 text-body-sm opacity-90">
+      <span className="flex items-center gap-0.5 rounded-full bg-white/20 px-2 py-0.5 font-semibold">
+        <Flecha className="h-3.5 w-3.5" aria-hidden />
+        {pct >= 0 ? "+" : ""}
+        {pct}%
+      </span>
+      vs. mes anterior ({formatCurrency(anterior)}) · {textoCobros}
+    </span>
   );
 }

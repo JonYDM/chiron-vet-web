@@ -52,10 +52,10 @@ export function AdministradoresPage() {
 
   return (
     <PantallaConHeader
-      titulo="Administradores"
-      subtitulo={<p className="text-body-sm text-on-surface-variant">Accesos de cada veterinaria</p>}
+      titulo="Clientes"
+      subtitulo={<p className="text-body-sm text-on-surface-variant">Quién administra cada veterinaria</p>}
       accion={
-        <Button size="icon" onClick={() => setElegirVet(true)} aria-label="Nuevo administrador">
+        <Button size="icon" onClick={() => setElegirVet(true)} aria-label="Nuevo cliente">
           <Plus className="h-5 w-5" aria-hidden />
         </Button>
       }
@@ -69,7 +69,7 @@ export function AdministradoresPage() {
           />
           <Input
             variant="soft"
-            aria-label="Buscar administradores"
+            aria-label="Buscar clientes"
             placeholder="Buscar por nombre, usuario o veterinaria"
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
@@ -146,7 +146,7 @@ export function AdministradoresPage() {
         open={elegirVet}
         onClose={() => setElegirVet(false)}
         title="¿Para qué veterinaria?"
-        descripcion="Elige la clínica del nuevo administrador."
+        descripcion="Elige la clínica que va a administrar."
       >
         <div className="flex flex-col gap-2">
           {opcionesVet.length === 0 ? (

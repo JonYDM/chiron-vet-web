@@ -15,7 +15,7 @@ export function CrearAdminModal({ open, onClose, veterinariaId, veterinariaNombr
     <AltaStaffDrawer
       open={open}
       onClose={onClose}
-      titulo="Nuevo administrador"
+      titulo="Nuevo cliente"
       descripcion={veterinariaNombre}
       guardando={crear.isPending}
       onCrear={({ datos, pin }) =>

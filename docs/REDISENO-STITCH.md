@@ -605,3 +605,18 @@ VentaCargo + Cargo Cobrado → aparece en Historial + "Mis pagos" del dueño + m
   El lápiz de la fila del plan sigue siendo solo para ajustar la fecha de renovación.
 - **Despliegue:** el backend (`feature/drawers-alineados`) va primero, porque cambia el
   contrato de `POST /api/usuarios/staff`.
+
+
+### Panel SuperAdmin: Cobros en el nav y dashboard navegable
+- **Bottom-nav del SuperAdmin:** Inicio · Veterinarias · Cobros · Admins. Con 4 módulos no hay
+  centro exacto, así que Inicio va primero y conserva su pastilla. Cobros ya no tiene botón
+  de volver porque es un módulo.
+- **Acciones rápidas en 3 tiles:** Nueva veterinaria (teal), Cobros y Administradores (tintes).
+- **Todas las métricas del dashboard llevan a su módulo** (chevron en la nota):
+  - Activas → Veterinarias.
+  - Administradores → Admins.
+  - Por vencer y Vencidas → Veterinarias con el filtro aplicado (`?filtro=porVencer|vencidas`).
+  - Esperado al mes → Cobros.
+  - Por cobrar → Vencidas (o Por vencer si no hay vencidas).
+- En Veterinarias, el filtro vive en la URL (`useSearchParams`), así que se puede enlazar
+  directo y el botón atrás lo respeta.

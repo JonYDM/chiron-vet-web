@@ -87,6 +87,9 @@ const ResumenSuperAdminPage = lazy(() =>
 const AdministradoresPage = lazy(() =>
   import("@/features/veterinarias").then((m) => ({ default: m.AdministradoresPage })),
 );
+const VeterinariaDetallePage = lazy(() =>
+  import("@/features/veterinarias").then((m) => ({ default: m.VeterinariaDetallePage })),
+);
 const EquipoPage = lazy(() =>
   import("@/features/usuarios").then((m) => ({ default: m.StaffPage })),
 );
@@ -184,6 +187,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <ResumenSuperAdminPage /> },
       { path: "veterinarias", element: <VeterinariasPage /> },
+      { path: "veterinarias/:id", element: <VeterinariaDetallePage /> },
       { path: "administradores", element: <AdministradoresPage /> },
     ],
   },

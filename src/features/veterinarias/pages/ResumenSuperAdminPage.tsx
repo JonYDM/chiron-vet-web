@@ -17,21 +17,21 @@ import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
 import { useToast } from "@/components/feedback/useToast";
 import { fechaHoyLarga } from "@/lib/format";
 import { saludoPorHora } from "@/lib/saludo";
-import { useMetricasSuperAdmin, useRenovarVeterinaria } from "../hooks";
-import { planLabel, textoSuscripcion } from "../suscripcion";
+import { useMetricasSuperAdmin, useRenovarSucursal } from "../hooks";
+import { planLabel, textoPrecio, textoSuscripcion } from "../suscripcion";
 import { CrearVeterinariaModal } from "../components/CrearVeterinariaModal";
 
 /** Dashboard del SuperAdmin: panorama general de la plataforma (suscripciones y cobro). */
 export function ResumenSuperAdminPage() {
   const { data: m, isLoading, isError } = useMetricasSuperAdmin();
-  const renovar = useRenovarVeterinaria();
+  const renovar = useRenovarSucursal();
   const toast = useToast();
   const [modalCrear, setModalCrear] = useState(false);
 
-  function onRenovar(id: string, nombre: string) {
-    renovar.mutate(id, {
+  function onRenovar(sucursalId: string, nombre: string) {
+    renovar.mutate(sucursalId, {
       onSuccess: (r) => toast.exito(`${nombre}: ${textoSuscripcion(r.fechaRenovacion)}`),
-      onError: () => toast.error("No se pudo renovar la veterinaria."),
+      onError: () => toast.error("No se pudo renovar."),
     });
   }
 
@@ -96,7 +96,7 @@ export function ResumenSuperAdminPage() {
                   icon={CheckCircle2}
                   label="Veterinarias activas"
                   valor={m.veterinariasActivas}
-                  nota={`de ${m.totalVeterinarias} en total`}
+                  nota={`de ${m.totalVeterinarias} · ${m.sucursalesActivas} sucursal${m.sucursalesActivas === 1 ? "" : "es"}`}
                   className="bg-primary-fixed/40"
                   colorIcono="text-tertiary"
                 />
@@ -128,12 +128,12 @@ export function ResumenSuperAdminPage() {
                 {/* Planes y crecimiento */}
                 <div className="col-span-2 flex items-center gap-3 rounded-2xl bg-surface-container p-3.5">
                   <div className="flex-1">
-                    <span className="text-body-sm text-on-surface-variant">Plan mensual</span>
+                    <span className="text-body-sm text-on-surface-variant">Suc. mensuales</span>
                     <span className="tabular block text-label-lg font-bold text-on-surface">{m.planMensual}</span>
                   </div>
                   <div className="h-8 w-px bg-outline-variant/40" />
                   <div className="flex-1">
-                    <span className="text-body-sm text-on-surface-variant">Plan anual</span>
+                    <span className="text-body-sm text-on-surface-variant">Suc. anuales</span>
                     <span className="tabular block text-label-lg font-bold text-on-surface">{m.planAnual}</span>
                   </div>
                   <div className="h-8 w-px bg-outline-variant/40" />
@@ -184,36 +184,43 @@ export function ResumenSuperAdminPage() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-2.5">
-                  {m.proximasRenovaciones.map((r) => (
-                    <div
-                      key={r.id}
-                      className="flex items-center gap-3 rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-3.5 shadow-soft"
-                    >
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-fixed/40 text-tertiary">
-                        <Building2 className="h-5 w-5" aria-hidden />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-label-lg font-bold text-on-surface">{r.nombre}</p>
-                        <div className="mt-0.5 flex items-center gap-1.5">
-                          <Badge tone={r.diasRestantes < 0 ? "danger" : "warning"}>
-                            {textoSuscripcion(r.fechaRenovacion)}
-                          </Badge>
-                          <span className="text-body-sm text-on-surface-variant">
-                            {planLabel[r.plan] ?? "Mensual"}
-                          </span>
-                        </div>
-                      </div>
-                      <Button
-                        size="sm"
-                        loading={renovar.isPending && renovar.variables === r.id}
-                        onClick={() => onRenovar(r.id, r.nombre)}
-                        aria-label={`Renovar ${r.nombre}`}
+                  {m.proximasRenovaciones.map((r) => {
+                    const etiqueta = r.esMatriz ? r.nombre : `${r.nombre} · ${r.sucursalNombre}`;
+                    return (
+                      <div
+                        key={r.sucursalId}
+                        className="flex items-center gap-3 rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-3.5 shadow-soft"
                       >
-                        <RefreshCw className="h-4 w-4" aria-hidden />
-                        Renovar
-                      </Button>
-                    </div>
-                  ))}
+                        <Link
+                          to={`/admin/veterinarias/${r.id}`}
+                          className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-fixed/40 text-tertiary"
+                          aria-label={`Ver ${r.nombre}`}
+                        >
+                          <Building2 className="h-5 w-5" aria-hidden />
+                        </Link>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-label-lg font-bold text-on-surface">{etiqueta}</p>
+                          <div className="mt-0.5 flex items-center gap-1.5">
+                            <Badge tone={r.diasRestantes < 0 ? "danger" : "warning"}>
+                              {textoSuscripcion(r.fechaRenovacion)}
+                            </Badge>
+                            <span className="tabular truncate text-body-sm text-on-surface-variant">
+                              {textoPrecio(r)} · {planLabel[r.plan] ?? "Mensual"}
+                            </span>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          loading={renovar.isPending && renovar.variables === r.sucursalId}
+                          onClick={() => onRenovar(r.sucursalId, etiqueta)}
+                          aria-label={`Renovar ${etiqueta}`}
+                        >
+                          <RefreshCw className="h-4 w-4" aria-hidden />
+                          Renovar
+                        </Button>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </section>

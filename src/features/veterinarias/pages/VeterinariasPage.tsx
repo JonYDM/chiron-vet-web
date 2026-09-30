@@ -25,7 +25,6 @@ import {
 } from "../hooks";
 import { diasParaRenovar, estadoSuscripcion, planLabel, textoSuscripcion } from "../suscripcion";
 import { CrearVeterinariaModal } from "../components/CrearVeterinariaModal";
-import { CrearAdminModal } from "../components/CrearAdminModal";
 
 type Filtro = "todas" | "porVencer" | "vencidas" | "inactivas";
 
@@ -43,7 +42,6 @@ export function VeterinariasPage() {
   const renovar = useRenovarVeterinaria();
   const toast = useToast();
   const [modalCrear, setModalCrear] = useState(false);
-  const [adminDe, setAdminDe] = useState<Veterinaria | null>(null);
   const [ajustarDe, setAjustarDe] = useState<Veterinaria | null>(null);
   const [texto, setTexto] = useState("");
   const [filtro, setFiltro] = useState<Filtro>("todas");
@@ -221,18 +219,16 @@ export function VeterinariasPage() {
                         <RefreshCw className="h-4 w-4" aria-hidden />
                         Renovar
                       </Button>
-                      <Button variant="soft" size="sm" fullWidth onClick={() => setAdminDe(v)}>
-                        <UserCog className="h-4 w-4" aria-hidden />
-                        Admin
-                      </Button>
                       <Button
-                        variant={v.activa ? "warning" : "soft"}
-                        size="icon"
+                        variant={v.activa ? "warning" : "outline"}
+                        size="sm"
+                        fullWidth
+                        className={v.activa ? undefined : "text-primary"}
                         loading={cambiarEstado.isPending && cambiarEstado.variables?.id === v.id}
                         onClick={() => cambiarEstado.mutate({ id: v.id, activar: !v.activa })}
-                        aria-label={v.activa ? `Desactivar ${v.nombre}` : `Activar ${v.nombre}`}
                       >
                         <Power className="h-4 w-4" aria-hidden />
+                        {v.activa ? "Desactivar" : "Activar"}
                       </Button>
                     </div>
                   </div>
@@ -253,14 +249,6 @@ export function VeterinariasPage() {
       </div>
 
       <CrearVeterinariaModal open={modalCrear} onClose={() => setModalCrear(false)} />
-      {adminDe && (
-        <CrearAdminModal
-          open={!!adminDe}
-          onClose={() => setAdminDe(null)}
-          veterinariaId={adminDe.id}
-          veterinariaNombre={adminDe.nombre}
-        />
-      )}
       {ajustarDe && (
         <AjustarRenovacionDrawer veterinaria={ajustarDe} onClose={() => setAjustarDe(null)} />
       )}

@@ -3,6 +3,7 @@ import {
   activarVeterinaria,
   ajustarRenovacion,
   ajustarRenovacionSucursal,
+  anularPago,
   cambiarEstadoSucursal,
   configurarAdminOperativo,
   crearAdmin,
@@ -11,16 +12,18 @@ import {
   desactivarVeterinaria,
   editarSucursal,
   editarVeterinaria,
+  listarPagos,
   listarVeterinarias,
   obtenerMetricasSuperAdmin,
   renovarSucursal,
   renovarVeterinaria,
 } from "./api";
-import type { CrearAdminRequest, CrearVeterinariaRequest, SucursalRequest } from "@/types/api";
+import type { CrearAdminRequest, CrearVeterinariaRequest, RenovarRequest, SucursalRequest } from "@/types/api";
 
 const KEY = ["veterinarias"];
 const KEY_METRICAS = ["metricas-superadmin"];
 const KEY_ADMINS = ["usuarios", "administradores"];
+const KEY_PAGOS = ["pagos-suscripcion"];
 
 /** Invalida todo lo que depende de las veterinarias (lista + métricas del SuperAdmin). */
 function invalidarVeterinarias(qc: QueryClient) {
@@ -135,12 +138,35 @@ export function useEditarSucursal() {
   });
 }
 
-/** Renueva un periodo de la sucursal. */
+/** Renueva un periodo y registra el cobro (refresca lista, métricas e historial de cobros). */
 export function useRenovarSucursal() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => renovarSucursal(id),
-    onSuccess: () => invalidarVeterinarias(qc),
+    mutationFn: ({ id, body }: { id: string; body?: RenovarRequest }) => renovarSucursal(id, body),
+    onSuccess: () => {
+      invalidarVeterinarias(qc);
+      qc.invalidateQueries({ queryKey: KEY_PAGOS });
+    },
+  });
+}
+
+/** Historial de cobros en un rango de fechas (YYYY-MM-DD). */
+export function usePagos(desde: string, hasta: string) {
+  return useQuery({
+    queryKey: [...KEY_PAGOS, desde, hasta],
+    queryFn: ({ signal }) => listarPagos(desde, hasta, signal),
+  });
+}
+
+/** Anula un pago (refresca historial y métricas de ingresos). */
+export function useAnularPago() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => anularPago(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: KEY_PAGOS });
+      qc.invalidateQueries({ queryKey: KEY_METRICAS });
+    },
   });
 }
 

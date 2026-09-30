@@ -16,12 +16,11 @@ import {
 import { Badge, Button, Input, SkeletonFila } from "@/components/ui";
 import { EmptyState } from "@/components/molecules/EmptyState";
 import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
-import { useToast } from "@/components/feedback/useToast";
 import { formatCurrency } from "@/lib/format";
 import { useDebounce } from "@/lib/useDebounce";
 import { useAdministradores } from "@/features/usuarios/hooks";
 import type { Sucursal, Veterinaria } from "@/types/api";
-import { useCambiarEstadoVeterinaria, useRenovarSucursal, useVeterinarias } from "../hooks";
+import { useCambiarEstadoVeterinaria, useVeterinarias } from "../hooks";
 import {
   diasParaRenovar,
   estadoSuscripcion,
@@ -35,6 +34,7 @@ import {
 import { CrearVeterinariaModal } from "../components/CrearVeterinariaModal";
 import { EditarVeterinariaDrawer } from "../components/EditarVeterinariaDrawer";
 import { AjustarRenovacionDrawer } from "../components/AjustarRenovacionDrawer";
+import { RenovarDrawer } from "../components/RenovarDrawer";
 
 type Filtro = "todas" | "porVencer" | "vencidas" | "inactivas";
 
@@ -49,11 +49,10 @@ const FILTROS: { valor: Filtro; label: string }[] = [
 export function VeterinariasPage() {
   const { data: veterinarias, isLoading, isError } = useVeterinarias();
   const cambiarEstado = useCambiarEstadoVeterinaria();
-  const renovar = useRenovarSucursal();
-  const toast = useToast();
   const navigate = useNavigate();
   const [modalCrear, setModalCrear] = useState(false);
   const [ajustarDe, setAjustarDe] = useState<{ sucursal: Sucursal; vet: Veterinaria } | null>(null);
+  const [cobrarA, setCobrarA] = useState<{ sucursal: Sucursal; vet: Veterinaria } | null>(null);
   const [editarDe, setEditarDe] = useState<Veterinaria | null>(null);
   const [texto, setTexto] = useState("");
   const [filtro, setFiltro] = useState<Filtro>("todas");
@@ -96,13 +95,6 @@ export function VeterinariasPage() {
   }, [ordenadas, filtro, textoBuscado]);
 
   const total = ordenadas.length;
-
-  function onRenovar(v: Veterinaria, s: Sucursal) {
-    renovar.mutate(s.id, {
-      onSuccess: (r) => toast.exito(`${v.nombre}: ${textoSuscripcion(r.fechaRenovacion)}`),
-      onError: () => toast.error("No se pudo renovar."),
-    });
-  }
 
   return (
     <PantallaConHeader
@@ -263,13 +255,7 @@ export function VeterinariasPage() {
                     {/* Acciones */}
                     <div className="flex gap-2 border-t border-outline-variant/20 pt-3">
                       {unica ? (
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          fullWidth
-                          loading={renovar.isPending && renovar.variables === unica.id}
-                          onClick={() => onRenovar(v, unica)}
-                        >
+                        <Button variant="primary" size="sm" fullWidth onClick={() => setCobrarA({ sucursal: unica, vet: v })}>
                           <RefreshCw className="h-4 w-4" aria-hidden />
                           Renovar
                         </Button>
@@ -310,6 +296,9 @@ export function VeterinariasPage() {
 
       <CrearVeterinariaModal open={modalCrear} onClose={() => setModalCrear(false)} />
       {editarDe && <EditarVeterinariaDrawer veterinaria={editarDe} onClose={() => setEditarDe(null)} />}
+      {cobrarA && (
+        <RenovarDrawer sucursal={cobrarA.sucursal} veterinariaNombre={cobrarA.vet.nombre} onClose={() => setCobrarA(null)} />
+      )}
       {ajustarDe && (
         <AjustarRenovacionDrawer
           sucursal={ajustarDe.sucursal}

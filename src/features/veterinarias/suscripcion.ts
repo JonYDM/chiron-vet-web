@@ -86,3 +86,40 @@ export function montoValido(valor: string): number | null {
   const n = Number(valor);
   return valor.trim() !== "" && Number.isFinite(n) && n >= 0 ? n : null;
 }
+
+
+/** Fecha local en formato YYYY-MM-DD. */
+export function aISO(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/** "12 oct 2026" a partir de YYYY-MM-DD (o "—" si no es válida). */
+export function fechaCorta(fecha?: string | null): string {
+  const d = aFecha(fecha);
+  return d ? d.toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" }) : "—";
+}
+
+/**
+ * Vencimiento que quedará al renovar (misma regla que el backend): si sigue vigente se
+ * suma al vencimiento actual; si ya venció, cuenta desde hoy.
+ */
+export function vencimientoTrasRenovar(fechaRenovacion: string, plan: PlanSuscripcion, hoy: Date = new Date()): string {
+  const hoyCero = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+  const actual = aFecha(fechaRenovacion);
+  const desde = actual && actual > hoyCero ? actual : hoyCero;
+  const hasta = new Date(desde);
+  if (plan === PlanSuscripcion.Anual) hasta.setFullYear(hasta.getFullYear() + 1);
+  else hasta.setMonth(hasta.getMonth() + 1);
+  return aISO(hasta);
+}
+
+/** Mes actual como YYYY-MM. */
+export function mesActual(): string {
+  return aISO(new Date()).slice(0, 7);
+}
+
+/** "YYYY-MM" → { desde, hasta } en YYYY-MM-DD (mes completo). */
+export function rangoMes(mes: string): { desde: string; hasta: string } {
+  const [y, m] = mes.split("-").map(Number);
+  return { desde: aISO(new Date(y, m - 1, 1)), hasta: aISO(new Date(y, m, 0)) };
+}

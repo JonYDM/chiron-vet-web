@@ -483,4 +483,38 @@ export interface MetricasSuperAdmin {
   proximasRenovaciones: RenovacionProxima[];
   totalSucursales: number;
   sucursalesActivas: number;
+  /** Ingresos (pagos no anulados, por mes de fechaPago). */
+  ganadoMes: number;
+  ganadoMesAnterior: number;
+  ganadoHistorico: number;
+  /** Renta de las sucursales activas por mes (anuales = precio / 12). */
+  ingresoMensualEsperado: number;
+  /** Renta de las sucursales vencidas o por vencer (7 días). */
+  montoPorCobrar: number;
+  pagosMes: number;
+}
+
+/** Datos opcionales del cobro al renovar (por defecto: precio de la sucursal y hoy). */
+export interface RenovarRequest {
+  monto?: number | null;
+  /** YYYY-MM-DD */
+  fechaPago?: string | null;
+  nota?: string | null;
+}
+
+/** Pago de suscripción (historial de cobros). */
+export interface PagoSuscripcion {
+  id: string;
+  veterinariaId: string;
+  veterinariaNombre: string;
+  sucursalId: string;
+  sucursalNombre: string;
+  esMatriz: boolean;
+  monto: number;
+  fechaPago: string;
+  plan: PlanSuscripcion;
+  periodoDesde: string;
+  periodoHasta: string;
+  nota: string | null;
+  anulado: boolean;
 }

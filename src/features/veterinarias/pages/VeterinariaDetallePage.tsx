@@ -20,16 +20,12 @@ import { useToast } from "@/components/feedback/useToast";
 import { formatCurrency } from "@/lib/format";
 import { useAdministradores } from "@/features/usuarios/hooks";
 import type { Sucursal, Veterinaria } from "@/types/api";
-import {
-  useCambiarEstadoSucursal,
-  useCambiarEstadoVeterinaria,
-  useRenovarSucursal,
-  useVeterinarias,
-} from "../hooks";
+import { useCambiarEstadoSucursal, useCambiarEstadoVeterinaria, useVeterinarias } from "../hooks";
 import { estadoSuscripcion, planLabel, rentaMensual, textoPrecio, textoSuscripcion } from "../suscripcion";
 import { EditarVeterinariaDrawer } from "../components/EditarVeterinariaDrawer";
 import { SucursalDrawer } from "../components/SucursalDrawer";
 import { AjustarRenovacionDrawer } from "../components/AjustarRenovacionDrawer";
+import { RenovarDrawer } from "../components/RenovarDrawer";
 
 /**
  * Detalle de veterinaria (SuperAdmin): datos del tenant + sus sucursales, que son lo que
@@ -43,6 +39,7 @@ export function VeterinariaDetallePage() {
   const [editarVet, setEditarVet] = useState(false);
   const [sucursalDrawer, setSucursalDrawer] = useState<{ sucursal?: Sucursal } | null>(null);
   const [ajustarDe, setAjustarDe] = useState<Sucursal | null>(null);
+  const [cobrarA, setCobrarA] = useState<Sucursal | null>(null);
 
   const vet = veterinarias?.find((v) => v.id === id);
   const admin = admins?.find((a) => a.activo && a.veterinariaId === id);
@@ -137,6 +134,7 @@ export function VeterinariaDetallePage() {
               veterinaria={vet}
               onEditar={() => setSucursalDrawer({ sucursal: s })}
               onAjustar={() => setAjustarDe(s)}
+              onCobrar={() => setCobrarA(s)}
             />
           ))}
         </section>
@@ -163,6 +161,7 @@ export function VeterinariaDetallePage() {
           onClose={() => setSucursalDrawer(null)}
         />
       )}
+      {cobrarA && <RenovarDrawer sucursal={cobrarA} veterinariaNombre={vet.nombre} onClose={() => setCobrarA(null)} />}
       {ajustarDe && (
         <AjustarRenovacionDrawer sucursal={ajustarDe} veterinariaNombre={vet.nombre} onClose={() => setAjustarDe(null)} />
       )}
@@ -185,24 +184,18 @@ function SucursalCard({
   veterinaria,
   onEditar,
   onAjustar,
+  onCobrar,
 }: {
   sucursal: Sucursal;
   veterinaria: Veterinaria;
   onEditar: () => void;
   onAjustar: () => void;
+  onCobrar: () => void;
 }) {
-  const renovar = useRenovarSucursal();
   const cambiarEstado = useCambiarEstadoSucursal();
   const toast = useToast();
   const estado = estadoSuscripcion(s.fechaRenovacion);
   const toneSusc = estado === "vencida" ? "danger" : estado === "porVencer" ? "warning" : "neutral";
-
-  function onRenovar() {
-    renovar.mutate(s.id, {
-      onSuccess: (r) => toast.exito(`${s.nombre}: ${textoSuscripcion(r.fechaRenovacion)}`),
-      onError: () => toast.error("No se pudo renovar la sucursal."),
-    });
-  }
 
   function onCambiarEstado() {
     cambiarEstado.mutate(
@@ -258,7 +251,7 @@ function SucursalCard({
       </div>
 
       <div className="flex gap-2 border-t border-outline-variant/20 pt-3">
-        <Button size="sm" fullWidth loading={renovar.isPending} onClick={onRenovar} disabled={!veterinaria.activa && !s.esMatriz}>
+        <Button size="sm" fullWidth onClick={onCobrar} disabled={!veterinaria.activa && !s.esMatriz}>
           <RefreshCw className="h-4 w-4" aria-hidden />
           Renovar
         </Button>

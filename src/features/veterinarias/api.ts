@@ -3,7 +3,9 @@ import type {
   CrearAdminRequest,
   CrearVeterinariaRequest,
   MetricasSuperAdmin,
+  PagoSuscripcion,
   PlanSuscripcion,
+  RenovarRequest,
   Sucursal,
   SucursalRequest,
   UsuarioCreado,
@@ -77,9 +79,20 @@ export function editarSucursal(id: string, body: SucursalRequest): Promise<Sucur
   return http.put<Sucursal>(`/api/admin/sucursales/${id}`, body);
 }
 
-/** Renueva un periodo de la sucursal (si es la Matriz, reactiva la veterinaria). */
-export function renovarSucursal(id: string): Promise<Sucursal> {
-  return http.post<Sucursal>(`/api/admin/sucursales/${id}/renovar`);
+/** Renueva un periodo y registra el cobro (si es la Matriz, reactiva la veterinaria). */
+export function renovarSucursal(id: string, body?: RenovarRequest): Promise<Sucursal> {
+  return http.post<Sucursal>(`/api/admin/sucursales/${id}/renovar`, body ?? {});
+}
+
+/** Historial de cobros en un rango de fechas de pago (YYYY-MM-DD). */
+export function listarPagos(desde: string, hasta: string, signal?: AbortSignal): Promise<PagoSuscripcion[]> {
+  const q = new URLSearchParams({ desde, hasta });
+  return http.get<PagoSuscripcion[]>(`/api/admin/pagos?${q.toString()}`, signal);
+}
+
+/** Anula un pago mal capturado (deja de contar en ingresos). */
+export function anularPago(id: string): Promise<unknown> {
+  return http.post(`/api/admin/pagos/${id}/anular`);
 }
 
 /** Ajuste manual de la fecha de renovación de la sucursal (YYYY-MM-DD). */

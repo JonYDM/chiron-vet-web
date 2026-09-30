@@ -378,6 +378,45 @@ Backend necesario para los drawers — **HECHO (fase 1, rama `feature/drawers-al
 - **Limpieza:** `configurarAdminOperativo` (front) y el endpoint `admin-operativo`
   ya no se usan. Falta decidir si se exponen en el detalle de la veterinaria o se eliminan.
 
+### Fase 2 — HECHO (rama `feature/sucursales`, migración `SucursalesCobro`)
+- **Decisiones tomadas con la propuesta por default:** anual = 10 × mensual ($2,500), plan
+  por sucursal y alta de sucursales solo por el SuperAdmin. El monto editable al renovar
+  llega en la fase 3.
+- **Backend:**
+  - Entidad `Sucursal` (`Chiron.Domain.Sucursales`).
+  - Servicio `GestionSucursales` (Application), que concentra todas las reglas:
+    - Si una veterinaria no tiene Matriz, se crea al vuelo con su plan, fecha y estado
+      (cubre el modo en memoria y datos viejos).
+    - La Matriz sigue el estado de la veterinaria: se activa o desactiva junto con ella,
+      y renovarla reactiva a la veterinaria. Por eso no se puede desactivar sola.
+    - Las demás sucursales se activan o desactivan por separado.
+- **Compatibilidad:**
+  - `GET /api/admin/veterinarias` devuelve `VeterinariaConSucursalesDto`; sus `direccion`,
+    `plan` y `fechaRenovacion` salen de la Matriz.
+  - Los endpoints viejos `.../veterinarias/{id}/renovar|renovacion` actúan sobre la Matriz.
+  - Así el front anterior sigue funcionando hasta que se despliega el nuevo.
+- **Métricas:**
+  - Por vencer, vencidas y planes cuentan **sucursales de veterinarias activas**.
+  - Se agregan `totalSucursales` y `sucursalesActivas`.
+  - `proximasRenovaciones` trae `sucursalId`, `sucursalNombre`, `esMatriz` y `precio`.
+- **Migración:** crea la tabla `Sucursales` más un `INSERT ... SELECT` que da de alta la Matriz
+  de cada veterinaria con su plan, fecha y estado, y precio 250/2500. Usa `gen_random_uuid()`,
+  que requiere PostgreSQL 13 o superior.
+- **Front:**
+  - `/admin/veterinarias/:id` (`VeterinariaDetallePage`):
+    - Datos del tenant, renta mensual de las sucursales activas y conteo de activas.
+    - Lista de sucursales, cada una con plan · renta, badge de vencimiento, ajustar fecha,
+      Renovar, ⚙ Editar y Desactivar (salvo la Matriz).
+    - "Desactivar veterinaria completa" en ámbar.
+  - Card de la lista:
+    - Con 1 sucursal muestra plan · renta y "Renovar".
+    - Con varias muestra "N sucursales · $X/mes" y el botón "Sucursales".
+    - El orden y los filtros usan la sucursal más urgente.
+  - Componentes compartidos: `SucursalDrawer` (datos → plan y renta), `CampoPrecio` y
+    `AjustarRenovacionDrawer` por sucursal. El alta de veterinaria pide la renta de la
+    Matriz; mientras no la toquen, cambiar el plan pone el precio base.
+  - Dashboard: "Por cobrar" renueva por sucursal y muestra "Veterinaria · Sucursal" y la renta.
+
 ### Panel `/admin` — bloque "Ingresos"
 - Va arriba del "Estado de la plataforma":
   - Card grande teal con **Ganado este mes** y variación contra el mes anterior

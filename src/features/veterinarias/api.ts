@@ -1,5 +1,6 @@
 import { http } from "@/lib/http";
 import type {
+  AdministradorCreado,
   CrearAdminRequest,
   CrearVeterinariaRequest,
   MetricasSuperAdmin,
@@ -52,9 +53,9 @@ export function ajustarRenovacion(id: string, fecha: string): Promise<unknown> {
   return http.post(`/api/admin/veterinarias/${id}/renovacion`, { fecha });
 }
 
-/** Crea el usuario Administrador de una veterinaria. */
-export function crearAdmin(body: CrearAdminRequest): Promise<unknown> {
-  return http.post("/api/admin/usuarios-admin", body);
+/** Crea el Administrador de una veterinaria; devuelve el usuario generado. */
+export function crearAdmin(body: CrearAdminRequest): Promise<AdministradorCreado> {
+  return http.post<AdministradorCreado>("/api/admin/usuarios-admin", body);
 }
 
 /** Configura si el Administrador de una veterinaria puede operar (true) o solo supervisar (false). */

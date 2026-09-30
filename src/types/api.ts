@@ -273,12 +273,22 @@ export interface CrearVeterinariaRequest {
   plan?: PlanSuscripcion;
 }
 
+/** Alta del Administrador (HU-SA4). El nombre de usuario lo genera el backend. */
 export interface CrearAdminRequest {
   veterinariaId: string;
-  nombreUsuario: string;
   nombre: string;
+  apellidoPaterno: string;
+  apellidoMaterno?: string | null;
+  telefono: string;
+  curp?: string | null;
   pin: string;
-  rol: RolUsuario;
+}
+
+/** Respuesta del alta: usuario generado (nombre.apellidopaterno) para entregarlo al admin. */
+export interface AdministradorCreado {
+  id: string;
+  nombreUsuario: string;
+  nombreCompleto: string;
 }
 
 export interface CrearStaffRequest {
@@ -375,6 +385,8 @@ export interface UsuarioDto {
   rol: RolUsuario;
   activo: boolean;
   clienteId: string | null;
+  /** Teléfono de contacto del staff (solo usuarios con datos personales). */
+  telefono?: string | null;
   /** Veterinaria a la que pertenece (opcional si el backend aún no lo envía). */
   veterinariaId?: string;
 }

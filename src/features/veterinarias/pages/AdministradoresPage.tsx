@@ -103,7 +103,10 @@ export function AdministradoresPage() {
                         <span className="truncate text-label-lg font-bold text-on-surface">{a.nombre}</span>
                         {!a.activo && <Badge tone="neutral">Inactivo</Badge>}
                       </div>
-                      <p className="truncate text-body-sm text-on-surface-variant">@{a.nombreUsuario}</p>
+                      <p className="truncate text-body-sm text-on-surface-variant">
+                        @{a.nombreUsuario}
+                        {a.telefono && <span> · {a.telefono}</span>}
+                      </p>
                     </div>
                   </div>
 

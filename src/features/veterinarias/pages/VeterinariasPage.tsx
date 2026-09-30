@@ -8,6 +8,7 @@ import {
   Power,
   RefreshCw,
   Search,
+  Settings2,
   UserCog,
 } from "lucide-react";
 import { Badge, Button, Drawer, Input, SkeletonFila } from "@/components/ui";
@@ -25,6 +26,7 @@ import {
 } from "../hooks";
 import { diasParaRenovar, estadoSuscripcion, planLabel, textoSuscripcion } from "../suscripcion";
 import { CrearVeterinariaModal } from "../components/CrearVeterinariaModal";
+import { EditarVeterinariaDrawer } from "../components/EditarVeterinariaDrawer";
 
 type Filtro = "todas" | "porVencer" | "vencidas" | "inactivas";
 
@@ -43,6 +45,7 @@ export function VeterinariasPage() {
   const toast = useToast();
   const [modalCrear, setModalCrear] = useState(false);
   const [ajustarDe, setAjustarDe] = useState<Veterinaria | null>(null);
+  const [editarDe, setEditarDe] = useState<Veterinaria | null>(null);
   const [texto, setTexto] = useState("");
   const [filtro, setFiltro] = useState<Filtro>("todas");
   const textoBuscado = useDebounce(texto);
@@ -186,6 +189,15 @@ export function VeterinariasPage() {
                           </p>
                         )}
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="-mr-2 -mt-2 shrink-0"
+                        onClick={() => setEditarDe(v)}
+                        aria-label={`Editar datos de ${v.nombre}`}
+                      >
+                        <Settings2 className="h-5 w-5" aria-hidden />
+                      </Button>
                     </div>
 
                     {/* Suscripción */}
@@ -249,6 +261,7 @@ export function VeterinariasPage() {
       </div>
 
       <CrearVeterinariaModal open={modalCrear} onClose={() => setModalCrear(false)} />
+      {editarDe && <EditarVeterinariaDrawer veterinaria={editarDe} onClose={() => setEditarDe(null)} />}
       {ajustarDe && (
         <AjustarRenovacionDrawer veterinaria={ajustarDe} onClose={() => setAjustarDe(null)} />
       )}

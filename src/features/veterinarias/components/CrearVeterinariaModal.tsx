@@ -1,21 +1,15 @@
 import { useState } from "react";
-import { CalendarDays, CalendarRange } from "lucide-react";
 import { Input, Drawer, Pasos } from "@/components/ui";
 import { ApiError } from "@/lib/http";
-import { cn } from "@/lib/cn";
 import { useToast } from "@/components/feedback/useToast";
 import { PlanSuscripcion } from "@/types/api";
 import { useCrearVeterinaria } from "../hooks";
+import { SelectorPlan } from "./SelectorPlan";
 
 interface Props {
   open: boolean;
   onClose: () => void;
 }
-
-const PLANES = [
-  { valor: PlanSuscripcion.Mensual, label: "Mensual", detalle: "Renueva cada mes", icon: CalendarDays },
-  { valor: PlanSuscripcion.Anual, label: "Anual", detalle: "Renueva cada año", icon: CalendarRange },
-] as const;
 
 /** Alta de veterinaria en 3 pasos: datos de contacto → dirección → plan de suscripción. */
 export function CrearVeterinariaModal({ open, onClose }: Props) {
@@ -95,32 +89,7 @@ export function CrearVeterinariaModal({ open, onClose }: Props) {
           {
             contenido: (
               <div className="space-y-4">
-                <div>
-                  <p className="mb-1.5 text-label-md font-semibold text-on-surface-variant">Plan de suscripción</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {PLANES.map((p) => {
-                      const activo = plan === p.valor;
-                      return (
-                        <button
-                          key={p.valor}
-                          type="button"
-                          onClick={() => setPlan(p.valor)}
-                          aria-pressed={activo}
-                          className={cn(
-                            "flex flex-col items-center gap-1 rounded-xl border p-3 transition-colors",
-                            activo
-                              ? "border-primary-container bg-primary-container/10 text-primary-container"
-                              : "border-outline-variant/40 bg-surface-container-lowest text-on-surface-variant",
-                          )}
-                        >
-                          <p.icon className="h-5 w-5" aria-hidden />
-                          <span className="text-label-md font-bold">{p.label}</span>
-                          <span className="text-body-sm opacity-80">{p.detalle}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                <SelectorPlan plan={plan} onChange={setPlan} />
                 {error && (
                   <p role="alert" className="rounded-xl bg-error-container/60 px-4 py-3 text-body-sm font-medium text-on-error-container">
                     {error}

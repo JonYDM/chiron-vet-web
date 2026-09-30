@@ -257,3 +257,151 @@
 ### Qué SÍ es determinante (priorizar)
 - Expediente + galería de fotos (ya hecho), clientes/pacientes, citas con estados simples,
   POS simple, recordatorios de vacunas/desparasitación (muy valorado en LATAM).
+
+## Planeación: Sucursales + cobro de suscripción + ingresos + drawers alineados
+
+> Estado: **planeado (2026-09-30)**. Objetivo: cobrar renta **por sucursal**, registrar
+> cada pago, ver en `/admin` cuánto se ha ganado y dejar todos los drawers de alta/edición
+> alineados 1:1 con su entidad y su DTO.
+
+### Decisiones de negocio
+- **La Veterinaria** sigue siendo el tenant: es dueña de la marca, del admin, de los
+  clientes y de las mascotas. Se desactiva completa solo en casos extremos.
+- **La Sucursal** es lo que se cobra. Cada una tiene su propio plan, precio, renovación y estado.
+  - Toda veterinaria tiene al menos una sucursal, la **Matriz**.
+  - Si una sucursal vence o se desactiva, solo esa sucursal deja de operar.
+- **Precio por sucursal:**
+  - Default: **$250/mes**.
+  - El SuperAdmin lo ajusta por sucursal (p. ej. $400 una grande, $200 una chica). El
+    sistema no calcula precios, solo los guarda.
+  - `Precio` es el monto **por periodo del plan**.
+- **Cada renovación genera un pago** (`PagoSuscripcion`). Las ganancias salen de los pagos
+  registrados. Honestidad: las renovaciones anteriores a esta feature no se registraron,
+  así que el histórico empieza en cero.
+- Los clientes, las mascotas y el expediente **se comparten** entre sucursales. Citas,
+  ventas, cargos, caja y stock son **por sucursal**.
+
+**Pendientes de confirmar** (van con la propuesta por default):
+1. **Precio del plan anual.** Propuesta: 10 × mensual ($2,500), es decir, 2 meses gratis.
+2. **Monto al renovar.** Propuesta: se precarga el precio de la sucursal y se puede
+   editar en ese pago (descuento o prórroga) sin cambiar el precio base.
+3. **Plan por sucursal.** Propuesta: cada sucursal tiene su propio plan (una puede ir
+   mensual y otra anual).
+4. **Alta de sucursales.** Propuesta: **solo el SuperAdmin**, porque cada sucursal
+   implica cobro. El admin de la veterinaria las ve, pero no las crea.
+
+### Modelo (backend)
+- **`Sucursal`** (nueva, `Chiron.Domain.Sucursales`):
+  - `VeterinariaId`, `Nombre`, `Direccion?`, `Telefono?`, `EsMatriz`, `Activa`,
+    `FechaAlta`, `Plan`, `Precio` (decimal, precisión 10,2) y `FechaRenovacion` (DateOnly).
+  - Métodos: `Crear`, `Editar`, `CambiarPrecio`, `Renovar(hoy)` (la misma regla que hoy
+    tiene Veterinaria), `AjustarRenovacion`, `Activar` y `Desactivar`.
+  - Regla: la Matriz no se puede desactivar mientras la veterinaria esté activa.
+- **`PagoSuscripcion`** (nueva, `Chiron.Domain.Suscripciones`):
+  - `VeterinariaId`, `SucursalId`, `Monto`, `FechaPago` (DateOnly), `Plan`,
+    `PeriodoDesde`, `PeriodoHasta`, `Nota?`, `Anulado` y `FechaRegistro`.
+  - Un pago mal capturado **se anula, no se borra**, para no perder el rastro.
+- **`Veterinaria`**:
+  - `Plan` y `FechaRenovacion` pasan a la Matriz. Se quitan de Veterinaria en una
+    migración posterior, cuando nada las lea.
+  - Se queda con `Nombre`, `Telefono` (contacto del dueño), `Activa`, `FechaAlta` y
+    `AdminOperativo`.
+  - `Direccion` se muda a la Sucursal.
+- **Migración de datos** (`Sucursales`): por cada veterinaria existente se crea su
+  Matriz. Copia nombre ("Matriz"), dirección, teléfono, plan, `FechaRenovacion` y
+  `Activa`, con `Precio` = 250 (mensual) o 2500 (anual). Se hace con `INSERT ... SELECT`
+  dentro de la migración.
+- **Operación por sucursal** (fase posterior):
+  - `SucursalId` en `Cita`, `Venta`, `Cargo` y en el stock.
+  - Stock: el catálogo de productos se comparte y el inventario vive en `StockSucursal`
+    (ProductoId, SucursalId, Cantidad).
+  - Staff: `Usuario.SucursalId?`. El admin queda en null (ve todas); vet y recepción
+    tienen una fija.
+  - Token: claim `sucursalId`. El admin cambia de sucursal con
+    `POST /api/auth/cambiar-sucursal`, que reemite el token validando que la sucursal
+    sea de su veterinaria.
+  - Los registros existentes quedan asignados a la Matriz en la migración.
+
+### Endpoints (SuperAdmin)
+- `GET /api/admin/veterinarias`: cada veterinaria incluye su resumen de sucursales
+  (total, activas, por vencer/vencidas).
+- `GET /api/admin/veterinarias/{id}/sucursales`, `POST .../sucursales` y
+  `PUT /api/admin/sucursales/{id}` (nombre, dirección, teléfono, plan, precio).
+- `POST /api/admin/sucursales/{id}/renovar` `{ monto?, fechaPago?, nota? }`: extiende el
+  periodo, crea el pago y devuelve `{ fechaRenovacion, pago }`. Si no viene `monto`, usa
+  `Precio`.
+- `POST /api/admin/sucursales/{id}/renovacion` (ajuste manual, sin pago) y
+  `.../activar|desactivar`.
+- `GET /api/admin/pagos?desde&hasta&veterinariaId`: historial de cobros.
+- `POST /api/admin/pagos/{id}/anular`.
+- `GET /api/admin/metricas` se amplía con un bloque **Ingresos**:
+  - `GanadoMes`: suma de pagos no anulados cuya `FechaPago` cae en el mes en curso.
+  - `GanadoMesAnterior`, para comparar (% de variación).
+  - `GanadoHistorico`.
+  - `IngresoMensualEsperado` (MRR): suma de `Precio` de las sucursales activas. Las
+    anuales cuentan como `Precio / 12`.
+  - `MontoPorCobrar`: suma de `Precio` de las sucursales vencidas y por vencer (7 días).
+  - Los conteos de suscripción (por vencer, vencidas, planes) pasan a contar **sucursales**.
+
+### Drawers alineados con entidad y DTO
+| Entidad | Drawer | Campos (= DTO) | Hoy | Cambio |
+|---|---|---|---|---|
+| Veterinaria | Alta | nombre, teléfono (+ la Matriz: dirección, plan, precio) | 3 pasos sin precio | Paso "Matriz" con dirección, plan y precio (default $250) |
+| Veterinaria | Editar | nombre, teléfono | DTO y hook existen, **sin UI** | Drawer `libre` desde la card |
+| Sucursal | Alta/Editar | nombre, dirección, teléfono, plan, precio | no existe | Wizard de 2 pasos: datos → plan y precio |
+| Sucursal | Renovar | monto (precargado), fecha de pago, nota | Renovar directo, sin pago | Drawer de confirmación con monto editable y nuevo vencimiento calculado |
+| Administrador | Detalle/Editar | usuario (copiable), nombre, apellidos, teléfono, CURP | "Gestionar" solo edita el nombre | Drawer de detalle + edición, resetear PIN y desactivar (warning). Requiere endpoint nuevo |
+| Staff (vet/recep) | Alta | igual que admin + rol (+ sucursal en la fase de operación) | Usuario escrito a mano | Reusar el wizard de HU-SA4 (usuario autogenerado, apellidos, teléfono) |
+| Staff | Gestionar | mismos campos que admin | solo nombre | El mismo componente de detalle/edición |
+
+Backend necesario para los drawers:
+- `Usuario.EditarDatosPersonales(nombre, paterno, materno?, tel, curp?)`.
+- `PUT /api/admin/administradores/{id}` y `PUT /api/usuarios/{id}/datos` (admin de la
+  vet, solo su tenant).
+- `GET .../{id}` de detalle con CURP **enmascarada** (`HEGM******…`). La CURP completa
+  solo se ve al editarla.
+- `CrearUsuarioStaff` pasa al generador `nombre.apellidopaterno` (se reusa
+  `GeneradorNombreUsuario`).
+- **Limpieza:** `configurarAdminOperativo` (front) y el endpoint `admin-operativo`
+  ya no se usan. Decidir si se exponen en el detalle de la veterinaria o se eliminan.
+
+### Panel `/admin` — bloque "Ingresos"
+- Va arriba del "Estado de la plataforma":
+  - Card grande teal con **Ganado este mes** y variación contra el mes anterior
+    (flecha + %).
+  - 2 cards: **Ingreso mensual esperado** y **Por cobrar** (monto + nº de sucursales).
+  - Enlace "Ver cobros", que lleva al historial de pagos (lista con searchbar y chips
+    por mes, mismo patrón que el Historial de ventas).
+- "Por cobrar" lista sucursales (veterinaria · sucursal · precio), y su botón Renovar
+  abre el drawer con el monto.
+
+### Fases (una rama backend por fase, migración commiteada antes del PR)
+| # | Fase | Back | Front | Migración | Tamaño |
+|---|---|---|---|---|---|
+| 1 | Drawers alineados | Editar datos personales, detalle con CURP enmascarada, staff con usuario autogenerado | Editar veterinaria, detalle/editar admin y staff, alta de staff en wizard | No (las columnas ya existen) | M |
+| 2 | Sucursal para cobro | Entidad Sucursal, Matriz automática, endpoints, métricas por sucursal | Sucursales en el detalle de la veterinaria, alta/edición, precio, renovar por sucursal | `Sucursales` (+ datos de la Matriz) | L |
+| 3 | Cobros e ingresos | `PagoSuscripcion`, renovar con pago, anular, historial, métricas de ingresos | Drawer Renovar con monto, bloque Ingresos, historial de cobros | `PagosSuscripcion` | M |
+| 4 | Limpieza | Quitar `Plan`/`FechaRenovacion`/`Direccion` de Veterinaria | Ajustar tipos | `LimpiezaVeterinaria` | S |
+| 5 | Operación por sucursal | `SucursalId` en Cita/Venta/Cargo, StockSucursal, staff asignado, claim + cambiar sucursal | Selector real (sustituye el mock), filtros por sucursal en el dashboard y el historial | `OperacionPorSucursal` | XL |
+
+- Las fases 2 y 3 son las que habilitan cobrar por sucursal y ver ganancias. La 5 se puede
+  posponer: mientras tanto, cada sucursal se cobra, pero la operación sigue unificada.
+- **Regla de despliegue** (aprendida el 2026-09-30): si el front depende de un contrato
+  nuevo, **primero** se mergea y despliega el back (con su migración) y **después** se
+  pushea el front.
+
+### HUs
+- **HU-SU1:** Como SuperAdmin, quiero dar de alta sucursales de una veterinaria con su
+  propio plan y precio, para cobrar renta por cada una.
+- **HU-SU2:** Como SuperAdmin, quiero ajustar el precio de una sucursal, para cobrar más
+  a las grandes y menos a las chicas.
+- **HU-SU3:** Como SuperAdmin, quiero renovar una sucursal registrando el monto cobrado,
+  para llevar el control de pagos.
+- **HU-SU4:** Como SuperAdmin, quiero ver cuánto he ganado este mes, el ingreso mensual
+  esperado y cuánto tengo por cobrar, para conocer la salud del negocio.
+- **HU-SU5:** Como SuperAdmin, quiero ver el historial de cobros y anular un pago mal
+  capturado, para corregir errores sin perder el rastro.
+- **HU-SU6:** Como SuperAdmin/Admin, quiero ver y editar los datos completos de un usuario
+  (apellidos, teléfono, CURP), para mantenerlos al día.
+- **HU-SU7:** Como Admin, quiero cambiar de sucursal y ver citas, ventas y stock de cada
+  una, para operar varias sedes.

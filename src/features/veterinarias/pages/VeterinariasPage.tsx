@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Building2,
   ChevronRight,
@@ -55,7 +55,11 @@ export function VeterinariasPage() {
   const [cobrarA, setCobrarA] = useState<{ sucursal: Sucursal; vet: Veterinaria } | null>(null);
   const [editarDe, setEditarDe] = useState<Veterinaria | null>(null);
   const [texto, setTexto] = useState("");
-  const [filtro, setFiltro] = useState<Filtro>("todas");
+  const [params, setParams] = useSearchParams();
+  const filtroUrl = params.get("filtro");
+  const filtro: Filtro = FILTROS.some((f) => f.valor === filtroUrl) ? (filtroUrl as Filtro) : "todas";
+  // El filtro vive en la URL: el dashboard puede mandar directo a "Vencidas" o "Por vencer".
+  const setFiltro = (f: Filtro) => setParams(f === "todas" ? {} : { filtro: f }, { replace: true });
   const textoBuscado = useDebounce(texto);
   const { data: admins } = useAdministradores();
 

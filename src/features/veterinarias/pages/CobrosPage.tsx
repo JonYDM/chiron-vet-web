@@ -31,7 +31,6 @@ export function CobrosPage() {
   return (
     <PantallaConHeader
       titulo="Cobros"
-      volverA="/admin"
       subtitulo={
         <p className="flex items-center gap-1 text-body-sm text-on-surface-variant">
           <Receipt className="h-4 w-4 text-primary-container" aria-hidden />

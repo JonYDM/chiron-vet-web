@@ -9,6 +9,7 @@ import {
   UserCog,
   BellRing,
   Receipt,
+  Wallet,
 } from "lucide-react";
 import type { Accion } from "@/lib/permisos";
 
@@ -56,19 +57,23 @@ export const navPortal: NavItem[] = [
   { to: "/portal/compras", label: "Mis pagos", icon: Receipt, permiso: null },
 ];
 
-/** Navegación del panel SuperAdmin (/admin/*): dashboard, veterinarias y administradores. */
+/**
+ * Navegación del panel SuperAdmin (/admin/*). Con 4 módulos no hay centro exacto:
+ * Inicio va primero (convención de apps) y conserva su pastilla destacada.
+ */
 export const navAdmin: NavItem[] = [
+  { to: "/admin", label: "Inicio", icon: Home, permiso: "gestionar_veterinarias" },
   {
     to: "/admin/veterinarias",
     label: "Veterinarias",
     icon: Building2,
     permiso: "gestionar_veterinarias",
   },
-  { to: "/admin", label: "Inicio", icon: Home, permiso: "gestionar_veterinarias" },
+  { to: "/admin/cobros", label: "Cobros", icon: Wallet, permiso: "gestionar_veterinarias" },
   {
     to: "/admin/administradores",
-    label: "Admins",
-    icon: UserCog,
+    label: "Clientes",
+    icon: Users,
     permiso: "gestionar_veterinarias",
   },
 ];

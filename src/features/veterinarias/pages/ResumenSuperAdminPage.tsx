@@ -12,7 +12,7 @@ import {
   RefreshCw,
   TrendingDown,
   TrendingUp,
-  UserCog,
+  Users,
   UserX,
   Wallet,
 } from "lucide-react";
@@ -43,31 +43,30 @@ export function ResumenSuperAdminPage() {
     >
       <div className="flex flex-col gap-6">
         {/* Acciones rápidas */}
-        <div className="grid grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-3 gap-2.5">
           <button
             onClick={() => setModalCrear(true)}
-            className="flex items-center gap-2.5 rounded-2xl bg-primary-container p-3.5 text-left text-on-primary shadow-soft transition-transform active:scale-[0.97]"
+            className="flex flex-col items-start gap-2 rounded-2xl bg-primary-container p-3 text-left text-on-primary shadow-soft transition-transform active:scale-[0.97]"
           >
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/20">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-white/20">
               <Plus className="h-5 w-5" aria-hidden />
             </span>
-            <span className="min-w-0">
-              <span className="block truncate text-label-md font-bold leading-tight">Nueva veterinaria</span>
-              <span className="block truncate text-[10px] opacity-80">Alta de cliente</span>
-            </span>
+            <span className="text-label-md font-bold leading-tight">Nueva veterinaria</span>
           </button>
-          <Link
+          <AccionRapida
+            to="/admin/cobros"
+            icon={Wallet}
+            label="Cobros"
+            className="bg-tertiary-fixed/60 text-on-tertiary-fixed-variant"
+            iconWrap="bg-tertiary/15 text-tertiary"
+          />
+          <AccionRapida
             to="/admin/administradores"
-            className="flex items-center gap-2.5 rounded-2xl bg-secondary-fixed p-3.5 text-on-secondary-fixed shadow-soft transition-transform active:scale-[0.97]"
-          >
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-st-secondary/15 text-st-secondary">
-              <UserCog className="h-5 w-5" aria-hidden />
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate text-label-md font-bold leading-tight">Administradores</span>
-              <span className="block truncate text-[10px] opacity-80">Accesos y PIN</span>
-            </span>
-          </Link>
+            icon={Users}
+            label="Clientes"
+            className="bg-secondary-fixed text-on-secondary-fixed"
+            iconWrap="bg-st-secondary/15 text-st-secondary"
+          />
         </div>
 
         {isLoading ? (
@@ -105,7 +104,7 @@ export function ResumenSuperAdminPage() {
                 </Link>
                 <Metrica
                   icon={TrendingUp}
-                  label="Esperado al mes"
+                  label="Esperado al mes" to="/admin/cobros"
                   valor={formatCurrency(m.ingresoMensualEsperado)}
                   nota={`${m.sucursalesActivas} sucursal${m.sucursalesActivas === 1 ? "" : "es"} activa${m.sucursalesActivas === 1 ? "" : "s"}`}
                   className="bg-tertiary-fixed/50"
@@ -113,7 +112,7 @@ export function ResumenSuperAdminPage() {
                 />
                 <Metrica
                   icon={HandCoins}
-                  label="Por cobrar"
+                  label="Por cobrar" to={m.vencidas > 0 ? "/admin/veterinarias?filtro=vencidas" : "/admin/veterinarias?filtro=porVencer"}
                   valor={formatCurrency(m.montoPorCobrar)}
                   nota={`${m.porVencer + m.vencidas} por vencer o vencidas`}
                   className="bg-secondary-fixed/60"
@@ -130,15 +129,15 @@ export function ResumenSuperAdminPage() {
               <div className="grid grid-cols-2 gap-2.5">
                 <Metrica
                   icon={CheckCircle2}
-                  label="Veterinarias activas"
+                  label="Veterinarias activas" to="/admin/veterinarias"
                   valor={m.veterinariasActivas}
                   nota={`de ${m.totalVeterinarias} · ${m.sucursalesActivas} sucursal${m.sucursalesActivas === 1 ? "" : "es"}`}
                   className="bg-primary-fixed/40"
                   colorIcono="text-tertiary"
                 />
                 <Metrica
-                  icon={UserCog}
-                  label="Administradores"
+                  icon={Users}
+                  label="Clientes" to="/admin/administradores"
                   valor={m.administradoresActivos}
                   nota="con acceso activo"
                   className="bg-tertiary-fixed/50"
@@ -146,7 +145,7 @@ export function ResumenSuperAdminPage() {
                 />
                 <Metrica
                   icon={CalendarClock}
-                  label="Por vencer"
+                  label="Por vencer" to="/admin/veterinarias?filtro=porVencer"
                   valor={m.porVencer}
                   nota="en los próximos 7 días"
                   className="bg-secondary-fixed/60"
@@ -154,7 +153,7 @@ export function ResumenSuperAdminPage() {
                 />
                 <Metrica
                   icon={AlertTriangle}
-                  label="Vencidas"
+                  label="Vencidas" to="/admin/veterinarias?filtro=vencidas"
                   valor={m.vencidas}
                   nota="requieren cobro"
                   className="bg-error-container/70"
@@ -294,6 +293,7 @@ function Metrica({
   nota,
   className,
   colorIcono,
+  to,
 }: {
   icon: typeof Building2;
   label: string;
@@ -301,10 +301,15 @@ function Metrica({
   nota: string;
   className: string;
   colorIcono: string;
+  /** Módulo al que lleva al tocarla. */
+  to: string;
 }) {
   const esTexto = typeof valor === "string";
   return (
-    <div className={`flex flex-col justify-between rounded-2xl p-3.5 shadow-inset-up ${className}`}>
+    <Link
+      to={to}
+      className={`flex flex-col justify-between rounded-2xl p-3.5 shadow-inset-up transition-transform active:scale-[0.97] ${className}`}
+    >
       <div className={`flex items-center justify-between ${colorIcono}`}>
         <span className="text-label-sm font-semibold">{label}</span>
         <Icon className="h-[18px] w-[18px]" aria-hidden />
@@ -317,9 +322,39 @@ function Metrica({
         >
           {valor}
         </div>
-        <div className="mt-1 text-body-sm leading-tight text-on-surface-variant">{nota}</div>
+        <div className="mt-1 flex items-center justify-between gap-1 text-body-sm leading-tight text-on-surface-variant">
+          <span>{nota}</span>
+          <ChevronRight className="h-4 w-4 shrink-0 opacity-50" aria-hidden />
+        </div>
       </div>
-    </div>
+    </Link>
+  );
+}
+
+/** Acción rápida hacia un módulo (tile con color de fondo). */
+function AccionRapida({
+  to,
+  icon: Icon,
+  label,
+  className,
+  iconWrap,
+}: {
+  to: string;
+  icon: typeof Building2;
+  label: string;
+  className: string;
+  iconWrap: string;
+}) {
+  return (
+    <Link
+      to={to}
+      className={`flex flex-col items-start gap-2 rounded-2xl p-3 shadow-soft transition-transform active:scale-[0.97] ${className}`}
+    >
+      <span className={`grid h-9 w-9 place-items-center rounded-xl ${iconWrap}`}>
+        <Icon className="h-5 w-5" aria-hidden />
+      </span>
+      <span className="text-label-md font-bold leading-tight">{label}</span>
+    </Link>
   );
 }
 

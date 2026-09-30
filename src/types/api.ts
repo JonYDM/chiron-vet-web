@@ -127,6 +127,27 @@ export enum PlanSuscripcion {
   Anual = 2,
 }
 
+/** Sucursal = unidad de cobro (cada una paga su renta). */
+export interface Sucursal {
+  id: string;
+  veterinariaId: string;
+  nombre: string;
+  direccion: string | null;
+  telefono: string | null;
+  esMatriz: boolean;
+  activa: boolean;
+  fechaAlta: string;
+  plan: PlanSuscripcion;
+  /** Renta por periodo del plan (MXN). */
+  precio: number;
+  /** Fecha de vencimiento/renovación (YYYY-MM-DD). */
+  fechaRenovacion: string;
+}
+
+/**
+ * Veterinaria (tenant) con sus sucursales. `direccion`, `plan` y `fechaRenovacion`
+ * son los de su Matriz (compatibilidad).
+ */
 export interface Veterinaria {
   id: string;
   nombre: string;
@@ -134,10 +155,20 @@ export interface Veterinaria {
   direccion?: string | null;
   activa: boolean;
   fechaAlta: string;
-  adminOperativo: boolean;
   plan: PlanSuscripcion;
-  /** Fecha de vencimiento/renovación (YYYY-MM-DD). */
+  /** Fecha de vencimiento/renovación de la Matriz (YYYY-MM-DD). */
   fechaRenovacion: string;
+  /** Matriz primero. */
+  sucursales: Sucursal[];
+}
+
+/** Alta/edición de sucursal. */
+export interface SucursalRequest {
+  nombre: string;
+  direccion?: string | null;
+  telefono?: string | null;
+  plan: PlanSuscripcion;
+  precio: number;
 }
 
 export interface Cliente {
@@ -271,6 +302,8 @@ export interface CrearVeterinariaRequest {
   telefono: string;
   direccion?: string | null;
   plan?: PlanSuscripcion;
+  /** Renta de la Matriz; si no viene, el backend usa el precio base del plan. */
+  precio?: number | null;
 }
 
 /** Alta del Administrador (HU-SA4). El nombre de usuario lo genera el backend. */
@@ -421,7 +454,7 @@ export interface UsuarioDto {
   veterinariaId?: string;
 }
 
-/** Renovación próxima o vencida (dashboard SuperAdmin). */
+/** Sucursal con renovación próxima o vencida (dashboard SuperAdmin). id/nombre = veterinaria. */
 export interface RenovacionProxima {
   id: string;
   nombre: string;
@@ -429,9 +462,13 @@ export interface RenovacionProxima {
   fechaRenovacion: string;
   diasRestantes: number;
   activa: boolean;
+  sucursalId: string;
+  sucursalNombre: string;
+  esMatriz: boolean;
+  precio: number;
 }
 
-/** Panorama general de la plataforma (GET /api/admin/metricas). */
+/** Panorama general de la plataforma (GET /api/admin/metricas). Suscripciones por sucursal. */
 export interface MetricasSuperAdmin {
   totalVeterinarias: number;
   veterinariasActivas: number;
@@ -444,4 +481,6 @@ export interface MetricasSuperAdmin {
   administradoresActivos: number;
   veterinariasSinAdmin: number;
   proximasRenovaciones: RenovacionProxima[];
+  totalSucursales: number;
+  sucursalesActivas: number;
 }

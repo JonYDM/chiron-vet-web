@@ -1,4 +1,5 @@
-import { PlanSuscripcion } from "@/types/api";
+import { formatCurrency } from "@/lib/format";
+import { PlanSuscripcion, type Sucursal, type Veterinaria } from "@/types/api";
 
 /** Días que avisamos antes del vencimiento ("por vencer"). */
 export const DIAS_AVISO = 7;
@@ -44,3 +45,44 @@ export const planLabel: Record<PlanSuscripcion, string> = {
   [PlanSuscripcion.Mensual]: "Mensual",
   [PlanSuscripcion.Anual]: "Anual",
 };
+
+/** Precio base por sucursal (igual que el backend): $250/mes o $2,500/año (2 meses gratis). */
+export const PRECIO_BASE: Record<PlanSuscripcion, number> = {
+  [PlanSuscripcion.Mensual]: 250,
+  [PlanSuscripcion.Anual]: 2500,
+};
+
+/** "$250/mes" o "$2,500/año". */
+export function textoPrecio(s: Pick<Sucursal, "precio" | "plan">): string {
+  return `${formatCurrency(s.precio)}/${s.plan === PlanSuscripcion.Anual ? "año" : "mes"}`;
+}
+
+/** Renta equivalente por mes (las anuales cuentan como precio / 12). */
+export function rentaMensual(s: Pick<Sucursal, "precio" | "plan">): number {
+  return s.plan === PlanSuscripcion.Anual ? s.precio / 12 : s.precio;
+}
+
+/**
+ * Sucursal que define el estado de cobro de la veterinaria: la activa que vence antes
+ * (si no hay activas, cualquiera). Null si no tiene sucursales.
+ */
+export function sucursalMasUrgente(v: Veterinaria): Sucursal | null {
+  const lista = v.sucursales ?? [];
+  const candidatas = lista.some((s) => s.activa) ? lista.filter((s) => s.activa) : lista;
+  return candidatas.reduce<Sucursal | null>(
+    (peor, s) => (!peor || diasParaRenovar(s.fechaRenovacion) < diasParaRenovar(peor.fechaRenovacion) ? s : peor),
+    null,
+  );
+}
+
+/** Fecha de renovación que manda en la veterinaria (la sucursal más urgente o, en su defecto, la propia). */
+export function fechaCobroVeterinaria(v: Veterinaria): string {
+  return sucursalMasUrgente(v)?.fechaRenovacion ?? v.fechaRenovacion;
+}
+
+
+/** Convierte el texto de un campo de monto a número válido (o null). */
+export function montoValido(valor: string): number | null {
+  const n = Number(valor);
+  return valor.trim() !== "" && Number.isFinite(n) && n >= 0 ? n : null;
+}

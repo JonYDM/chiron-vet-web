@@ -4,6 +4,8 @@ import type {
   CrearVeterinariaRequest,
   MetricasSuperAdmin,
   PlanSuscripcion,
+  Sucursal,
+  SucursalRequest,
   UsuarioCreado,
   Veterinaria,
 } from "@/types/api";
@@ -61,4 +63,31 @@ export function crearAdmin(body: CrearAdminRequest): Promise<UsuarioCreado> {
 /** Configura si el Administrador de una veterinaria puede operar (true) o solo supervisar (false). */
 export function configurarAdminOperativo(id: string, operativo: boolean): Promise<unknown> {
   return http.post(`/api/admin/veterinarias/${id}/admin-operativo`, { operativo });
+}
+
+// ── Sucursales (unidad de cobro) ──
+
+/** Da de alta una sucursal de la veterinaria. */
+export function crearSucursal(veterinariaId: string, body: SucursalRequest): Promise<Sucursal> {
+  return http.post<Sucursal>(`/api/admin/veterinarias/${veterinariaId}/sucursales`, body);
+}
+
+/** Edita datos, plan y precio de una sucursal (no mueve la fecha de renovación). */
+export function editarSucursal(id: string, body: SucursalRequest): Promise<Sucursal> {
+  return http.put<Sucursal>(`/api/admin/sucursales/${id}`, body);
+}
+
+/** Renueva un periodo de la sucursal (si es la Matriz, reactiva la veterinaria). */
+export function renovarSucursal(id: string): Promise<Sucursal> {
+  return http.post<Sucursal>(`/api/admin/sucursales/${id}/renovar`);
+}
+
+/** Ajuste manual de la fecha de renovación de la sucursal (YYYY-MM-DD). */
+export function ajustarRenovacionSucursal(id: string, fecha: string): Promise<Sucursal> {
+  return http.post<Sucursal>(`/api/admin/sucursales/${id}/renovacion`, { fecha });
+}
+
+/** Activa/desactiva una sucursal que no es la Matriz. */
+export function cambiarEstadoSucursal(id: string, activar: boolean): Promise<Sucursal> {
+  return http.post<Sucursal>(`/api/admin/sucursales/${id}/${activar ? "activar" : "desactivar"}`);
 }

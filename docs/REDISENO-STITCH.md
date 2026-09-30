@@ -559,7 +559,7 @@ VentaCargo + Cargo Cobrado → aparece en Historial + "Mis pagos" del dueño + m
   renovaciones próximas/vencidas) con botón Renovar.
 - **`/admin/veterinarias`:** searchbar + chips (Todas / Por vencer / Vencidas / Inactivas),
   lista ordenada por vencimiento; cada card muestra admin asignado (o "Sin administrador"),
-  plan, badge de suscripción, Renovar, ajustar fecha, Admin y activar/desactivar.
+  plan, badge de suscripción, Renovar, ajustar fecha y activar/desactivar.
 - **`/admin/administradores`:** searchbar (nombre, usuario o veterinaria), cards con la
   veterinaria de cada admin, Resetear PIN / Gestionar. El "+" pide primero la veterinaria
   (primero las que no tienen admin) y abre el alta.
@@ -575,7 +575,19 @@ VentaCargo + Cargo Cobrado → aparece en Historial + "Mis pagos" del dueño + m
   veterinarias, y `["usuarios","administradores"]` al crear un admin.
 
 ### Pendiente
-- **Fase 3/4 del Admin:** apellidos separados, teléfono, CURP opcional y usuario
-  autogenerado `nombre.apellidopaterno` (HU-SA4) + wizard de alta del admin.
 - `docs/DESIGN-SYSTEM.md` está desactualizado (todavía describe la paleta índigo, Inter y
   anime.js). La referencia real es el `DESIGN.md` de Stitch + los tokens de `tailwind.config.js`.
+
+### Alta ampliada del Administrador (HU-SA4, rama backend `feature/alta-admin-ampliada`)
+- **Card de veterinaria:** se quitó el botón "Admin" (la card ya dice quién es el admin
+  y el alta vive en Administradores). Quedan 2 botones iguales: **Renovar** (primary) y
+  **Desactivar** (warning ámbar) / **Activar** (outline teal; sin terracota).
+- **Wizard de 3 pasos** en `CrearAdminModal` (Drawer + `Pasos`):
+  1. Nombre(s) + apellido paterno + materno opcional, con vista previa en vivo
+     "Su usuario será `juan.flores`" (el back resuelve choques).
+  2. Teléfono (10 dígitos) + CURP opcional (mayúsculas, validación de formato en vivo).
+  3. PIN de 6 dígitos (enmascarado).
+  - Al crear, el wizard se reemplaza por una pantalla con el nombre completo y el
+    **usuario generado** con botón Copiar, para entregárselo al admin.
+- La card de Administradores muestra `@usuario · teléfono` si lo tiene.
+- Detalle del modelo y reglas del usuario autogenerado: `PENDIENTES-TECNICOS.md`.

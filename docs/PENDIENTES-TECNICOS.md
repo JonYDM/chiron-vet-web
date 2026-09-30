@@ -141,13 +141,21 @@
     - `Plan` (enum: Mensual / Anual) — para el modelo de cobro/renovación.
     - `FechaRenovacion` (calculada: FechaAlta/último pago + 1 mes o 1 año según Plan).
       El panel muestra "Renueva el [fecha]" y resalta las próximas a vencer.
-  - **Administrador** (Usuario staff rol Administrador). Agregar:
-    - `Curp` — se **PIDE** al usuario (NO se genera) + validar formato (18 chars, patrón
-      CURP). Dato personal sensible: validar y no exponer de más en UI.
-    - `Telefono` de contacto.
-    - **Usuario de login autogenerado** a partir de nombre + parte de la CURP
-      (ej. `mariana.hegm`), para que sea único y no lo escriban a mano. El PIN se crea
-      como ya se hace.
+  - **Administrador** (Usuario staff rol Administrador) — **HECHO (HU-SA4)**:
+    - Nuevas columnas en `Usuario` (nullable, los usuarios antiguos quedan en null):
+      `ApellidoPaterno`, `ApellidoMaterno`, `Telefono` (10 dígitos) y `Curp`.
+    - `Curp` **opcional**; si se captura se valida el formato (18 chars, sexo H/M/X) en
+      back y front, y se guarda en mayúsculas. No se expone en `UsuarioDto`.
+    - `Nombre` guarda el nombre completo (para no romper las vistas que lo muestran).
+    - **Usuario autogenerado** `nombre.apellidopaterno` (primer nombre, minúsculas, sin
+      acentos, ñ→n, apellidos compuestos juntos). Si choca: + inicial del materno
+      (`juan.floresg`), luego número (`juan.flores2`…). Lo genera `GeneradorNombreUsuario`.
+    - Caso de uso `CrearAdministrador`; `POST /api/admin/usuarios-admin` recibe
+      `{ veterinariaId, nombre, apellidoPaterno, apellidoMaterno?, telefono, curp?, pin }`
+      y devuelve `{ id, nombreUsuario, nombreCompleto }`.
+    - Front: wizard de 3 pasos (nombre y apellidos con vista previa del usuario →
+      teléfono + CURP → PIN) y pantalla final con el usuario y botón Copiar.
+    - Migración `AdminDatosPersonales`.
   - Migraciones EF para ambos + DTOs + endpoints (crear/editar) + validación de CURP.
   - Nota: la CURP NO se autogenera (la homoclave la asigna RENAPO y no es calculable);
     se pide y se valida. Opcional: validar coherencia con nombre/fecha de nacimiento.

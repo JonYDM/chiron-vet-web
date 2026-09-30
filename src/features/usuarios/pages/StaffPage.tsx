@@ -9,7 +9,7 @@ import { RolUsuario, type UsuarioDto } from "@/types/api";
 import { useStaff } from "../hooks";
 import { CrearStaffModal } from "../components/CrearStaffModal";
 import { ResetearPinModal } from "../components/ResetearPinModal";
-import { GestionarUsuarioModal } from "../components/GestionarUsuarioModal";
+import { DetalleUsuarioDrawer } from "../components/DetalleUsuarioDrawer";
 
 /** Gestión del equipo del Administrador (buscar, listar, crear, resetear PIN, gestionar). */
 export function StaffPage() {
@@ -159,10 +159,14 @@ export function StaffPage() {
         />
       )}
       {gestionUsuario && (
-        <GestionarUsuarioModal
+        <DetalleUsuarioDrawer
           open={!!gestionUsuario}
           onClose={() => setGestionUsuario(null)}
-          usuario={gestionUsuario}
+          usuarioId={gestionUsuario.id}
+          onResetearPin={() => {
+            setResetUsuario(gestionUsuario);
+            setGestionUsuario(null);
+          }}
         />
       )}
     </PantallaConHeader>

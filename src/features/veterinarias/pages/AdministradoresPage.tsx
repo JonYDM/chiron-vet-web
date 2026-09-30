@@ -6,7 +6,7 @@ import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
 import { useDebounce } from "@/lib/useDebounce";
 import { useAdministradores } from "@/features/usuarios/hooks";
 import { ResetearPinModal } from "@/features/usuarios";
-import { GestionarUsuarioModal } from "@/features/usuarios/components/GestionarUsuarioModal";
+import { DetalleUsuarioDrawer } from "@/features/usuarios/components/DetalleUsuarioDrawer";
 import type { UsuarioDto, Veterinaria } from "@/types/api";
 import { useVeterinarias } from "../hooks";
 import { CrearAdminModal } from "../components/CrearAdminModal";
@@ -190,7 +190,18 @@ export function AdministradoresPage() {
       {reset && (
         <ResetearPinModal open={!!reset} onClose={() => setReset(null)} usuarioId={reset.id} nombre={reset.nombre} />
       )}
-      {gestion && <GestionarUsuarioModal open={!!gestion} onClose={() => setGestion(null)} usuario={gestion} />}
+      {gestion && (
+        <DetalleUsuarioDrawer
+          open={!!gestion}
+          onClose={() => setGestion(null)}
+          usuarioId={gestion.id}
+          veterinariaNombre={gestion.veterinariaId ? vetPorId.get(gestion.veterinariaId)?.nombre : undefined}
+          onResetearPin={() => {
+            setReset(gestion);
+            setGestion(null);
+          }}
+        />
+      )}
     </PantallaConHeader>
   );
 }

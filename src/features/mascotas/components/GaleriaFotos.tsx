@@ -11,8 +11,17 @@ import { useFotos, useSubirFoto, useEliminarFoto } from "../hooks";
  * Comprime en cliente antes de subir. Si el backend/tabla no está listo, muestra
  * un estado de error/vacío sin romper la pantalla.
  */
-export function GaleriaFotos({ mascotaId, puedeEditar }: { mascotaId: string; puedeEditar: boolean }) {
-  const { data: fotos, isLoading, isError } = useFotos(mascotaId);
+export function GaleriaFotos({
+  mascotaId,
+  puedeEditar,
+  portal = false,
+}: {
+  mascotaId: string;
+  puedeEditar: boolean;
+  /** Vista del dueño: lee del endpoint del portal y es de solo lectura. */
+  portal?: boolean;
+}) {
+  const { data: fotos, isLoading, isError } = useFotos(mascotaId, portal);
   const subir = useSubirFoto(mascotaId);
   const eliminar = useEliminarFoto(mascotaId);
   const inputRef = useRef<HTMLInputElement>(null);

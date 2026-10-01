@@ -22,10 +22,10 @@ export function usePacientes(texto?: string) {
 }
 
 /** Galería de fotos de una mascota. */
-export function useFotos(mascotaId: string) {
+export function useFotos(mascotaId: string, portal = false) {
   return useQuery({
-    queryKey: ["fotos", mascotaId],
-    queryFn: ({ signal }) => listarFotos(mascotaId, signal),
+    queryKey: ["fotos", mascotaId, portal ? "portal" : "staff"],
+    queryFn: ({ signal }) => listarFotos(mascotaId, signal, portal),
     enabled: !!mascotaId,
   });
 }

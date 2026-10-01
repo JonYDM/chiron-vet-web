@@ -55,8 +55,10 @@ export async function listarPacientes(
 }
 
 /** Lista la galería de fotos de una mascota (más recientes primero). */
-export function listarFotos(mascotaId: string, signal?: AbortSignal): Promise<FotoMascota[]> {
-  return http.get<FotoMascota[]>(`/api/mascotas/${mascotaId}/fotos`, signal);
+/** Galería de la mascota. `portal` = el dueño (endpoint que valida que la mascota sea suya). */
+export function listarFotos(mascotaId: string, signal?: AbortSignal, portal = false): Promise<FotoMascota[]> {
+  const base = portal ? "/api/portal/mascotas" : "/api/mascotas";
+  return http.get<FotoMascota[]>(`${base}/${mascotaId}/fotos`, signal);
 }
 
 /** Sube una foto (multipart) a la galería. Opcionalmente ligada a un registro médico. */

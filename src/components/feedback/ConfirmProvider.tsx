@@ -51,7 +51,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
       {opciones && (
         <Modal open={abierto} onClose={() => cerrar(false)} title={opciones.titulo}>
           <div className="space-y-5">
-            <p className="text-sm text-ink-soft">{opciones.mensaje}</p>
+            <p className="text-body-md text-on-surface-variant">{opciones.mensaje}</p>
             <div className="flex gap-2">
               <Button variant="ghost" fullWidth onClick={() => cerrar(false)}>
                 Cancelar

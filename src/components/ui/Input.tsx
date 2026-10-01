@@ -5,32 +5,25 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
   hint?: string;
-  /** "outline" (borde, por defecto) o "soft" (sin borde, relleno suave estilo Nubank). */
+  /** "outline" (borde, por defecto; formularios) o "soft" (relleno, sin borde; buscadores). */
   variant?: "outline" | "soft";
 }
 
 /**
- * Campo de texto con anatomía y estados estilo shadcn/ui: borde e input tokenizados,
- * anillo de foco con el color de marca, estado de error y texto de ayuda accesibles.
- * La variante "soft" quita el borde y usa un relleno suave (look Nubank).
+ * Campo de texto con tokens del design system Stitch: superficie blanca con borde
+ * outline-variant, foco en teal y error en error-st. El texto es de 16px para que iOS
+ * no haga zoom al enfocar. La variante "soft" (buscadores) usa relleno surface-container-low.
  */
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, label, error, hint, id, variant = "outline", ...props }, ref) => {
     const autoId = useId();
     const inputId = id ?? autoId;
-    const describedBy = error
-      ? `${inputId}-error`
-      : hint
-        ? `${inputId}-hint`
-        : undefined;
+    const describedBy = error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined;
 
     return (
       <div className="w-full space-y-1.5">
         {label && (
-          <label
-            htmlFor={inputId}
-            className="text-sm font-medium leading-none text-foreground"
-          >
+          <label htmlFor={inputId} className="block text-label-md font-semibold text-on-surface-variant">
             {label}
           </label>
         )}
@@ -40,30 +33,32 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           aria-invalid={!!error}
           aria-describedby={describedBy}
           className={cn(
-            "flex w-full text-foreground transition-[color,box-shadow,border-color] duration-150",
-            "placeholder:text-muted-foreground/70 focus-visible:outline-none",
+            "flex w-full text-base text-on-surface transition-[color,box-shadow,border-color,background-color] duration-150",
+            "placeholder:text-outline focus-visible:outline-none",
             "disabled:cursor-not-allowed disabled:opacity-50",
             variant === "soft"
               ? cn(
-                  "h-14 rounded-2xl border-0 bg-muted px-4 text-base",
-                  "focus-visible:ring-2 focus-visible:ring-ring/40",
-                  error && "bg-destructive/10 focus-visible:ring-destructive/40",
+                  "h-14 rounded-2xl border-0 bg-surface-container-low px-4",
+                  "focus-visible:ring-2 focus-visible:ring-primary-container/30",
+                  error && "bg-error-container/50 focus-visible:ring-error-st/30",
                 )
               : cn(
-                  "h-11 rounded-md border bg-card px-3.5 py-2 text-sm shadow-xs",
-                  "focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:border-ring",
-                  error ? "border-destructive focus-visible:ring-destructive/40" : "border-input",
+                  "h-12 rounded-xl border bg-surface-container-lowest px-4",
+                  "focus-visible:border-primary-container focus-visible:ring-2 focus-visible:ring-primary-container/20",
+                  error
+                    ? "border-error-st focus-visible:border-error-st focus-visible:ring-error-st/20"
+                    : "border-outline-variant/70",
                 ),
             className,
           )}
           {...props}
         />
         {error ? (
-          <p id={`${inputId}-error`} className="text-xs font-medium text-destructive">
+          <p id={`${inputId}-error`} className="text-body-sm font-medium text-error-st">
             {error}
           </p>
         ) : hint ? (
-          <p id={`${inputId}-hint`} className="text-xs text-muted-foreground">
+          <p id={`${inputId}-hint`} className="text-body-sm text-on-surface-variant">
             {hint}
           </p>
         ) : null}

@@ -11,9 +11,9 @@ const avatarVariants = cva(
         lg: "h-14 w-14 text-lg",
       },
       tone: {
-        primary: "bg-secondary text-secondary-foreground",
-        accent: "bg-accent/20 text-accent-strong",
-        neutral: "bg-muted text-muted-foreground",
+        primary: "bg-primary-fixed/40 text-tertiary",
+        accent: "bg-secondary-fixed text-on-secondary-fixed-variant",
+        neutral: "bg-surface-container text-on-surface-variant",
       },
     },
     defaultVariants: { size: "md", tone: "primary" },

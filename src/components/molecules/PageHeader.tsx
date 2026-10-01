@@ -12,9 +12,9 @@ export function PageHeader({ titulo, descripcion, accion }: PageHeaderProps) {
   return (
     <div className="mb-5 flex items-start justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-bold text-ink">{titulo}</h1>
+        <h1 className="text-headline-lg-mobile font-bold tracking-tight text-on-surface">{titulo}</h1>
         {descripcion && (
-          <p className="mt-1 text-sm text-ink-soft">{descripcion}</p>
+          <p className="mt-1 text-body-sm text-on-surface-variant">{descripcion}</p>
         )}
       </div>
       {accion && <div className="shrink-0">{accion}</div>}

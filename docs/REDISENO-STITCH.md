@@ -655,3 +655,32 @@ VentaCargo + Cargo Cobrado → aparece en Historial + "Mis pagos" del dueño + m
   entre staff y portal).
 - **Pendiente:** borrar los alias heredados de `tailwind.config.js` cuando `bg-surface` deje
   de usarse.
+
+### Portal: módulo "Citas" (antes Recordatorios) con confirmación de asistencia
+- **Problema reportado:** una desparasitación o cita de hoy no aparecía. Había dos causas en el
+  backend:
+  1. "Hoy" se calculaba en UTC, así que después de las 6 pm en México ya era mañana.
+  2. Las citas se ocultaban al pasar su hora, aunque el staff no las hubiera marcado.
+
+  Se corrigió con el helper `HoraMexico` (PR #46). Ahora una cita de hoy sigue visible
+  mientras esté "Programada".
+- **Backend (rama `feature/portal-citas`, migración `CitaConfirmacion`):**
+  - `Cita.Confirmacion` (Pendiente / Confirmada / NoAsistira), independiente del
+    `EstadoCita` que maneja el staff. Responder no cancela la cita: avisa a la clínica.
+  - `GET /api/portal/mis-citas` y `POST /api/portal/citas/{id}/asistencia { asistira }`.
+    Valida que la cita sea de una mascota del dueño. Si es de otro dueño responde "no existe",
+    para no revelar citas ajenas.
+  - `CitaDto` del staff incluye `confirmacion`.
+- **Front:**
+  - Portal `/portal/citas`:
+    - "Próximas citas": cada una con "Voy a asistir" / "No podré ir". La respuesta se puede
+      cambiar.
+    - "Vacunas y desparasitaciones".
+    - "Historial de citas" con su estado.
+  - `/portal/recordatorios` redirige a `/portal/citas` y el nav dice "Citas".
+  - Staff: la card de la cita muestra "Confirmó que asistirá" (verde) o "Avisó que no podrá
+    ir" (ámbar) mientras siga programada.
+- El perfil de la mascota del portal usa el layout del veterinario en solo lectura e incluye
+  la galería. La galería se lee por `GET /api/portal/mascotas/{id}/fotos`, que valida al
+  dueño. Los endpoints genéricos de mascota y fotos quedaron solo para staff, porque antes un
+  dueño podía ver mascotas ajenas de su misma clínica.

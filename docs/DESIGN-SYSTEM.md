@@ -1,137 +1,96 @@
-# 🎨 Chiron — Design System
+# Patwi — Design System
 
-> Dirección visual y sistema de componentes del frontend. Inspiración: lenguaje de
-> feedback de Nubank, limpieza de Apple/Material, patrones de Mobbin/Skiper UI
-> (reconstruidos con tokens propios, no copiados). Identidad: paleta "Visión Canina".
-> Creado: 2026-09-27
-
----
+> Fuente de verdad visual: el `DESIGN.md` de Stitch y los tokens de `tailwind.config.js`.
+> Este documento resume **cómo se usan** en Patwi. Si algo aquí contradice al código, manda el
+> código; actualiza este archivo. (Reemplaza la versión anterior: índigo, Inter y anime.js ya
+> no aplican.)
 
 ## Principios
+- **Clínico moderno con calidez**: superficies suaves, sin blanco estéril ni monocromo frío.
+- **Mobile-first real**: pantallas de 360 px, pulgar, teclado en pantalla y safe-areas.
+- **Jerarquía antes que decoración**: cada card tiene carácter (icono o avatar, título fuerte,
+  badge), nunca plana. Nada de "AI slop".
+- **Emojis mínimos**: se usan íconos de lucide.
 
-1. **Consistencia por variantes.** Los componentes se definen con **CVA**
-   (class-variance-authority): ejes tipados de `variant` (color/estilo), `size` (tamaño)
-   y estado. Nada de clases sueltas duplicadas → se elimina el look "genérico".
-2. **Ligereza.** Tokens sin runtime (Tailwind), componentes propios estilo **shadcn/ui**
-   (CVA + tokens semánticos vía CSS variables). El motor de animación es **anime.js**
-   (~ligero), no Framer Motion.
-3. **Movimiento con propósito.** Microanimaciones que confirman acciones y guían la vista,
-   nunca decorativas de más. Siempre respetando `prefers-reduced-motion`.
-4. **Accesibilidad.** Focus visible (halo de marca), contraste, touch targets ≥ 44px,
-   `aria-*` en componentes interactivos.
+## Marca
+- Producto **Patwi**, mascota **Wipo**. Wordmark en **Nunito 800** (`font-marca`).
+- UI en **Plus Jakarta Sans** (`font-sans`).
+- No cambiar `STORAGE_KEY = "chiron.sesion"`, porque desloguea a todos.
 
----
+## Color (jerarquía)
+| Rol | Tokens | Cuándo |
+|---|---|---|
+| **Principal / marca** | `primary-container` (#0d6e6e), `on-primary`, `tertiary`, `primary-fixed` | Acción principal, activo, cifras clave |
+| **Acento puntual** | `st-secondary` (terracota), `secondary-fixed`, `on-secondary-fixed(-variant)` | Un toque por pantalla (una acción rápida, un aviso). **No abusar** |
+| **Neutro / informativo** | `surface-container(-low/-high)`, `on-surface-variant`, `outline(-variant)` | Datos, filtros, chips inactivos |
+| **Superficies** | `surface-container-lowest` (blanco) sobre fondo `surface` | Cards, drawers, inputs |
+| **Texto** | `on-surface` (principal), `on-surface-variant` (secundario), `outline` (placeholder) | — |
+| **Error** | `error-st`, `error-container`, `on-error-container` | Validación y alertas |
+| **Estados** | `success`, `warning` (ámbar, texto `#B45309`) | Éxito y "por vencer" o desactivar |
 
-## Tokens semánticos (shadcn) — `src/styles/index.css` + `tailwind.config.js`
+- **Filtros**: cards o chips **neutros**; el activo va en teal (`bg-primary-container text-on-primary`).
+- **Métricas tipo bento**: color de fondo "acciones rápidas" (`primary-fixed/40`,
+  `tertiary-fixed/50`, `secondary-fixed/60`, `error-container/70`) con `shadow-inset-up`.
+  La métrica más importante va en teal sólido.
+- **Prohibido en código nuevo**: los alias heredados de shadcn (`text-ink`, `bg-muted`, `bg-card`,
+  `text-foreground`, `bg-danger`, `bg-secondary`, `bg-accent`). Siguen definidos solo por
+  compatibilidad (`bg-surface` aún se usa en el shell).
 
-El sistema sigue el patrón de **shadcn/ui**: los colores se declaran como **CSS variables
-en HSL** dentro de `:root` (en `src/styles/index.css`) y Tailwind los mapea a nombres
-semánticos. Esto permite temizar (p. ej. modo oscuro) sin tocar componentes.
+## Tipografía (escala Stitch)
+`headline-xl/lg/md/sm`, `headline-lg-mobile` (títulos de pantalla), `body-lg/md/sm`,
+`label-lg/md/sm`, `metric-display` (cifras). Cifras con `tabular`.
+- Inputs a **16 px** (`text-base`) para que iOS no haga zoom.
 
-### Variables base (`:root`)
-`--background` · `--foreground` · `--card` · `--card-foreground` · `--primary` ·
-`--primary-foreground` · `--secondary` · `--accent` · `--muted` · `--muted-foreground` ·
-`--destructive` · `--success` · `--border` · `--input` · `--ring` · `--radius`.
+## Forma y profundidad
+- Radios: cards y bloques `rounded-2xl`; inputs y botones `rounded-xl`; chips `rounded-full`.
+- Sombras: `shadow-soft` (cards), `shadow-lift` (popovers), `shadow-inset-up` (métricas),
+  `shadow-primary-glow` (Inicio activo).
+- Bordes suaves: `border-outline-variant/40`.
 
-Identidad **"Visión Canina"** (colores que perros y gatos perciben):
-- `--primary: 227 100% 65%` → índigo **#4C6FFF**
-- `--accent: 39 100% 56%` → ámbar **#FFB020**
+## Componentes (usar estos, no reinventar)
+- **Button**: variantes semánticas.
+  - `primary` (teal): agregar o acción principal.
+  - `warning` (ámbar): desactivar.
+  - `danger` (rojo): anular o eliminar.
+  - `soft` y `ghost`: acciones neutras.
+  - `outline` + `text-primary`: reactivar.
+- **Input / Select**: `outline` por defecto (formularios) y `soft` para buscadores.
+  Label `label-md`; `hint` y `error` debajo.
+- **Drawer** (Vaul): todos los formularios. `Modal` es un alias del Drawer.
+- **Pasos**: wizard dentro del Drawer, con 1-3 campos por paso. En edición usar `libre`.
+  Termina con "¡Listo!".
+- **Badge**: tonos `neutral`, `primary`, `success`, `warning`, `danger`, `info`.
+- **Avatar** (iniciales o foto), **EmptyState** (ilustración `empty.webp`),
+  **SkeletonFila** (misma forma que la card real), **CheckExito** (pantallas de éxito),
+  **PaginaError** (404 y 403).
 
-### Nombres semánticos en Tailwind
-`bg-background`, `text-foreground`, `bg-card`, `bg-primary/text-primary-foreground`,
-`bg-secondary`, `bg-accent`, `bg-muted/text-muted-foreground`, `bg-destructive`,
-`border-border`, `ring-ring`, etc.
+## Patrones
+- **Listas**: searchbar `soft` + chips de filtro (patrón Clientes). Cards con icono o avatar,
+  título, dato secundario, badge y acciones al pie (`border-t`). **Sin animación de entrada.**
+- **Filtros navegables**: si otra vista enlaza a un filtro, el filtro vive en la URL
+  (`?filtro=`).
+- **Formularios**: Drawer + `Pasos` cortos; alta y edición comparten los mismos componentes de
+  campos (p. ej. `CamposNombre`, `CamposContacto`, `SelectorPlan`, `CampoPrecio`).
+- **Éxito**: check animado (`CheckExito` o el "¡Listo!" de `Pasos`); para cobros, la
+  animación `CobroExitoso`.
+- **Destructivo**: confirmación en línea o `useConfirm`. Anular no borra.
+- **Dashboard**: saludo por hora + fecha, acciones rápidas en tiles de color y métricas
+  clicables que llevan a su módulo.
 
-### Alias de compatibilidad
-Para no romper clases previas hay alias mapeados a los tokens semánticos:
-`canvas`→background, `surface`→card, `hairline`→border, `ink`/`ink-soft`/`ink-muted`→
-foreground/muted-foreground, `danger`→destructive, `primary-50/100`→secondary.
+## Layout y shell
+- Header sólido y claro (sin blur, que causaba vibración), avatar de Wipo con saludo y sin
+  ícono de notificaciones.
+- Bottom-nav docked edge-to-edge (`rounded-t-3xl`, `surface-nav` con blur) e "Inicio" con
+  pastilla teal.
+- `min-h-dvh` (teclado), `env(safe-area-inset-*)` y `scrollbar-gutter: stable`.
 
-### Tipografía
-- Fuente **Inter** (400–800).
-- Escala con jerarquía: `text-display`, `text-h1`, `text-h2`, `text-h3`.
+## Animación
+- **CSS plano en `src/styles/index.css`** (p. ej. `cobro-*`, `shimmer`), no en
+  `tailwind.config`, porque el dev server no recarga el config en caliente.
+- Micro y funcional: feedback de éxito y press (`active:scale-[0.97]`). Nada decorativo en
+  listas.
 
-### Forma y elevación
-- Radios basados en `var(--radius)`: `lg`, `xl`, `2xl`, `3xl` (generosos).
-- Sombras multicapa: `xs`, `soft`, `lift`, `float`, `focus` (halo), `primary-glow`.
-- Gradientes de marca: `bg-brand`, `bg-brand-mesh`, `bg-accent-grad`.
-
-### Movimiento
-- Easings: `out-expo`, `out-back`, `in-out-soft`.
-- Duraciones: `fast` (120ms), default (180ms), `slow` (280ms).
-- Animaciones CSS: `fade-in`, `fade-in-up`, `scale-in`. Shimmer para skeletons.
-- Entradas y microinteracciones con **anime.js** (ver sección Movimiento).
-
----
-
-## Componentes base (`src/components/ui`)
-
-Definidos con CVA (variantes tipadas):
-
-| Componente | Variantes principales |
-|---|---|
-| **Button** | `variant`: primary, secondary, soft, ghost, danger, outline · `size`: sm, md, lg, icon · `loading`, `fullWidth` |
-| **Badge** | `tone`: neutral, primary, success, warning, danger · `size`: sm, md |
-| **Avatar** | `size`: sm, md, lg · `tone`: primary, accent, neutral (iniciales) |
-| **Input / Select** | label, error, hint (con aria) |
-| **Card** | Header/Title/Content/Footer |
-| **Modal** | accesible (Escape, overlay, focus) |
-| **Skeleton / SkeletonFila** | placeholders con shimmer para carga |
-| **Spinner** | carga accesible (`role=status`) |
-
----
-
-## Movimiento (anime.js + View Transitions)
-
-- **anime.js** (~ligero) para entradas y microinteracciones. Helpers en:
-  - `src/lib/anim.tsx` → componente `<Reveal>` (fade+subida; `stagger` para cascadas).
-  - `src/lib/useContador.ts` → hook `useContador` (efecto "count up" de números, tipo Nubank).
-- **View Transitions API** para transiciones entre rutas: `lib/useNavegarConTransicion.ts`
-  (con fallback a navegación normal).
-- Todo respeta `prefers-reduced-motion: reduce`.
-
-> Nota: se migró de Framer Motion a **anime.js** para reducir peso (~36KB → ~1KB de helpers +
-> anime.js). El `<Reveal>` reemplaza a `motion.div`.
-
-## Estética "Chiron × Nubank"
-
-- **Bloques de color generosos:** gradientes de marca (`bg-brand`, `bg-brand-mesh`,
-  `bg-accent-grad`) en heros y zonas clave, no solo botones.
-- **Ilustraciones propias (SVG, sin equipo gráfico):** en `components/ilustraciones`
-  (`Blob`, `Huella`, `MascotaVacio`). `EmptyState` las usa para estados vacíos con carácter.
-- **Radios grandes** (rounded-3xl), sombras suaves, mucho aire, tipografía grande y amigable.
-
----
-
-## Pantallas insignia (referencia de estilo)
-- **LoginPage:** flujo en 2 pasos con transición horizontal, fondo con halos de marca (blur),
-  logo con `scale-in`, feedback animado.
-- **StaffDashboard:** métricas y accesos rápidos con entrada en cascada; skeletons durante la carga.
-
-Estas dos sirven de referencia para pulir el resto de pantallas con el mismo lenguaje.
-
----
-
-## Feedback (toasts y confirmaciones)
-
-- **Toasts:** se usa **`react-hot-toast`** estilizado con nuestros tokens (tarjeta, borde,
-  sombra) y montado en `ToastProvider` (`<Toaster position="top-center">`). La app consume
-  siempre la fachada `useToast()` (`src/components/feedback/useToast.ts`) que expone
-  `exito` / `error` / `info`, de modo que la librería se puede cambiar sin tocar consumidores.
-- **Errores HTTP:** `HttpFeedbackBridge` observa el cache de **mutaciones** de TanStack Query
-  y muestra un toast ante 403 (sin permiso) u otros errores de negocio. Las **queries** de
-  fondo no generan toast (ruido evitado).
-- **Confirmaciones:** `ConfirmProvider` con API imperativa (`useConfirm`) para acciones
-  destructivas.
-
----
-
-## Pendientes / evolución
-- ~~Aplicar `EmptyState` + `Reveal` al resto de pantallas~~ ✅ hecho en toda la app
-  (clientes, mis-mascotas, citas, POS, expediente, historial de ventas, recordatorios,
-  mi-expediente, equipo y veterinarias).
-- ~~Refactor de componentes base a variantes CVA con tokens semánticos~~ ✅ hecho
-  (Button/Input/Select/Card/Modal/Badge/Avatar/Skeleton).
-- ~~Toasts con librería madura~~ ✅ migrado a `react-hot-toast`.
-- Tooltips accesibles reutilizables.
-- Modo oscuro (los tokens semánticos ya están listos: basta un bloque `.dark` en `:root`).
+## Accesibilidad
+- `aria-label` en botones de solo ícono; `role="alert"` en errores; íconos decorativos con
+  `aria-hidden`.
+- Contraste: texto secundario siempre con `on-surface-variant` (no con `outline`).

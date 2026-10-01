@@ -620,3 +620,22 @@ VentaCargo + Cargo Cobrado → aparece en Historial + "Mis pagos" del dueño + m
   - Por cobrar → Vencidas (o Por vencer si no hay vencidas).
 - En Veterinarias, el filtro vive en la URL (`useSearchParams`), así que se puede enlazar
   directo y el botón atrás lo respeta.
+
+
+### Migración final de tokens heredados (shadcn → Stitch)
+- **Componentes base:**
+  - `Input` y `Select`: borde `outline-variant`, foco teal, error `error-st`, 16 px (sin zoom
+    en iOS) y `h-12`.
+  - `Card`, `Skeleton` y `SkeletonFila` quedan con la misma forma que las cards reales.
+  - También se migraron `Avatar`, `PageHeader` y `ConfirmProvider`.
+- Se borraron `QuickCard`, `EnConstruccion` y `FiltroEstadoTabs`, que no tenían usos.
+- **Features:** 66 reemplazos exactos de clases (`text-ink*`, `bg-danger`, `bg-muted`,
+  `bg-secondary`, `bg-accent*`, …). Todas las alertas de error usan `on-error-container`.
+- Los ✅ se reemplazaron por `CheckExito` en DarAcceso, CambiarMiPin y ResetearPin.
+- `docs/DESIGN-SYSTEM.md` se reescribió con los tokens y reglas reales.
+- **Pendiente:**
+  - El **portal del dueño** (`MisMascotas`, `MiExpediente`, `MisRecordatorios`) y el
+    `ExpedientePage` del staff ya tienen colores Stitch, pero conservan la maquetación vieja
+    (Card simple, `text-sm`). Toca rediseñarlos con el patrón de listas.
+  - Los alias heredados de `tailwind.config.js` se pueden borrar cuando `bg-surface` deje de
+    usarse.

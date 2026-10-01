@@ -106,7 +106,12 @@ export function MisCitasPage() {
                       {formatDate(diaLocal(c.fechaHora))} · {horaLocal(c.fechaHora)}
                     </p>
                   </div>
-                  <Badge tone={estadoCitaTone(c.estado)}>{estadoCitaLabel[c.estado]}</Badge>
+                  {c.estado === EstadoCita.Programada ? (
+                    // Ya pasó pero la clínica no la marcó: "Programada" confundiría al dueño.
+                    <Badge tone="neutral">Sin registrar</Badge>
+                  ) : (
+                    <Badge tone={estadoCitaTone(c.estado)}>{estadoCitaLabel[c.estado]}</Badge>
+                  )}
                 </div>
               ))}
             </Seccion>

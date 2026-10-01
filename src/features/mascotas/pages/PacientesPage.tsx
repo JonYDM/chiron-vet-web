@@ -5,7 +5,7 @@ import { Badge, Button, Input, SkeletonFila } from "@/components/ui";
 import { EmptyState } from "@/components/molecules/EmptyState";
 import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
 import { especieLabel } from "@/lib/enums";
-import { EspecieMascota } from "@/types/api";
+import { toneEspecie } from "@/lib/mascotas";
 import { useDebounce } from "@/lib/useDebounce";
 import { usePacientes } from "../hooks";
 import type { MascotaConDueno } from "../api";
@@ -99,22 +99,6 @@ export function PacientesPage() {
       <MascotaModal open={nuevaAbierta} onClose={() => setNuevaAbierta(false)} />
     </PantallaConHeader>
   );
-}
-
-/** Tono de badge por especie (para dar color y distinguir de un vistazo). */
-function toneEspecie(especie: EspecieMascota): "primary" | "info" | "warning" | "success" | "neutral" {
-  switch (especie) {
-    case EspecieMascota.Perro:
-      return "primary";
-    case EspecieMascota.Gato:
-      return "warning";
-    case EspecieMascota.Ave:
-      return "info";
-    case EspecieMascota.Conejo:
-      return "success";
-    default:
-      return "neutral";
-  }
 }
 
 function PacienteCard({ mascota }: { mascota: MascotaConDueno }) {

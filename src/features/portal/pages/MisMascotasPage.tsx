@@ -39,25 +39,22 @@ export function MisMascotasPage() {
       }
     >
       <div className="flex flex-col gap-4">
+        <BarraBusqueda valor={texto} onChange={setTexto} placeholder="Buscar por nombre o raza" />
+
+        {/* Aviso compacto (una línea, tono suave): informa sin competir con la lista */}
         {proximo && (
           <Link
             to="/portal/citas"
-            className="flex items-center gap-3 rounded-2xl bg-primary-container p-4 text-on-primary shadow-soft transition-transform active:scale-[0.99]"
+            className="flex items-center gap-2 rounded-xl bg-primary-fixed/40 px-3 py-2 text-tertiary transition-colors active:bg-primary-fixed/60"
           >
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/20">
-              <BellRing className="h-5 w-5" aria-hidden />
+            <BellRing className="h-4 w-4 shrink-0" aria-hidden />
+            <span className="min-w-0 flex-1 truncate text-body-sm">
+              <span className="font-bold">{textoRelativo(proximo.fecha)}</span> · {proximo.nombreMascota}:{" "}
+              {proximo.detalle}
             </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-label-sm font-semibold opacity-90">{textoRelativo(proximo.fecha)}</span>
-              <span className="block truncate text-label-lg font-bold">
-                {proximo.nombreMascota}: {proximo.detalle}
-              </span>
-            </span>
-            <ChevronRight className="h-5 w-5 shrink-0 opacity-80" aria-hidden />
+            <ChevronRight className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
           </Link>
         )}
-
-        <BarraBusqueda valor={texto} onChange={setTexto} placeholder="Buscar por nombre o raza" />
 
         {isLoading ? (
           <div className="flex flex-col gap-3">

@@ -65,8 +65,11 @@
   **PaginaError** (404 y 403).
 
 ## Patrones
-- **Listas**: searchbar `soft` + chips de filtro (patrón Clientes). Cards con icono o avatar,
-  título, dato secundario, badge y acciones al pie (`border-t`). **Sin animación de entrada.**
+- **Listas**: **toda vista de lista o módulo lleva searchbar** (`BarraBusqueda`, variante `soft`
+  con lupa y `useDebounce`), más chips de filtro cuando aplique (patrón Clientes). Si la
+  búsqueda no da resultados, el vacío dice "Sin resultados" y no el vacío inicial.
+  Cards con icono o avatar, título, dato secundario, badge y acciones al pie (`border-t`).
+  **Sin animación de entrada.**
 - **Filtros navegables**: si otra vista enlaza a un filtro, el filtro vive en la URL
   (`?filtro=`).
 - **Formularios**: Drawer + `Pasos` cortos; alta y edición comparten los mismos componentes de

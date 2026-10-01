@@ -15,11 +15,15 @@ function mesActual(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
-/** Convierte "YYYY-MM" en rango ISO [desde, hasta] del mes completo. */
+/**
+ * Convierte "YYYY-MM" en rango ISO [desde, hasta] del mes completo en hora LOCAL (México).
+ * Antes usaba medianoche UTC: las ventas del último día después de las 6 pm se iban al
+ * mes siguiente, y las del día 1 antes de las 6 pm, al anterior.
+ */
 function rangoDelMes(mes: string): { desde: string; hasta: string } {
   const [y, m] = mes.split("-").map(Number);
-  const desde = new Date(Date.UTC(y, m - 1, 1, 0, 0, 0));
-  const hasta = new Date(Date.UTC(y, m, 0, 23, 59, 59));
+  const desde = new Date(y, m - 1, 1, 0, 0, 0, 0);
+  const hasta = new Date(y, m, 0, 23, 59, 59, 999);
   return { desde: desde.toISOString(), hasta: hasta.toISOString() };
 }
 

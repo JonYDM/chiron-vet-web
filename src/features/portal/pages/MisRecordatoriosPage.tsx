@@ -26,7 +26,7 @@ export function MisRecordatoriosPage() {
         </div>
       ) : isError ? (
         <Card>
-          <CardContent className="py-8 text-center text-sm text-danger">
+          <CardContent className="py-8 text-center text-sm text-error-st">
             No se pudieron cargar los recordatorios.
           </CardContent>
         </Card>
@@ -38,7 +38,7 @@ export function MisRecordatoriosPage() {
               <div key={`${r.clienteId}-${i}`}>
                 <Card>
                   <CardContent className="flex items-center gap-3 p-4">
-                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent-strong">
+                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-secondary-fixed text-on-secondary-fixed-variant">
                       {esVacuna ? (
                         <Syringe className="h-5 w-5" aria-hidden />
                       ) : (
@@ -46,10 +46,10 @@ export function MisRecordatoriosPage() {
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium text-ink">
+                      <p className="font-medium text-on-surface">
                         {r.nombreMascota}: {r.detalle}
                       </p>
-                      <p className="text-sm text-ink-soft">
+                      <p className="text-sm text-on-surface-variant">
                         {formatDate(r.fecha)}
                       </p>
                     </div>

@@ -64,7 +64,7 @@ export function PacientesPage() {
           </div>
         ) : noDisponible ? (
           <div className="flex flex-col items-center gap-3 rounded-2xl bg-surface-container-lowest p-8 text-center shadow-soft">
-            <div className="grid h-14 w-14 place-items-center rounded-2xl bg-secondary text-primary-container">
+            <div className="grid h-14 w-14 place-items-center rounded-2xl bg-primary-fixed/40 text-primary-container">
               <Stethoscope className="h-7 w-7" aria-hidden />
             </div>
             <p className="text-headline-sm font-bold text-on-surface">Pacientes en camino</p>

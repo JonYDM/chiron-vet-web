@@ -44,7 +44,7 @@ export function ExpedientePage() {
         </div>
       ) : isError ? (
         <Card>
-          <CardContent className="py-8 text-center text-sm text-danger">
+          <CardContent className="py-8 text-center text-sm text-error-st">
             No se pudo cargar el expediente.
           </CardContent>
         </Card>
@@ -58,7 +58,7 @@ export function ExpedientePage() {
               <div key={r.id}>
                 <Card>
                   <CardContent className="flex gap-3 p-4">
-                    <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-50 text-primary">
+                    <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-fixed/30 text-primary">
                       {esVacuna ? (
                         <Syringe className="h-5 w-5" aria-hidden />
                       ) : (
@@ -68,34 +68,34 @@ export function ExpedientePage() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <Badge tone="primary">{tipoRegistroLabel[r.tipo]}</Badge>
-                        <span className="text-xs text-ink-soft">
+                        <span className="text-xs text-on-surface-variant">
                           {formatDate(r.fecha)}
                         </span>
                       </div>
-                      <p className="mt-1.5 text-ink">{r.descripcion}</p>
+                      <p className="mt-1.5 text-on-surface">{r.descripcion}</p>
                       {r.diagnostico && (
-                        <p className="mt-1 text-sm text-ink-soft">
-                          <span className="font-medium text-ink">Diagnóstico:</span>{" "}
+                        <p className="mt-1 text-sm text-on-surface-variant">
+                          <span className="font-medium text-on-surface">Diagnóstico:</span>{" "}
                           {r.diagnostico}
                         </p>
                       )}
                       {r.tratamiento && (
-                        <p className="mt-1 text-sm text-ink-soft">
-                          <span className="font-medium text-ink">Tratamiento:</span>{" "}
+                        <p className="mt-1 text-sm text-on-surface-variant">
+                          <span className="font-medium text-on-surface">Tratamiento:</span>{" "}
                           {r.tratamiento}
                         </p>
                       )}
                       {(r.pesoKg != null || r.temperaturaC != null) && (
-                        <p className="mt-1 text-sm text-ink-soft">
+                        <p className="mt-1 text-sm text-on-surface-variant">
                           {r.pesoKg != null && <>Peso: {r.pesoKg} kg&nbsp;&nbsp;</>}
                           {r.temperaturaC != null && <>Temp: {r.temperaturaC} °C</>}
                         </p>
                       )}
                       {r.notas && (
-                        <p className="mt-1 text-sm italic text-ink-soft">{r.notas}</p>
+                        <p className="mt-1 text-sm italic text-on-surface-variant">{r.notas}</p>
                       )}
                       {r.fechaProximaAplicacion && (
-                        <p className="mt-1.5 flex items-center gap-1.5 text-sm text-accent-strong">
+                        <p className="mt-1.5 flex items-center gap-1.5 text-sm text-on-secondary-fixed-variant">
                           <CalendarClock className="h-4 w-4" aria-hidden />
                           Próxima: {formatDate(r.fechaProximaAplicacion)}
                         </p>

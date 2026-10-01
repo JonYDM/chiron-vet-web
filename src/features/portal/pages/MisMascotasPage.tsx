@@ -25,7 +25,7 @@ export function MisMascotasPage() {
         </div>
       ) : isError ? (
         <Card>
-          <CardContent className="py-8 text-center text-sm text-danger">
+          <CardContent className="py-8 text-center text-sm text-error-st">
             No se pudieron cargar tus mascotas.
           </CardContent>
         </Card>
@@ -37,24 +37,24 @@ export function MisMascotasPage() {
               <Link key={m.id} to={`/portal/mascotas/${m.id}`}>
                 <Card className="transition-all duration-150 hover:shadow-lift active:scale-[0.99]">
                   <CardContent className="flex items-center gap-4 p-4">
-                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary-50 text-primary">
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary-fixed/30 text-primary">
                       <PawPrint className="h-6 w-6" aria-hidden />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-ink">{m.nombre}</p>
+                      <p className="font-semibold text-on-surface">{m.nombre}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-1.5">
                         <Badge tone="neutral">{especieLabel[m.especie]}</Badge>
                         {m.sexo !== SexoMascota.NoEspecificado && (
                           <Badge tone="neutral">{sexoLabel[m.sexo]}</Badge>
                         )}
                         {edad !== null && (
-                          <span className="text-sm text-ink-soft">
+                          <span className="text-sm text-on-surface-variant">
                             {edad} {edad === 1 ? "año" : "años"}
                           </span>
                         )}
                       </div>
                     </div>
-                    <ChevronRight className="h-5 w-5 shrink-0 text-ink-soft" aria-hidden />
+                    <ChevronRight className="h-5 w-5 shrink-0 text-on-surface-variant" aria-hidden />
                   </CardContent>
                 </Card>
               </Link>

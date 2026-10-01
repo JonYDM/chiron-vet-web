@@ -1,3 +1,4 @@
+import { CheckExito } from "@/components/feedback/CheckExito";
 import { useState } from "react";
 import { Button, Modal } from "@/components/ui";
 import { PinInput } from "@/components/molecules/PinInput";
@@ -48,11 +49,9 @@ export function ResetearPinModal({ open, onClose, usuarioId, nombre }: Props) {
       <div className="space-y-5">
         {ok ? (
           <div className="space-y-4 text-center">
-            <p className="text-ink">
-              ✅ Nuevo PIN asignado a{" "}
-              <span className="font-semibold">{nombre}</span>.
-            </p>
-            <p className="text-sm text-ink-soft">
+            <CheckExito />
+            <p className="text-headline-sm font-bold text-on-surface">Nuevo PIN asignado a {nombre}</p>
+            <p className="text-body-sm text-on-surface-variant">
               Ya puede iniciar sesión con su nuevo PIN.
             </p>
             <Button fullWidth onClick={cerrar}>
@@ -61,9 +60,9 @@ export function ResetearPinModal({ open, onClose, usuarioId, nombre }: Props) {
           </div>
         ) : (
           <>
-            <p className="text-sm text-ink-soft">
+            <p className="text-sm text-on-surface-variant">
               Asigna un nuevo PIN de {PIN_LENGTH} dígitos para{" "}
-              <span className="font-medium text-ink">{nombre}</span>.
+              <span className="font-medium text-on-surface">{nombre}</span>.
             </p>
             <PinInput
               value={pin}
@@ -79,7 +78,7 @@ export function ResetearPinModal({ open, onClose, usuarioId, nombre }: Props) {
             {error && (
               <p
                 role="alert"
-                className="rounded-xl bg-danger/10 px-4 py-3 text-center text-sm text-danger"
+                className="rounded-xl bg-error-container/60 px-4 py-3 text-center text-body-sm font-medium text-on-error-container"
               >
                 {error}
               </p>

@@ -150,7 +150,7 @@ export function AgregarRegistroModal({ open, onClose, mascotaId }: Props) {
 
         {/* Detalle clínico (opcional) */}
         <div className="rounded-xl bg-canvas p-3">
-          <p className="mb-3 text-sm font-semibold text-ink-soft">
+          <p className="mb-3 text-sm font-semibold text-on-surface-variant">
             Detalle clínico (opcional)
           </p>
           <div className="space-y-3">
@@ -196,7 +196,7 @@ export function AgregarRegistroModal({ open, onClose, mascotaId }: Props) {
         </div>
 
         {error && (
-          <p role="alert" className="rounded-xl bg-danger/10 px-4 py-3 text-sm text-danger">
+          <p role="alert" className="rounded-xl bg-error-container/60 px-4 py-3 text-body-sm font-medium text-on-error-container">
             {error}
           </p>
         )}

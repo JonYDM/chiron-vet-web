@@ -56,7 +56,7 @@ export function GaleriaFotos({ mascotaId, puedeEditar }: { mascotaId: string; pu
         <div className="flex items-center gap-2">
           <h2 className="text-headline-sm font-bold text-on-surface">Registro fotográfico</h2>
           {totalFotos > 0 && (
-            <span className="rounded-full bg-secondary px-2 py-0.5 text-label-sm font-semibold text-primary-container">
+            <span className="rounded-full bg-primary-fixed/40 px-2 py-0.5 text-label-sm font-semibold text-primary-container">
               {totalFotos}
             </span>
           )}

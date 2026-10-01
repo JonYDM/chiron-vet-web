@@ -188,7 +188,7 @@ function ClienteFila({ cliente }: { cliente: Cliente }) {
     >
       {/* Fila superior */}
       <button onClick={irADetalle} className="flex items-start gap-3 text-left">
-        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-secondary text-label-md font-bold uppercase text-primary-container">
+        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary-fixed/40 text-label-md font-bold uppercase text-primary-container">
           {iniciales}
         </div>
         <div className="min-w-0 flex-1">

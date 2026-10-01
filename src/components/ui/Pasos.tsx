@@ -88,7 +88,7 @@ export function Pasos({
   if (fase === "guardando" || guardando) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
-        <span className="grid h-16 w-16 place-items-center rounded-full bg-secondary text-primary-container">
+        <span className="grid h-16 w-16 place-items-center rounded-full bg-primary-fixed/40 text-primary-container">
           <Loader2 className="h-8 w-8 animate-spin" aria-hidden />
         </span>
         <p className="text-label-lg font-semibold text-on-surface">{textoGuardando}</p>

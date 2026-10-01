@@ -1,3 +1,4 @@
+import { CheckExito } from "@/components/feedback/CheckExito";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button, Modal } from "@/components/ui";
@@ -65,11 +66,11 @@ export function DarAccesoModal({
       <div className="space-y-5">
         {ok ? (
           <div className="space-y-4 text-center">
-            <p className="text-ink">
-              ✅ Acceso creado para{" "}
-              <span className="font-semibold">{clienteNombre}</span>.
+            <CheckExito />
+            <p className="text-headline-sm font-bold text-on-surface">
+              Acceso creado para {clienteNombre}
             </p>
-            <p className="rounded-xl bg-primary-50 px-4 py-3 text-sm text-ink">
+            <p className="rounded-xl bg-primary-fixed/30 px-4 py-3 text-body-sm text-on-surface">
               El dueño entra con su teléfono{" "}
               <span className="font-semibold">{clienteTelefono}</span> y el PIN que
               acabas de asignar.
@@ -80,9 +81,9 @@ export function DarAccesoModal({
           </div>
         ) : (
           <>
-            <p className="text-sm text-ink-soft">
+            <p className="text-sm text-on-surface-variant">
               Asigna un PIN de {PIN_LENGTH} dígitos para que{" "}
-              <span className="font-medium text-ink">{clienteNombre}</span> acceda
+              <span className="font-medium text-on-surface">{clienteNombre}</span> acceda
               al portal y vea sus mascotas y recordatorios.
             </p>
 
@@ -101,7 +102,7 @@ export function DarAccesoModal({
             {error && (
               <p
                 role="alert"
-                className="rounded-xl bg-danger/10 px-4 py-3 text-center text-sm text-danger"
+                className="rounded-xl bg-error-container/60 px-4 py-3 text-center text-body-sm font-medium text-on-error-container"
               >
                 {error}
               </p>

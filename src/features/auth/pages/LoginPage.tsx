@@ -150,7 +150,7 @@ export function LoginPage() {
           <Reveal key="pin" className="flex flex-col">
             <button
               onClick={volver}
-              className="absolute left-6 top-6 flex w-fit items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-label-md font-medium text-on-surface-variant transition-colors hover:text-on-surface"
+              className="absolute left-6 top-6 flex w-fit items-center gap-1.5 rounded-full bg-surface-container px-3 py-1.5 text-label-md font-medium text-on-surface-variant transition-colors hover:text-on-surface"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden />
               {identificador}

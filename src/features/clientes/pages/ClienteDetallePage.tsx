@@ -155,7 +155,7 @@ export function ClienteDetallePage() {
               <PawPrint className="h-5 w-5 text-primary-container" aria-hidden />
               <h2 className="text-headline-sm font-bold text-on-surface">Mascotas</h2>
               {mascotas && mascotas.length > 0 && (
-                <span className="rounded-full bg-secondary px-2 py-0.5 text-label-sm font-semibold text-primary-container">
+                <span className="rounded-full bg-primary-fixed/40 px-2 py-0.5 text-label-sm font-semibold text-primary-container">
                   {mascotas.length}
                 </span>
               )}
@@ -175,7 +175,7 @@ export function ClienteDetallePage() {
                     onClick={() => navigate(`/app/mascotas/${m.id}`, { state: { mascota: m } })}
                     className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
                   >
-                    <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg bg-secondary text-primary-container">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg bg-primary-fixed/40 text-primary-container">
                       {m.fotoPerfilUrl ? (
                         <img src={m.fotoPerfilUrl} alt="" className="h-full w-full object-cover" />
                       ) : (

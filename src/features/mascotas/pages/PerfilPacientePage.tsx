@@ -153,12 +153,12 @@ export function PerfilPacientePage() {
 
         {/* Próxima cita / dosis */}
         {proxima && (
-          <div className="flex items-center gap-3 rounded-2xl bg-accent/10 p-4">
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent/20 text-accent-strong">
+          <div className="flex items-center gap-3 rounded-2xl bg-secondary-fixed/50 p-4">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-secondary-fixed text-on-secondary-fixed-variant">
               <CalendarClock className="h-5 w-5" aria-hidden />
             </div>
             <div>
-              <p className="text-label-sm font-semibold uppercase tracking-wide text-accent-strong">
+              <p className="text-label-sm font-semibold uppercase tracking-wide text-on-secondary-fixed-variant">
                 Próxima dosis / revisión
               </p>
               <p className="text-body-md font-bold text-on-surface">{formatDate(proxima)}</p>
@@ -199,7 +199,7 @@ export function PerfilPacientePage() {
                   r.tipo === TipoRegistroMedico.Desparasitacion;
                 return (
                   <div key={r.id} className="flex gap-3 rounded-xl bg-surface-container p-3">
-                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-secondary text-primary-container">
+                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary-fixed/40 text-primary-container">
                       {esVacuna ? (
                         <Syringe className="h-4 w-4" aria-hidden />
                       ) : (

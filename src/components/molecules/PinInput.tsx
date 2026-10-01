@@ -67,7 +67,7 @@ export function PinInput({
               className={cn(
                 "tabular grid h-14 w-11 place-items-center rounded-xl border-2 text-2xl font-bold text-on-surface transition-all sm:w-12",
                 lleno
-                  ? "border-primary-container bg-secondary"
+                  ? "border-primary-container bg-primary-fixed/40"
                   : activo
                     ? "border-primary-container"
                     : "border-outline-variant/40 bg-surface-container-lowest",

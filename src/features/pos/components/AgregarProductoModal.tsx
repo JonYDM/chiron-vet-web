@@ -84,7 +84,7 @@ export function AgregarProductoModal({ open, onClose }: Props) {
         </div>
 
         {error && (
-          <p role="alert" className="rounded-xl bg-danger/10 px-4 py-3 text-sm text-danger">
+          <p role="alert" className="rounded-xl bg-error-container/60 px-4 py-3 text-body-sm font-medium text-on-error-container">
             {error}
           </p>
         )}

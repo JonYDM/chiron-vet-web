@@ -1,3 +1,4 @@
+import { CheckExito } from "@/components/feedback/CheckExito";
 import { useState } from "react";
 import { Button, Modal } from "@/components/ui";
 import { PinInput } from "@/components/molecules/PinInput";
@@ -44,7 +45,8 @@ export function CambiarMiPinModal({ open, onClose }: Props) {
     <Modal open={open} onClose={cerrar} title="Cambiar mi PIN">
       {ok ? (
         <div className="space-y-4 text-center">
-          <p className="text-ink">✅ Tu PIN se actualizó correctamente.</p>
+          <CheckExito />
+          <p className="text-headline-sm font-bold text-on-surface">Tu PIN se actualizó</p>
           <Button fullWidth onClick={cerrar}>
             Entendido
           </Button>
@@ -52,16 +54,16 @@ export function CambiarMiPinModal({ open, onClose }: Props) {
       ) : (
         <div className="space-y-5">
           <div>
-            <p className="mb-2 text-sm font-medium text-ink">PIN actual</p>
+            <p className="mb-2 text-sm font-medium text-on-surface">PIN actual</p>
             <PinInput value={pinActual} onChange={setPinActual} length={PIN_LENGTH} />
           </div>
           <div>
-            <p className="mb-2 text-sm font-medium text-ink">Nuevo PIN</p>
+            <p className="mb-2 text-sm font-medium text-on-surface">Nuevo PIN</p>
             <PinInput value={nuevoPin} onChange={setNuevoPin} length={PIN_LENGTH} />
           </div>
 
           {error && (
-            <p role="alert" className="rounded-xl bg-danger/10 px-4 py-3 text-center text-sm text-danger">
+            <p role="alert" className="rounded-xl bg-error-container/60 px-4 py-3 text-center text-body-sm font-medium text-on-error-container">
               {error}
             </p>
           )}

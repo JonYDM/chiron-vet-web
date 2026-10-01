@@ -487,3 +487,28 @@ Backend necesario para los drawers — **HECHO (fase 1, rama `feature/drawers-al
   (apellidos, teléfono, CURP), para mantenerlos al día.
 - **HU-SU7:** Como Admin, quiero cambiar de sucursal y ver citas, ventas y stock de cada
   una, para operar varias sedes.
+
+## Seguridad: aislamiento multi-tenant (2026-09-30, rama `fix/aislamiento-tenant`)
+- **Hallazgo:** 16 endpoints confiaban en la veterinaria o en el id del recurso que mandaba el
+  cliente:
+  - 7 rutas `/api/veterinarias/{id}/...`: clientes, citas próximas, catálogo, ventas, resumen,
+    métricas y **envío de recordatorios**.
+  - 5 `POST` que tomaban `VeterinariaId` del body: registro rápido, ventas, expediente,
+    productos y citas.
+  - 4 lecturas por id: usuario, mascotas y ventas de un cliente, y el expediente de una
+    mascota.
+
+  Con un id válido, alguien del staff de una clínica podía leer o escribir datos de otra.
+- **Arreglo (sin migración, sin cambios en el front):**
+  - Helper `VetDelToken(user)` y filtro `MismaVeterinaria` en las rutas con `{veterinariaId}`.
+    Si la de la ruta no es la del token, responde **404**.
+  - Los comandos del body se reescriben con `cmd with { VeterinariaId = <token> }`.
+  - `EsClienteDeMiVeterinaria` y `EsMascotaDeMiVeterinaria` validan las lecturas por id.
+  - Un recurso de otra clínica devuelve 404 y no 403, para no confirmar que existe.
+- **Regla para endpoints nuevos:**
+  - La veterinaria sale **siempre del token**.
+  - Todo recurso por id se valida contra ella, en el caso de uso o en el endpoint.
+  - El dueño solo usa `/api/portal/*`, que valida su `clienteId`.
+- **Pendiente menor:** `AgendarCita.VeterinarioId` y `AgregarRegistroMedico.AtendidoPorId`
+  aceptan cualquier id de usuario. No expone datos, pero conviene validar que sea staff de la
+  misma veterinaria.

@@ -53,7 +53,7 @@ export const navStaff: NavItem[] = [
 /** Navegación del portal del dueño (/portal/*). */
 export const navPortal: NavItem[] = [
   { to: "/portal", label: "Mis mascotas", icon: PawPrint, permiso: null },
-  { to: "/portal/recordatorios", label: "Recordatorios", icon: BellRing, permiso: null },
+  { to: "/portal/citas", label: "Citas", icon: Calendar, permiso: null },
   { to: "/portal/compras", label: "Mis pagos", icon: Receipt, permiso: null },
 ];
 

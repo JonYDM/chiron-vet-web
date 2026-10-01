@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { miExpediente, misCompras, misMascotas, misRecordatorios } from "./api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { miExpediente, misCitas, misCompras, misMascotas, misRecordatorios, responderAsistencia } from "./api";
 
 /** Mis mascotas (dueño autenticado). */
 export function useMisMascotas() {
@@ -18,11 +18,31 @@ export function useMiExpediente(mascotaId: string) {
   });
 }
 
-/** Mis recordatorios. */
+/** Mis recordatorios (vacunas/desparasitaciones y citas próximas). */
 export function useMisRecordatorios() {
   return useQuery({
     queryKey: ["portal", "recordatorios"],
     queryFn: ({ signal }) => misRecordatorios(signal),
+  });
+}
+
+/** Citas de mis mascotas. */
+export function useMisCitas() {
+  return useQuery({
+    queryKey: ["portal", "citas"],
+    queryFn: ({ signal }) => misCitas(signal),
+  });
+}
+
+/** Respondo si asistiré (refresca citas y recordatorios). */
+export function useResponderAsistencia() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ citaId, asistira }: { citaId: string; asistira: boolean }) => responderAsistencia(citaId, asistira),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["portal", "citas"] });
+      qc.invalidateQueries({ queryKey: ["portal", "recordatorios"] });
+    },
   });
 }
 

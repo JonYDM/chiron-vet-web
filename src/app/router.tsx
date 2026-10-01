@@ -67,8 +67,8 @@ const MisMascotasPage = lazy(() =>
 const MiExpedientePage = lazy(() =>
   import("@/features/portal").then((m) => ({ default: m.MiExpedientePage })),
 );
-const MisRecordatoriosPage = lazy(() =>
-  import("@/features/portal").then((m) => ({ default: m.MisRecordatoriosPage })),
+const MisCitasPage = lazy(() =>
+  import("@/features/portal").then((m) => ({ default: m.MisCitasPage })),
 );
 const MisComprasPage = lazy(() =>
   import("@/features/portal").then((m) => ({ default: m.MisComprasPage })),
@@ -178,7 +178,9 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <MisMascotasPage /> },
       { path: "mascotas/:mascotaId", element: <MiExpedientePage /> },
-      { path: "recordatorios", element: <MisRecordatoriosPage /> },
+      { path: "citas", element: <MisCitasPage /> },
+      // Antes se llamaba Recordatorios: los enlaces viejos siguen funcionando.
+      { path: "recordatorios", element: <Navigate to="/portal/citas" replace /> },
       { path: "compras", element: <MisComprasPage /> },
     ],
   },

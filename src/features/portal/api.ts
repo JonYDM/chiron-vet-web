@@ -1,5 +1,15 @@
 import { http } from "@/lib/http";
-import type { Mascota, RegistroMedico, RecordatorioDetectado, VentaHistorial } from "@/types/api";
+import type { Mascota, MiCita, RegistroMedico, RecordatorioDetectado, VentaHistorial } from "@/types/api";
+
+/** Citas de MIS mascotas (más recientes primero). */
+export function misCitas(signal?: AbortSignal): Promise<MiCita[]> {
+  return http.get<MiCita[]>("/api/portal/mis-citas", signal);
+}
+
+/** Respondo si asistiré a una cita (solo mientras siga programada). */
+export function responderAsistencia(citaId: string, asistira: boolean): Promise<MiCita> {
+  return http.post<MiCita>(`/api/portal/citas/${citaId}/asistencia`, { asistira });
+}
 
 /** Mis compras/cobros (lo que el dueño pagó: consultas, artículos). */
 export function misCompras(signal?: AbortSignal): Promise<VentaHistorial[]> {

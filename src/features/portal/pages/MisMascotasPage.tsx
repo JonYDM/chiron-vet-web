@@ -33,7 +33,7 @@ export function MisMascotasPage() {
       <div className="flex flex-col gap-4">
         {proximo && (
           <Link
-            to="/portal/recordatorios"
+            to="/portal/citas"
             className="flex items-center gap-3 rounded-2xl bg-primary-container p-4 text-on-primary shadow-soft transition-transform active:scale-[0.99]"
           >
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/20">

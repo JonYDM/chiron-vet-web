@@ -45,6 +45,25 @@ export enum EstadoCita {
   NoAsistio = 4,
 }
 
+/** Respuesta del dueño a una cita (independiente del estado que maneja el staff). */
+export enum ConfirmacionCita {
+  Pendiente = 1,
+  Confirmada = 2,
+  NoAsistira = 3,
+}
+
+/** Cita de una de MIS mascotas (portal). */
+export interface MiCita {
+  id: string;
+  mascotaId: string;
+  mascotaNombre: string;
+  /** UTC */
+  fechaHora: string;
+  motivo: string;
+  estado: EstadoCita;
+  confirmacion: ConfirmacionCita;
+}
+
 export enum OrigenCliente {
   NoEspecificado = 0,
   Recomendacion = 1,

@@ -32,3 +32,15 @@ export function textoRelativo(fechaIso: string): string {
   if (dias === -1) return "Ayer";
   return dias > 0 ? `En ${dias} días` : `Hace ${Math.abs(dias)} días`;
 }
+
+
+/** Día local (YYYY-MM-DD) de un instante ISO en UTC (p. ej. la FechaHora de una cita). */
+export function diaLocal(isoUtc: string): string {
+  const d = new Date(isoUtc);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/** "10:30 a. m." en hora local. */
+export function horaLocal(isoUtc: string): string {
+  return new Date(isoUtc).toLocaleTimeString("es-MX", { hour: "numeric", minute: "2-digit" });
+}

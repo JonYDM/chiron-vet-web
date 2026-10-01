@@ -1,5 +1,5 @@
 import { http } from "@/lib/http";
-import type { AgendarCitaRequest, Cita, EstadoCita } from "@/types/api";
+import type { AgendarCitaRequest, Cita, ConfirmacionCita, EstadoCita } from "@/types/api";
 
 /** Cita enriquecida con nombre de mascota y dueño (del endpoint GET /citas). */
 export interface CitaConPaciente {
@@ -11,6 +11,8 @@ export interface CitaConPaciente {
   motivo: string;
   estado: EstadoCita;
   veterinarioId: string | null;
+  /** Respuesta del dueño desde su portal. */
+  confirmacion?: ConfirmacionCita;
 }
 
 /** Lista las citas de la veterinaria, opcionalmente filtradas por estado. */

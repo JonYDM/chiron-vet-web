@@ -8,7 +8,7 @@ import { cn } from "@/lib/cn";
 import { estadoCitaLabel, estadoCitaTone } from "@/lib/enums";
 import { formatDate } from "@/lib/format";
 import { useDebounce } from "@/lib/useDebounce";
-import { EstadoCita } from "@/types/api";
+import { ConfirmacionCita, EstadoCita } from "@/types/api";
 import type { CitaConPaciente } from "../api";
 import { useCambiarEstadoCita, useCitas } from "../hooks";
 import { AgendarCitaModal } from "../components/AgendarCitaModal";
@@ -202,6 +202,18 @@ function CitaCard({
       <div>
         <p className="text-headline-sm font-bold leading-tight text-on-surface">{cita.mascotaNombre}</p>
         <p className="mt-0.5 truncate text-body-md text-on-surface-variant">Dueño: {cita.clienteNombre}</p>
+        {cita.estado === EstadoCita.Programada && cita.confirmacion === ConfirmacionCita.Confirmada && (
+          <p className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-0.5 text-label-sm font-semibold text-success">
+            <Check className="h-3.5 w-3.5" aria-hidden />
+            Confirmó que asistirá
+          </p>
+        )}
+        {cita.estado === EstadoCita.Programada && cita.confirmacion === ConfirmacionCita.NoAsistira && (
+          <p className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-warning/15 px-2.5 py-0.5 text-label-sm font-semibold text-[#B45309]">
+            <UserX className="h-3.5 w-3.5" aria-hidden />
+            Avisó que no podrá ir
+          </p>
+        )}
       </div>
 
       {/* Motivo */}

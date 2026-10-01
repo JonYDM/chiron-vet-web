@@ -1,10 +1,12 @@
 import { useState, type ReactNode } from "react";
 import { CalendarCheck, CalendarClock, Check, Syringe, UserX } from "lucide-react";
 import { EmptyState } from "@/components/molecules/EmptyState";
+import { BarraBusqueda } from "@/components/molecules/BarraBusqueda";
 import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
 import { Badge, Button, SkeletonFila } from "@/components/ui";
 import { useToast } from "@/components/feedback/useToast";
 import { ApiError } from "@/lib/http";
+import { useDebounce } from "@/lib/useDebounce";
 import { estadoCitaLabel, estadoCitaTone } from "@/lib/enums";
 import { formatDate } from "@/lib/format";
 import { diaLocal, diasHasta, horaLocal, textoRelativo } from "@/lib/mascotas";
@@ -19,8 +21,11 @@ import { useMisCitas, useMisRecordatorios, useResponderAsistencia } from "../hoo
 export function MisCitasPage() {
   const { data: citas, isLoading, isError } = useMisCitas();
   const { data: recordatorios } = useMisRecordatorios();
+  const [texto, setTexto] = useState("");
+  const q = useDebounce(texto).trim().toLowerCase();
+  const coincide = (...campos: string[]) => !q || campos.some((c) => c.toLowerCase().includes(q));
 
-  const todas = citas ?? [];
+  const todas = (citas ?? []).filter((c) => coincide(c.mascotaNombre, c.motivo));
   const proximas = todas
     .filter((c) => c.estado === EstadoCita.Programada && diasHasta(diaLocal(c.fechaHora)) >= 0)
     .sort((a, b) => a.fechaHora.localeCompare(b.fechaHora));
@@ -29,9 +34,11 @@ export function MisCitasPage() {
   // Vacunas/desparasitaciones (las citas ya salen arriba con su propia card).
   const aplicaciones = (recordatorios ?? [])
     .filter((r) => r.tipo === TipoRecordatorio.ProximaAplicacion && diasHasta(r.fecha) >= 0)
+    .filter((r) => coincide(r.nombreMascota, r.detalle))
     .sort((a, b) => a.fecha.localeCompare(b.fecha));
 
   const sinNada = proximas.length === 0 && aplicaciones.length === 0 && anteriores.length === 0;
+  const hayDatos = (citas?.length ?? 0) > 0 || (recordatorios?.length ?? 0) > 0;
 
   return (
     <PantallaConHeader
@@ -45,6 +52,8 @@ export function MisCitasPage() {
         </p>
       }
     >
+      <div className="flex flex-col gap-4">
+      <BarraBusqueda valor={texto} onChange={setTexto} placeholder="Buscar por mascota o motivo" />
       {isLoading ? (
         <div className="flex flex-col gap-3">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -56,7 +65,11 @@ export function MisCitasPage() {
           No se pudieron cargar tus citas.
         </div>
       ) : sinNada ? (
-        <EmptyState titulo="Todo al día" descripcion="No tienes citas ni vacunas pendientes por ahora." />
+        q && hayDatos ? (
+          <EmptyState titulo="Sin resultados" descripcion="Ninguna cita o vacuna coincide con la búsqueda." />
+        ) : (
+          <EmptyState titulo="Todo al día" descripcion="No tienes citas ni vacunas pendientes por ahora." />
+        )
       ) : (
         <div className="flex flex-col gap-6">
           {proximas.length > 0 && (
@@ -118,6 +131,7 @@ export function MisCitasPage() {
           )}
         </div>
       )}
+      </div>
     </PantallaConHeader>
   );
 }

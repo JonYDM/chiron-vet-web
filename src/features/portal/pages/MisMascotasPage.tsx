@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { BellRing, ChevronRight, PawPrint } from "lucide-react";
 import { EmptyState } from "@/components/molecules/EmptyState";
+import { BarraBusqueda } from "@/components/molecules/BarraBusqueda";
+import { useDebounce } from "@/lib/useDebounce";
 import { PantallaConHeader } from "@/components/organisms/PantallaConHeader";
 import { Badge, SkeletonFila } from "@/components/ui";
 import { especieLabel, sexoLabel } from "@/lib/enums";
@@ -13,6 +16,11 @@ import { useMisMascotas, useMisRecordatorios } from "../hooks";
 export function MisMascotasPage() {
   const { data: mascotas, isLoading, isError } = useMisMascotas();
   const { data: recordatorios } = useMisRecordatorios();
+  const [texto, setTexto] = useState("");
+  const q = useDebounce(texto).trim().toLowerCase();
+  const filtradas = (mascotas ?? []).filter(
+    (m) => !q || m.nombre.toLowerCase().includes(q) || (m.raza ?? "").toLowerCase().includes(q),
+  );
 
   // El recordatorio más cercano que aún no pasa (lo más útil para el dueño al entrar).
   const proximo = (recordatorios ?? [])
@@ -49,6 +57,8 @@ export function MisMascotasPage() {
           </Link>
         )}
 
+        <BarraBusqueda valor={texto} onChange={setTexto} placeholder="Buscar por nombre o raza" />
+
         {isLoading ? (
           <div className="flex flex-col gap-3">
             {Array.from({ length: 2 }).map((_, i) => (
@@ -59,12 +69,14 @@ export function MisMascotasPage() {
           <div className="rounded-2xl bg-surface-container-lowest p-8 text-center text-body-sm text-error-st shadow-soft">
             No se pudieron cargar tus mascotas.
           </div>
-        ) : total > 0 ? (
+        ) : filtradas.length > 0 ? (
           <div className="flex flex-col gap-3">
-            {mascotas!.map((m) => (
+            {filtradas.map((m) => (
               <MascotaCard key={m.id} mascota={m} />
             ))}
           </div>
+        ) : total > 0 ? (
+          <EmptyState titulo="Sin resultados" descripcion="Ninguna mascota coincide con la búsqueda." />
         ) : (
           <EmptyState
             titulo="Sin mascotas"

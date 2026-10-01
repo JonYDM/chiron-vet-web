@@ -48,10 +48,21 @@ export function fechaHoyCorta(): string {
   return dateShortFmt.format(new Date()).replace(/\./g, "");
 }
 
+/**
+ * Convierte a Date. Una fecha SIN hora ("2026-09-30", p. ej. un DateOnly del backend) se toma
+ * como ese día en hora LOCAL: `new Date("2026-09-30")` la interpreta como medianoche UTC, que en
+ * México (UTC-6) cae el día anterior a las 6 pm y mostraba la fecha un día antes.
+ */
+function aFechaLocal(value: string | Date): Date {
+  if (typeof value !== "string") return value;
+  const soloFecha = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (soloFecha) return new Date(Number(soloFecha[1]), Number(soloFecha[2]) - 1, Number(soloFecha[3]));
+  return new Date(value);
+}
 /** Formatea una fecha ISO (o Date) como "27 sept 2026". */
 export function formatDate(value: string | Date | null | undefined): string {
   if (!value) return "—";
-  const d = typeof value === "string" ? new Date(value) : value;
+  const d = aFechaLocal(value);
   if (Number.isNaN(d.getTime())) return "—";
   return dateFmt.format(d);
 }
@@ -61,7 +72,7 @@ export function formatDateTime(
   value: string | Date | null | undefined,
 ): string {
   if (!value) return "—";
-  const d = typeof value === "string" ? new Date(value) : value;
+  const d = aFechaLocal(value);
   if (Number.isNaN(d.getTime())) return "—";
   return dateTimeFmt.format(d);
 }
@@ -76,7 +87,7 @@ export function edadEnAnios(
   fechaNacimiento: string | null | undefined,
 ): number | null {
   if (!fechaNacimiento) return null;
-  const nac = new Date(fechaNacimiento);
+  const nac = aFechaLocal(fechaNacimiento);
   if (Number.isNaN(nac.getTime())) return null;
   const hoy = new Date();
   let edad = hoy.getFullYear() - nac.getFullYear();

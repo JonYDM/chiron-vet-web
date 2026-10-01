@@ -33,12 +33,16 @@ general — no es "a la medida".
 consultorios) serán **opcionales/activables por veterinaria**, no obligatorias, para
 adaptarse a todo el mercado. Multi-sucursal ya previsto aunque hoy tengan una.
 
-**Prioridad para enganchar (cliente ancla + mercado):**
-1. Clientes/Pacientes/Expediente [casi listo].
+**Prioridad para enganchar (cliente ancla + mercado)** — estado al 2026-09-30:
+1. Clientes/Pacientes/Expediente — ✅ hecho (incluye galería, también en el portal).
 2. **Recordatorios + notificaciones in-app** ← el gancho ("que vuelvan"). ALTA.
-3. Citas (modelo cita/consulta) — agenda con varios vets.
-4. POS simple — su caja/inventario.
-5. Panel SuperAdmin + multi-sucursal — para su 2ª sucursal.
+   Los recordatorios están ✅ (staff y portal). Las **notificaciones in-app** son
+   ⏳ **lo siguiente** (épica §8, Fase 1).
+3. Citas (modelo cita/consulta), agenda con varios vets — ✅ hecho, con confirmación de
+   asistencia del dueño. Falta el estado **"En proceso"**.
+4. POS simple (caja e inventario) — ✅ hecho, con cobro de consultas (cargos).
+5. Panel SuperAdmin + multi-sucursal — ✅ panel, sucursales y cobros. ⏳ Falta la operación
+   por sucursal (fase 5).
 
 ### SÍ entra al MVP
 - **Clientes + Pacientes + Expediente + galería de fotos** [REAL, hecho].
@@ -72,30 +76,27 @@ adaptarse a todo el mercado. Multi-sucursal ya previsto aunque hoy tengan una.
 - Un usuario pertenece a **una** veterinaria (`veterinariaId` viaja en el token JWT).
 - Roles: SuperAdmin, Administrador, Veterinario, Recepcionista, DueñoMascota.
 
-### Modelo multi-sucursal (DEFINITIVO, MVP)
-- **Cada sucursal = una veterinaria independiente** (tenant aislado por `veterinariaId`,
-  como ya funciona: pacientes, empleados, citas, POS separados).
-- **Proceso comercial:** el Admin contacta al SuperAdmin pidiendo otra sucursal → el
-  **SuperAdmin crea otra veterinaria y se la asigna a ese mismo Admin**.
-- El Admin, si tiene varias, **cambia de contexto** con el selector de sucursal del header
-  y alimenta cada una por separado. NO hay vista consolidada.
-- **SuperAdmin:** su panel se centra en gestión de veterinarias (alta, activar/desactivar,
-  crear admin, **asignar veterinaria a un admin existente**). (El flag AdminOperativo quedó
-  obsoleto — ver decisiones.)
+### Modelo multi-sucursal (DEFINITIVO, actualizado 2026-09-30)
+> El modelo anterior ("cada sucursal = una veterinaria independiente") se **descartó**,
+> porque cada sucursal paga su renta y los clientes se comparten entre sedes.
+- La **Veterinaria** es el tenant: dueña de la marca, del admin, de los clientes y de las
+  mascotas.
+- La **Sucursal** vive **dentro** de la veterinaria y es la **unidad de cobro**: cada una
+  tiene plan, renta y renovación. Toda veterinaria tiene una **Matriz**, que sigue el estado
+  de la veterinaria.
+- **Hecho (fases 2 y 3):** alta y edición de sucursales por el SuperAdmin, renovar = registrar
+  pago, historial de cobros e ingresos en `/admin`. Ver la planeación en
+  `PENDIENTES-TECNICOS.md`.
+- **Pendiente (fase 5, operación por sucursal):** `SucursalId` en citas, ventas, cargos y
+  stock; staff asignado a una sucursal; claim `sucursalId` y "cambiar sucursal", que
+  reemplaza el selector mock del header. Clientes y expedientes se siguen compartiendo.
 
-### Historia de usuario
-> Como **SuperAdmin**, cuando un Admin me pide otra sucursal, creo una nueva veterinaria y
-> se la asigno, para que le aparezca en su rol y la administre por separado.
+### Historias de usuario
+> **HU-SU1..SU5** (alta de sucursal, precio por sucursal, renovar con pago, ingresos e
+> historial de cobros): **hechas**.
 >
-> Como **Administrador con varias sucursales**, cambio de veterinaria activa desde la barra
-> superior, para operar cada sucursal (sus pacientes, empleados, citas, POS) sin cerrar sesión.
-
-### Pendiente de backend (multi-sucursal)
-- Relación **usuario ↔ N veterinarias** (hoy es 1↔1 vía token). Ej. tabla `UsuarioVeterinaria`.
-- Endpoint **listar "mis veterinarias"** (las del admin logueado).
-- **Cambiar de contexto:** al elegir sucursal, reemitir el token con el nuevo `veterinariaId`
-  (lo más limpio, ya que el tenant viaja en el token).
-- **SuperAdmin:** endpoint para **asignar** una veterinaria (nueva o existente) a un Admin.
+> **HU-SU7** — Como **Administrador con varias sucursales**, quiero cambiar de sucursal y
+> ver citas, ventas y stock de cada una, para operar varias sedes. **Pendiente (fase 5).**
 
 ---
 

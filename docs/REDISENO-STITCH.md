@@ -633,9 +633,25 @@ VentaCargo + Cargo Cobrado → aparece en Historial + "Mis pagos" del dueño + m
   `bg-secondary`, `bg-accent*`, …). Todas las alertas de error usan `on-error-container`.
 - Los ✅ se reemplazaron por `CheckExito` en DarAcceso, CambiarMiPin y ResetearPin.
 - `docs/DESIGN-SYSTEM.md` se reescribió con los tokens y reglas reales.
-- **Pendiente:**
-  - El **portal del dueño** (`MisMascotas`, `MiExpediente`, `MisRecordatorios`) y el
-    `ExpedientePage` del staff ya tienen colores Stitch, pero conservan la maquetación vieja
-    (Card simple, `text-sm`). Toca rediseñarlos con el patrón de listas.
-  - Los alias heredados de `tailwind.config.js` se pueden borrar cuando `bg-surface` deje de
-    usarse.
+- **Portal del dueño rediseñado** (patrón de listas, `PantallaConHeader`):
+  - **Mis mascotas:**
+    - Card del **próximo recordatorio** en teal arriba ("Mañana · Firulais: Rabia"), que
+      lleva a Recordatorios.
+    - Cards con foto o huella, badge de especie con color (igual que Pacientes) y raza · edad.
+  - **Mi expediente:**
+    - El título es el nombre de la mascota y "Volver" lleva a Mis mascotas.
+    - Encabezado con foto, especie y raza, y card teal de la **próxima aplicación**.
+    - Historial con ícono y color por tipo: vacuna y desparasitación en teal, cirugía en
+      terracota, el resto neutro.
+  - **Recordatorios:** secciones "Próximos" y "Ya pasaron", con fecha relativa en badge
+    (warning si faltan 7 días o menos, danger si ya pasó).
+  - El portal sigue mostrando al dueño solo descripción y próxima aplicación. Diagnóstico y
+    tratamiento quedan para el staff, igual que antes.
+- **Código borrado:**
+  - `ExpedientePage` del staff: no estaba enrutada; `PerfilPacientePage` la reemplazó.
+    Los hooks de `features/expedientes` se conservan.
+  - `PageHeader`: ya no tenía usos.
+- `toneEspecie`, `diasHasta` y `textoRelativo` viven en `src/lib/mascotas.ts` (compartidos
+  entre staff y portal).
+- **Pendiente:** borrar los alias heredados de `tailwind.config.js` cuando `bg-surface` deje
+  de usarse.
